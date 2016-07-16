@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+
+<f:view contentType="text/html" encoding="UTF-8">
+	<h:head>
+		<ui:include src="/layout/headCommons.xhtml" />
+	</h:head>
+	
+	<h:body styleClass="login-page">
+		<p:ajaxStatus styleClass="ajax-status">
+			<f:facet name="start">
+				<h:graphicImage value="/resources/images/loading.gif" />
+			</f:facet>
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>	
+		
+		<h:form id="login">
+			<div class="login-panel">
+				<div class="login-logo">
+					<p:graphicImage id="logo" value="/resources/images/logo-white.png" styleClass="animate-0 zoomIn" />
+					<pe:tooltip for="logo" value="" />
+
+					<span>#{msg['title.appTitle']}</span>
+				</div>
+				<div class="login-inner-panel">
+					<div class="login-error-message">
+						<p:messages />
+					</div>
+					<div class="login-input">
+						<p:inputText id="username" value="#{loginManager.username}" required="true" requiredMessage="#{msg['error.loginRequired']}" label="#{msg['label.username']}" size="50" />
+						<p:watermark for="login:username" value="#{msg['label.login']}" />
+						<div class="input-icon"><div>@</div></div>
+					</div>
+					<div class="login-input">
+						<p:password id="password" value="#{loginManager.password}" required="true" requiredMessage="#{msg['error.passwordRequired']}" label="#{msg['label.password']}" size="50" autocomplete="off" />
+						<p:watermark for="login:password" value="#{msg['label.password']}" />
+						<div class="input-icon"><span class="ui-icon-password" /></div>
+					</div>
+					<div class="login-input">
+						<p:commandButton value="#{msg['button.login']}" process="@form" action="#{loginManager.login}" ajax="false" />
+					</div>
+				</div>
+			</div>
+        </h:form>
+	</h:body>
+</f:view>
+</html>

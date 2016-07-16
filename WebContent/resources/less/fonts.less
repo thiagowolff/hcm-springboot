@@ -1,0 +1,28 @@
+/* Fonts */
+
+.font(@fontFamily) {
+    font-family: @fontFamily;
+    src: url('@{fontFamily}.eot?ln=fonts');
+    src: url('@{fontFamily}.eot?ln=fonts&#iefix') format('embedded-opentype'),
+         url('@{fontFamily}.svg?ln=fonts#@{fontFamily}') format('svg'),
+         url('@{fontFamily}.woff?ln=fonts') format('woff'),
+         url('@{fontFamily}.ttf?ln=fonts') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	.font('icomoon');
+}
+
+@font-face {
+	.font('lato-regular');
+}
+
+@font-face {
+	.font('open-sans-regular');
+}
+
+@font-face {
+	.font('open-sans-bold');
+}

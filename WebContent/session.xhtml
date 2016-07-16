@@ -1,0 +1,192 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+				xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+				xmlns:p="http://primefaces.org/ui"
+				xmlns:pe="http://primefaces.org/ui/extensions"
+				xmlns:lcf="http://litecode.com.br/functions">
+
+	<p:growl id="growl" widgetVar="growl" showDetail="true" life="10000" />
+
+	<div class="content-wrapper">
+		<h:form id="form">
+			<h:panelGrid id="sessionGrid" columns="10" styleClass="input-grid">
+				<p:outputLabel value="#{msg['label.date']}" />
+				<p:calendar id="sessionDate" value="#{sessionManager.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="10">
+					<p:ajax event="dateSelect" process="@this" update="chambersGrid" />
+				</p:calendar>
+
+				<p:outputLabel value="#{msg['label.chamber']}" />
+				<p:selectOneMenu id="sessionChamber" value="#{sessionManager.session.chamber}" converter="omnifaces.SelectItemsConverter">
+					<f:selectItems value="#{chamberManager.chambers}" var="chamber" itemValue="#{chamber}" itemLabel="#{chamber.name}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel value="#{msg['label.time']}" for="sessionTime" />
+				<pe:timePicker id="sessionTime" value="#{sessionManager.session.sessionTime}" mode="spinner" startHours="6" endHours="22" showOn="focus" intervalMinutes="15" required="true" />
+
+				<p:outputLabel value="#{msg['label.patient']}" for="sessionPatient" />
+				<p:selectOneMenu id="sessionPatient" value="#{sessionManager.session.patient}" converter="omnifaces.SelectItemsConverter" required="true">
+					<f:selectItem itemValue="#{null}" itemLabel="#{msg['label.select']}" />
+					<f:selectItems value="#{patientManager.patients}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}" />
+				</p:selectOneMenu>
+
+				<p:commandButton value="#{msg['button.add']}" actionListener="#{sessionManager.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatient" update="chambersGrid, messages" validateClient="true">
+					<p:resetInput target="@form" />
+				</p:commandButton>
+
+                <p:commandButton value="#{msg['button.duplicateSessions']}" process="@this" actionListener="#{sessionManager.initializePreviousDailySessionsDate()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" />
+				<p:messages id="messages" />
+			</h:panelGrid>
+
+			<p:dataGrid id="chambersGrid" var="chamber" value="#{chamberManager.chambers}" rows="2" columns="1" layout="grid">
+				<p:dataTable id="periodsTable" widgetVar="periodsTable" value="#{sessionManager.getSessions(chamber.chamberId).entrySet()}" var="sessionsByPeriod" rows="9" emptyMessage="#{msg['message.noSessionsFound']}">
+					<f:facet name="header">
+						#{chamber.name}
+					</f:facet>
+
+					<p:columnGroup type="header">
+						<p:column headerText="#{msg['label.id']}" width="15" />
+						<p:column headerText="#{msg['label.patient']}" />
+						<p:column headerText="#{msg['label.numberOfSessions']}" width="60" />
+						<p:column headerText="#{msg['label.time']}" width="75" />
+						<p:column headerText="#{msg['label.startTime']}" width="75" />
+						<p:column headerText="#{msg['label.endTime']}" width="75" />
+						<p:column headerText="#{msg['label.decompressionTime']}" width="75" />
+						<p:column headerText="#{msg['label.shutdownTime']}" width="75" />
+						<p:column headerText="#{msg['label.status']}"  width="90" />
+						<p:column headerText="#{msg['label.progress']}" width="120" />
+						<p:column headerText="#{msg['label.action']}" width="85" />
+					</p:columnGroup>
+
+					<p:subTable id="sessionsTable" widgetVar="sessionsTable" value="#{sessionsByPeriod.value}" var="chamberSession">
+						<f:facet name="header">
+							<h:outputText value="#{lcf:enum(sessionsByPeriod.key)}" />
+						</f:facet>
+
+						<p:column>
+							<h:outputText value="#{chamberSession.sessionId}" />
+						</p:column>
+						<p:column style="text-align: left;">
+							<h:outputText value="#{chamberSession.patient.name}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{chamberSession.numberOfPatientSessions}" />
+						</p:column>
+						<p:column>
+							<h:outputText value="#{chamberSession.sessionTime}">
+								<f:convertDateTime pattern="HH:mm:ss" />
+							</h:outputText>
+						</p:column>
+						<p:column>
+							<h:outputText value="#{chamberSession.startTime}" style="color: #007d18;">
+								<f:convertDateTime pattern="HH:mm:ss" />
+							</h:outputText>
+						</p:column>
+						<p:column>
+							<h:outputText value="#{chamberSession.endTime}" style="color: #b14538;">
+								<f:convertDateTime pattern="HH:mm:ss" />
+							</h:outputText>
+						</p:column>
+						<p:column>
+							<h:outputText value="#{chamberSession.decompressionTime}">
+								<f:convertDateTime pattern="HH:mm:ss" />
+							</h:outputText>
+						</p:column>
+						<p:column>
+							<h:outputText value="#{chamberSession.shutdownTime}">
+								<f:convertDateTime pattern="HH:mm:ss" />
+							</h:outputText>
+						</p:column>
+						<p:column>
+							<h:outputText value="#{lcf:enum(chamberSession.status)}" styleClass="#{lcf:enumStyle(chamberSession.status)}" />
+						</p:column>
+
+						<p:column>
+							<div class="timer-progress-cell">
+								<div id="currentTime-#{chamberSession.sessionId}">
+									<h:outputText value="#{sessionTracker.getSession(chamberSession.sessionId).timeRemaining}" rendered="#{chamberSession.status eq 'RUNNING'}" />
+									<h:outputText value="00:00:00" rendered="#{chamberSession.status ne 'RUNNING'}" />
+								</div>
+								<div>
+									<p:progressBar widgetVar="progress-#{chamberSession.sessionId}" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status ne 'FINISHED'}" />
+									<p:progressBar value="100" displayOnly="true" rendered="#{chamberSession.status eq 'FINISHED'}" />
+								</div>
+							</div>
+						</p:column>
+						<p:column>
+							<p:commandButton title="#{msg['button.startSession']}" icon="ui-icon-play" actionListener="#{sessionManager.startSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{chamberSession.status ne 'CREATED'}" />
+							<p:commandButton title="#{msg['button.reset']}" icon="ui-icon-first" actionListener="#{sessionManager.resetSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'CREATED'}" />
+							<p:commandButton title="#{msg['button.delete']}" icon="ui-icon-trash" actionListener="#{sessionManager.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" />
+						</p:column>
+					</p:subTable>
+				</p:dataTable>
+			</p:dataGrid>
+		</h:form>
+	</div>
+
+	<h:form>
+		<p:confirmDialog message="#{msg['confirmation.deleteSession']}" header="#{msg['title.deleteSession']}" severity="alert" widgetVar="confirmDeleteSessionDialog">
+			<p:commandButton value="#{msg['button.delete']}" process="@this" update=":form:chambersGrid" oncomplete="PF('confirmDeleteSessionDialog').hide()" actionListener="#{sessionManager.deleteSession()}" />
+			<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDeleteSessionDialog').hide()" />
+		</p:confirmDialog>
+	</h:form>
+
+    <h:form id="duplicateSessionsForm">
+        <p:dialog header="#{msg['title.duplicateSessions']}" widgetVar="duplicateSessionDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
+            <h:panelGrid columns="3">
+                <p:outputLabel value="#{msg['label.date']}" />
+                <p:calendar id="previousSessionsDate" value="#{sessionManager.previousDailySessionsDate}" required="true" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="10" />
+                <p:commandButton value="#{msg['button.duplicate']}" process="@this, previousSessionsDate" update=":form:chambersGrid" actionListener="#{sessionManager.duplicateSessions()}" oncomplete="PF('duplicateSessionDialog').hide()" />
+            </h:panelGrid>
+        </p:dialog>
+    </h:form>
+
+    <p:socket onMessage="handleMessage" channel="/notify">
+		<p:ajax event="message" update=":form:chambersGrid" global="false" />
+	</p:socket>
+	<p:socket onMessage="handleAlarm" channel="/alarm" />
+	<p:socket onMessage="updateTimer" channel="/progress" />
+
+	<script type="text/javascript">
+		function handleMessage(notificationMessage) {
+			var facesMessage = {
+				summary: notificationMessage.messageSummary,
+				detail: notificationMessage.messageDetail,
+				severity: notificationMessage.eventType
+			};
+
+			PF('growl').show([facesMessage]);
+			playSound(notificationMessage.chamberEvent.notificationSound);
+		}
+
+		function playSound(audioFile) {
+			var audio = document.getElementById("audio");
+			audio.src = "#{request.contextPath}/javax.faces.resource/sounds/" + audioFile;
+			audio.play();
+		}
+
+		function updateTimer(session) {
+			$("#currentTime-" + session.sessionId).text(session.timeRemaining);
+			progressStep(session);
+		}
+
+		function progressStep(session) {
+			var widget = PF('progress-' + session.sessionId);
+			if (widget) {
+				widget.setValue(session.currentProgress);
+			}
+		}
+
+		function handleAlarm(alarm) {
+			var facesMessage = {
+				summary: alarm.name,
+				detail: alarm.message,
+				severity: "info"
+			};
+
+			PF('growl').show([facesMessage]);
+			playSound(alarm.notificationSound);
+		}
+	</script>
+</ui:composition>
