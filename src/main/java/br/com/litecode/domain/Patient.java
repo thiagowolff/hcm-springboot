@@ -112,9 +112,8 @@ public class Patient {
 
 		Patient patient = (Patient) o;
 
-		if (patientId != null ? !patientId.equals(patient.patientId) : patient.patientId != null) return false;
+		return patientId != null ? patientId.equals(patient.patientId) : patient.patientId == null;
 
-		return true;
 	}
 
 	@Override

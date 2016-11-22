@@ -57,9 +57,8 @@ public class Chamber implements Serializable {
 
 		Chamber chamber = (Chamber) o;
 
-		if (!chamberId.equals(chamber.chamberId)) return false;
+		return chamberId.equals(chamber.chamberId);
 
-		return true;
 	}
 
 	@Override

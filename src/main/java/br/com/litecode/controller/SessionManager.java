@@ -162,12 +162,12 @@ public class SessionManager implements Serializable {
 		int i = 0;
 
 		for (PatientSession patientSession : session.getPatientSessions()) {
-			chamberOccupation[i] = patientSession.getStatus() == PatientSessionStatus.ACTIVE ? 1l : 2l;
+			chamberOccupation[i] = patientSession.getStatus() == PatientSessionStatus.ACTIVE ? 1L : 2L;
 			i++;
 		}
 
 		for (int j = i; j < chamberOccupation.length; j++) {
-			chamberOccupation[j] = 0l;
+			chamberOccupation[j] = 0L;
 		}
 
 		return chamberOccupation;

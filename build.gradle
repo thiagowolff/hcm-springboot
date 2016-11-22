@@ -1,0 +1,89 @@
+import org.lesscss.LessCompiler
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.lesscss:lesscss:1.7.0.1.1"
+    }
+}
+
+plugins {
+    id "org.hidetake.ssh" version "2.7.0"
+}
+
+apply plugin: "java"
+apply plugin: "war"
+apply plugin: "org.hidetake.ssh"
+
+repositories {
+    mavenCentral()
+
+    maven {
+        url "http://ci.litecode.com.br:8081/nexus/content/repositories/litecode"
+    }
+}
+
+dependencies {
+    providedCompile "org.jboss.spec.javax.servlet:jboss-servlet-api_3.1_spec:1.0.0.Final"
+    providedCompile "org.jboss.spec.javax.faces:jboss-jsf-api_2.2_spec:2.2.13"
+    providedCompile "jstl:jstl:1.2"
+    providedCompile "org.jboss.spec.javax.ejb:jboss-ejb-api_3.2_spec:1.0.0.Final"
+    providedCompile "javax.validation:validation-api:1.1.0.Final"
+    providedCompile "javax.enterprise:cdi-api:1.2"
+    providedCompile "org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final"
+    providedCompile "org.hibernate:hibernate-core:5.0.10.Final"
+    providedCompile "org.hibernate:hibernate-entitymanager:5.0.10.Final"
+
+    compile "org.primefaces:primefaces:6.0"
+    compile "br.com.litecode:primefaces-theme-next:1.1"
+    compile "br.com.litecode:litefaces-enum-i18n:1.0.1"
+    compile "org.primefaces.extensions:primefaces-extensions:6.0.0"
+    compile "org.omnifaces:omnifaces:2.5.1"
+    compile "com.google.guava:guava:20.0"
+    compile "joda-time:joda-time:2.9.5"
+    compile "org.atmosphere:atmosphere-runtime:2.4.7"
+    compile "org.apache.shiro:shiro-core:1.3.2"
+    compile "org.apache.shiro:shiro-web:1.3.2"
+}
+
+task compileLess << {
+    def lessCompiler = new LessCompiler()
+
+    ant.replace(file: "$lessDir/style.less", token: "?ln=less", value: "")
+    lessCompiler.compile(file("$projectDir/$lessDir/style.less"), file("$projectDir/$cssDir/style.css"))
+    ant.replace(file: "$lessDir/style.less", token: ".less", value: ".less?ln=less")
+}
+
+remotes {
+    remoteServer {
+        host = serverHost
+        user = serverUser
+        password = serverPassword
+        knownHosts = allowAnyHosts
+    }
+}
+
+task deploy << {
+    def cssFile = new File("$cssDir/style.css")
+    cssFile.delete()
+
+    ssh.run {
+        session(remotes.remoteServer) {
+            println("Backing up previous release...")
+            def today = new Date().format('yyyyMMdd')
+            execute "cp /opt/wildfly/standalone/deployments/HCM.war /opt/wildfly/standalone/releases/HCM-" + today + ".war"
+
+            println("Uploading WAR...")
+            put from: "build/libs/HCM.war", into: "/opt/wildfly/standalone/deployments"
+
+            println("Initiating server...")
+            execute "service wildfly restart"
+        }
+    }
+}
+
+war.dependsOn "compileLess"
+deploy.dependsOn "war"

@@ -15,8 +15,6 @@ import org.joda.time.LocalTime;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
