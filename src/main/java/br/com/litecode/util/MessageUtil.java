@@ -1,7 +1,5 @@
 package br.com.litecode.util;
 
-import com.google.common.base.CaseFormat;
-
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 

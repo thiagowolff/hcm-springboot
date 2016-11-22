@@ -1,11 +1,11 @@
 package br.com.litecode.application;
 
 import br.com.litecode.application.push.NotificationMessage;
+import br.com.litecode.application.push.SessionProgressMessage;
 import br.com.litecode.controller.SessionTracker;
 import br.com.litecode.domain.Alarm;
 import br.com.litecode.domain.ChamberEvent;
 import br.com.litecode.domain.ChamberEvent.EventType;
-import br.com.litecode.domain.Patient;
 import br.com.litecode.domain.Session;
 import br.com.litecode.domain.Session.SessionStatus;
 import br.com.litecode.service.SessionService;
@@ -13,14 +13,12 @@ import br.com.litecode.util.MessageUtil;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Splitter;
 import org.joda.time.LocalDateTime;
-import org.omnifaces.util.Messages;
 import org.primefaces.push.EventBus;
 import org.primefaces.push.EventBusFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.*;
-import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Date;
@@ -105,16 +103,6 @@ public class SessionTimer {
 				break;
 			case COMPLETION:
 				session.setStatus(SessionStatus.FINISHED);
-
-				Patient patient = session.getPatient();
-				Long numberOfPatientSessions = sessionService.getNumberOfPatientSessions(patient.getPatientId());
-				if (numberOfPatientSessions == null) {
-					numberOfPatientSessions = 0L;
-				}
-
-				session.setNumberOfPatientSessions(numberOfPatientSessions + 1);
-				session.setPatient(patient);
-
 				sessionTracker.removeActiveSession(session);
 		}
 
@@ -128,7 +116,7 @@ public class SessionTimer {
 		eventBus.publish("/notify", new NotificationMessage(chamberEvent, messageSummary, messageDetail));
 	}
 
-	@Schedule(second = "*/1", minute = "*", hour = "*", persistent = false)
+	@Schedule(second = "*/2", minute = "*", hour = "*", persistent = false)
 	public void clockTimeout() {
 		timerService.getTimers().forEach(timer -> {
 			if (!timer.isCalendarTimer()) {
@@ -145,7 +133,7 @@ public class SessionTimer {
 					session.updateProgress(timer.getTimeRemaining());
 
 					EventBus eventBus = EventBusFactory.getDefault().eventBus();
-					eventBus.publish("/progress", session);
+					eventBus.publish("/progress", new SessionProgressMessage(session.getSessionId(), session.getCurrentProgress(), session.getTimeRemaining()));
 				}
 			}
 		});

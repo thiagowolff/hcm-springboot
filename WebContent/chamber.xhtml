@@ -1,0 +1,33 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+				xmlns:p="http://primefaces.org/ui"
+				xmlns:lc="http://java.sun.com/jsf/composite/components">
+	
+	<h:form id="chambersForm">
+		<lc:headerPanel title="#{msg['title.chambers']}" />
+
+		<div class="content-wrapper">
+			<p:dataTable id="chamberTable" var="chamber" value="#{chamberManager.chambers}" emptyMessage="#{msg['message.noData']}">
+				<p:column headerText="#{msg['label.id']}" sortBy="#{chamber.chamberId}">
+					<h:outputText value="#{chamber.chamberId}" />
+				</p:column>
+				
+				<p:column headerText="#{msg['label.name']}" sortBy="#{chamber.name}">
+					<h:outputText value="#{chamber.name}" />
+				</p:column>
+
+				<p:column headerText="#{msg['label.maxNumberOfPatients']}">
+					<h:outputText value="#{chamber.maxNumberOfPatients}" />
+				</p:column>
+
+				<p:column headerText="#{msg['label.events']}" style="text-align: left">
+					<ui:repeat value="#{chamber.chamberEvents}" var="event">
+						<h:outputText value="#{event.eventType}: #{event.timeout / 60 / 1000} min&lt;br /&gt;" escape="false" rendered="#{event.timeout gt 0}" />
+					</ui:repeat>
+				</p:column>
+			</p:dataTable>
+		</div>
+	</h:form>
+</ui:composition>

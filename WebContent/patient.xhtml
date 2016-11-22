@@ -1,15 +1,18 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
 				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+				xmlns:fn="http://java.sun.com/jsp/jstl/functions"
 				xmlns:f="http://xmlns.jcp.org/jsf/core"
 				xmlns:h="http://xmlns.jcp.org/jsf/html"
 				xmlns:p="http://primefaces.org/ui"
+				xmlns:pe="http://primefaces.org/ui/extensions"
 				xmlns:lc="http://java.sun.com/jsf/composite/components">
 	
-	<h:form id="patientsForm">  
+	<h:form id="patientsForm">
 		<p:growl id="messages" severity="info"/>
 
 		<lc:headerPanel title="#{msg['title.patients']}" addButtonAction="#{patientManager.newPatient()}" update=":patientInputForm" oncomplete="PF('patientDialog').show()" />
-	
+		<pe:timePicker value="#{sessionManager.session.sessionTime}" rendered="false" />
+
 		<div class="content-wrapper">
 			<p:dataTable id="patientsTable" widgetVar="patientsTable" value="#{patientManager.patients}" var="patient" paginator="true" rows="15" paginatorAlwaysVisible="false" filteredValue="#{patientManager.filteredPatients}"
 				paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="15,30,100,500" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
@@ -17,22 +20,23 @@
 				<p:column headerText="#{msg['label.name']}" sortBy="#{patient.name}" style="text-align: left;">
 	          		<h:outputText value="#{patient.name}" />
 				</p:column>
-				<p:column headerText="#{msg['label.cpf']}" width="100">
-					<h:outputText value="#{patient.cpf}" converter="cpfConverter" />
+				<p:column headerText="#{msg['label.folderNumber']}" sortBy="#{patient.folderNumber}" width="120">
+	          		<h:outputText value="#{patient.folderNumber}" />
 				</p:column>
-				<p:column headerText="#{msg['label.address']}" style="text-align: left;">
-					<h:outputText value="#{patient.address.addressStreet}" />
-					<h:outputText value="#{not empty patient.address.addressNumber ? ', ' : ''} #{patient.address.addressNumber}" />
-					<h:outputText value="#{not empty patient.address.addressComplement ? ' / ' : ''} #{patient.address.addressComplement}" />
-					<h:outputText value="#{not empty patient.address.city ? ' - ' : ''} #{patient.address.city}" />
-					<h:outputText value="#{not empty patient.address.state ? ' - ' : ''} #{patient.address.state}" />
-					<h:outputText value=" #{patient.address.zipCode}" />
+				<p:column headerText="#{msg['label.numberOfSessions']}" width="70">
+					<h:outputText value="#{patientManager.patientSessionStats[patient.patientId].totalNumberOfSessions}" />
+				</p:column>
+				<p:column headerText="#{msg['label.numberOfCompletedSessions']}" width="70">
+					<h:outputText value="#{patientManager.patientSessionStats[patient.patientId].numberOfCompletedSessions}" />
+				</p:column>
+				<p:column headerText="#{msg['label.numberOfAbsentSessions']}" width="70">
+					<h:outputText value="#{patientManager.patientSessionStats[patient.patientId].numberOfAbsentSessions}" />
+				</p:column>
+				<p:column headerText="#{msg['label.email']}" width="100">
+					<h:outputText value="#{patient.email}" />
 				</p:column>
 				<p:column headerText="#{msg['label.phone']}" width="100">
-					<h:outputText value="#{patient.address.phoneNumber}" />
-				</p:column>
-				<p:column headerText="#{msg['label.email']}">
-					<h:outputText value="#{patient.email}" />
+					<h:outputText value="#{patient.phoneNumber}" />
 				</p:column>
 				<p:column headerText="#{msg['label.creationDate']}" sortBy="#{patient.creationDate}" width="120">
 					<h:outputText value="#{patient.creationDate}">
@@ -58,46 +62,17 @@
 				<p:outputLabel value="#{msg['label.name']}" for="patientName" />
 				<p:inputText id="patientName" value="#{patient.name}" required="true" maxlength="150" size="50" />
 
+				<p:outputLabel value="#{msg['label.folderNumber']}" for="folderNumber" />
+				<p:inputText id="folderNumber" value="#{patient.folderNumber}" maxlength="30" size="15" />
+
 				<p:outputLabel value="#{msg['label.email']}" for="patientEmail" />
 				<p:inputText id="patientEmail" value="#{patient.email}" maxlength="75" size="50" />
 
 				<p:outputLabel value="#{msg['label.phone']}" for="patientPhone" />
-				<p:inputMask id="patientPhone" value="#{patient.address.phoneNumber}" mask="(99) ?999999999" maxlength="15" size="15" />
-
-				<p:outputLabel value="#{msg['label.cpf']}" for="patientCpf" />
-				<p:inputMask id="patientCpf" value="#{patient.cpf}" mask="999.999.999-99" converter="cpfConverter" validator="cpfValidator" size="15" />
-
-				<p:outputLabel value="#{msg['label.rg']}" for="patientRg" />
-				<p:inputText id="patientRg" value="#{patient.rg}" size="15" />
+				<p:inputMask id="patientPhone" value="#{patient.phoneNumber}" mask="(99) ?999999999" maxlength="15" size="15" />
 
 				<p:outputLabel value="#{msg['label.birthDate']}" for="patientBirthDate" />
 				<p:calendar id="patientBirthDate" value="#{patient.birthDate}" pattern="dd/MM/yyyy" mask="true" yearRange="c-100:c+15" size="15" showOn="button" navigator="true" />
-
-				<p:outputLabel value="#{msg['label.zipCode']}" for="patientZipCode" />
-				<p:inputMask id="patientZipCode" widgetVar="zipCode" value="#{patient.address.zipCode}" mask="99999-999" onblur="if (PF('zipCode').getValue().length == 9) { onchange() } else return false;" size="15">
-					<p:ajax event="change" listener="#{addressManager.loadAddressByZipCode(patient.address)}" update="patientAddress, patientNeighborhood, patientCity, patientState" />
-				</p:inputMask>
-
-				<p:outputLabel value="#{msg['label.address']}" for="patientAddress" />
-				<p:inputText id="patientAddress" value="#{patient.address.addressStreet}" maxlength="150" size="50" />
-
-				<p:outputLabel value="#{msg['label.number']}" for="patientAddressNumber"/>
-				<p:inputText id="patientAddressNumber" value="#{patient.address.addressNumber}" maxlength="10"  size="10" />
-
-				<p:outputLabel value="#{msg['label.addressComplement']}" for="patientAddressComplement" />
-				<p:inputText id="patientAddressComplement" value="#{patient.address.addressComplement}" maxlength="50" size="10" />
-
-				<p:outputLabel value="#{msg['label.neighborhood']}" for="patientNeighborhood" />
-				<p:inputText id="patientNeighborhood" value="#{patient.address.neighborhood}" maxlength="50" />
-
-				<p:outputLabel value="#{msg['label.city']}" for="patientCity" />
-				<p:inputText id="patientCity" value="#{patient.address.city}" maxlength="100" />
-
-				<p:outputLabel value="#{msg['label.state']}" for="patientState" />
-				<p:selectOneMenu id="patientState" value="#{patient.address.state}">
-					<f:selectItem itemLabel="" itemValue="#{null}" />
-					<f:selectItems value="#{addressManager.states}" />
-				</p:selectOneMenu>
 			</p:panelGrid>
 
 			<h:panelGrid columns="3">
@@ -108,7 +83,7 @@
 	</h:form>
 
 	<h:form id="confirmDeletePatientForm">
-		<p:confirmDialog message="#{msg['confirmation.deletePacient']}" header="#{msg['title.deletePatient']}" severity="alert" widgetVar="confirmDeletePatientDialog">
+		<p:confirmDialog message="#{msg['confirmation.deletePatient']}" header="#{msg['title.deletePatient']}" severity="alert" widgetVar="confirmDeletePatientDialog">
 			<p:messages autoUpdate="true" />
 			<p:commandButton value="#{msg['button.delete']}" actionListener="#{patientManager.deletePatient}" process="@form" update=":patientsForm:messages, :patientsForm:patientsTable" oncomplete="if (!args.validationFailed) { PF('confirmDeletePatientDialog').hide(); PF('patientsTable').clearFilters(); }" />
 			<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDeletePatientDialog').hide();" />

@@ -7,7 +7,7 @@ import java.io.Serializable;
 @Table(name = "chamber_event")
 @Cacheable
 public class ChamberEvent implements Serializable {
-	public enum EventType { CREATION, INITIATION, DECOMPRESSION, TRANSPORT, SHUTDOWN, COMPLETION }
+	public enum EventType { CREATION, START, DECOMPRESSION, TRANSPORT, WEAR_MASK, REMOVE_MASK, SHUTDOWN, COMPLETION }
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -5,12 +5,10 @@ import org.primefaces.push.annotation.OnMessage;
 import org.primefaces.push.annotation.PushEndpoint;
 import org.primefaces.push.impl.JSONEncoder;
 
-import javax.faces.application.FacesMessage;
-
 @PushEndpoint("/progress")
 public class ProgressResource {
 	@OnMessage(encoders = {JSONEncoder.class})
-	public Session onMessage(Session session) {
+	public SessionProgressMessage onMessage(SessionProgressMessage session) {
 		return session;
 	}
 }

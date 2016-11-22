@@ -6,7 +6,10 @@ import org.joda.time.LocalTime;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "session")
@@ -23,9 +26,8 @@ public class Session implements Serializable {
 	@JoinColumn(name = "chamber_id")
 	private Chamber chamber;
 
-	@ManyToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
-	@JoinColumn(name = "patient_id")
-	private Patient patient;
+	@OneToMany(mappedBy = "session", cascade = { CascadeType.REMOVE, CascadeType.MERGE })
+	private List<PatientSession> patientSessions;
 
 	@Column(name = "session_time")
 	private Date sessionTime;
@@ -39,9 +41,6 @@ public class Session implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private SessionStatus status;
 
-	@Column(name = "patient_session_count")
-	private Long numberOfPatientSessions;
-
 	@Transient
 	private String timeRemaining;
 
@@ -49,6 +48,7 @@ public class Session implements Serializable {
 	private long currentProgress;
 
 	public Session() {
+		patientSessions = new ArrayList<>();
 		status = SessionStatus.CREATED;
 		currentProgress = 0;
 	}
@@ -71,10 +71,6 @@ public class Session implements Serializable {
 		}
 
 		return TimePeriod.AFTERNOON;
-	}
-
-	public Date getDecompressionTime() {
-		return LocalDateTime.fromDateFields(startTime).plusMillis(chamber.getChamberEvent(EventType.DECOMPRESSION).getTimeout()).toDate();
 	}
 
 	public Date getShutdownTime() {
@@ -109,12 +105,12 @@ public class Session implements Serializable {
 		this.chamber = chamber;
 	}
 
-	public Patient getPatient() {
-		return patient;
+	public List<PatientSession> getPatientSessions() {
+		return patientSessions;
 	}
 
-	public void setPatient(Patient patient) {
-		this.patient = patient;
+	public void setPatientSessions(List<PatientSession> patientSessions) {
+		this.patientSessions = patientSessions;
 	}
 
 	public SessionStatus getStatus() {
@@ -143,13 +139,5 @@ public class Session implements Serializable {
 
 	public void setEndTime(Date endTime) {
 		this.endTime = endTime;
-	}
-
-	public Long getNumberOfPatientSessions() {
-		return numberOfPatientSessions;
-	}
-
-	public void setNumberOfPatientSessions(Long numberOfPatientSessions) {
-		this.numberOfPatientSessions = numberOfPatientSessions;
 	}
 }

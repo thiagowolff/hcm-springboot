@@ -1,7 +1,6 @@
 package br.com.litecode.domain;
 
 import javax.persistence.*;
-import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Date;

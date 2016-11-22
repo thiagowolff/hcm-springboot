@@ -9,8 +9,8 @@
 		<h:form prependId="false">
 		    <p:tieredMenu id="leftMenu" autoDisplay="true">
 		    	<p:menuitem value="#{msg['menu.sessions']}" actionListener="#{navigationController.setActivePage('/session.xhtml')}" update=":content" icon="ui-menu-icon ui-icon-clock" />
-		    	<p:menuitem value="#{msg['menu.pacients']}" actionListener="#{navigationController.setActivePage('/patient.xhtml')}" update=":content" icon="ui-menu-icon ui-icon-persons" />
-				<p:menuitem value="#{msg['menu.chambers']}" actionListener="#{navigationController.setActivePage('/chamber.xhtml')}" update=":content" icon="ui-menu-icon ui-icon-archive" disabled="true" />
+		    	<p:menuitem value="#{msg['menu.patients']}" actionListener="#{navigationController.setActivePage('/patient.xhtml')}" update=":content" icon="ui-menu-icon ui-icon-persons" />
+				<p:menuitem value="#{msg['menu.chambers']}" actionListener="#{navigationController.setActivePage('/chamber.xhtml')}" update=":content" icon="ui-menu-icon ui-icon-archive" />
 			</p:tieredMenu>
 		</h:form>
 	</ui:composition>

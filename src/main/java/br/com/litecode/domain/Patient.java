@@ -3,7 +3,7 @@ package br.com.litecode.domain;
 import javax.persistence.*;
 import javax.validation.constraints.Pattern;
 import java.time.Instant;
-import java.util.Date;
+import java.util.*;
 
 @Entity
 @Table(name = "patient")
@@ -17,18 +17,15 @@ public class Patient {
 	@Column
 	private String name;
 
-	@Column(name = "cpf")
-	private String cpf;
-
-	@Embedded
-	private Address address;
+	@Column(name = "folder_number")
+	private String folderNumber;
 
 	@Column
 	@Pattern(regexp = "^([_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,}))?$")
 	private String email;
 
-	@Column
-	private String rg;
+	@Column(name = "phone_number")
+	private String phoneNumber;
 
 	@Column(name = "birth_date")
 	private Date birthDate;
@@ -36,14 +33,12 @@ public class Patient {
 	@Column(name = "creation_date")
 	private Date creationDate;
 
-	@Column(name = "initial_session_count")
-	private int initialSessionCount;
+	@OneToMany(mappedBy = "patient")
+	private List<PatientSession> patientSessions;
 
 	public Patient() {
-		initialSessionCount = 0;
-		address = new Address();
-		address.setZipCode("");
 		creationDate = Date.from(Instant.now());
+		patientSessions = new ArrayList<>();
 	}
 
 	public Integer getPatientId() {
@@ -62,20 +57,16 @@ public class Patient {
 		this.name = name;
 	}
 
-	public String getCpf() {
-		return cpf;
+	public String getFolderNumber() {
+		return folderNumber;
 	}
 
-	public void setCpf(String cpf) {
-		this.cpf = cpf;
+	public void setFolderNumber(String folderNumber) {
+		this.folderNumber = folderNumber;
 	}
 
-	public Address getAddress() {
-		return address;
-	}
-
-	public void setAddress(Address address) {
-		this.address = address;
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
 	}
 
 	public String getEmail() {
@@ -84,14 +75,6 @@ public class Patient {
 
 	public void setEmail(String email) {
 		this.email = email;
-	}
-
-	public String getRg() {
-		return rg;
-	}
-
-	public void setRg(String rg) {
-		this.rg = rg;
 	}
 
 	public Date getBirthDate() {
@@ -106,8 +89,20 @@ public class Patient {
 		return creationDate;
 	}
 
-	public int getInitialSessionCount() {
-		return initialSessionCount;
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public List<PatientSession> getPatientSessions() {
+		return patientSessions;
+	}
+
+	public void setPatientSessions(List<PatientSession> patientSessions) {
+		this.patientSessions = patientSessions;
 	}
 
 	@Override

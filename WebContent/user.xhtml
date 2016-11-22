@@ -11,7 +11,7 @@
 		<lc:headerPanel title="#{msg['title.users']}" addButtonAction="#{userManager.newUser()}" update=":userForm" oncomplete="PF('userDialog').show()" />
 
 		<div class="content-wrapper">
-			<p:dataTable id="userTable" var="user" value="#{userManager.users}" paginator="true" rows="20" paginatorPosition="bottom" paginatorAlwaysVisible="false" emptyMessage="#{msg['warning.noData']}">
+			<p:dataTable id="userTable" var="user" value="#{userManager.users}" paginator="true" rows="20" paginatorPosition="bottom" paginatorAlwaysVisible="false" emptyMessage="#{msg['message.noData']}">
 				<p:column headerText="#{msg['label.login']}" sortBy="#{user.username}">
 					<h:outputText value="#{user.username}" />
 				</p:column>

@@ -4,6 +4,8 @@ import br.com.litecode.application.SessionTimer;
 import br.com.litecode.application.push.NotificationMessage;
 import br.com.litecode.domain.ChamberEvent.EventType;
 import br.com.litecode.domain.Patient;
+import br.com.litecode.domain.PatientSession;
+import br.com.litecode.domain.PatientSession.PatientSessionStatus;
 import br.com.litecode.domain.Session;
 import br.com.litecode.domain.Session.SessionStatus;
 import br.com.litecode.domain.Session.TimePeriod;
@@ -21,10 +23,7 @@ import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -38,11 +37,13 @@ public class SessionManager implements Serializable {
 	@Inject private SessionTracker sessionTracker;
 
 	private Session session;
+	private List<Patient> patients;
 	private Date sessionDate;
 	private Date previousDailySessionsDate;
 
 	public SessionManager() {
 		session = new Session();
+		patients = new ArrayList<>();
 		sessionDate = new Date();
 	}
 
@@ -62,10 +63,16 @@ public class SessionManager implements Serializable {
 			return;
 		}
 
+		if (patients.size() > session.getChamber().getMaxNumberOfPatients()) {
+			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", session.getChamber().getMaxNumberOfPatients()));
+			return;
+		}
+
 		session.setSessionTime(sessionTime.toDate());
 		session.setStartTime(session.getSessionTime());
 		session.setEndTime(endTime);
-		sessionService.createSession(session);
+
+		sessionService.createSession(session, patients);
 
 		String messageSummary = MessageUtil.getMessage("message.sessionCreatedSummary", session.getChamber().getChamberId(), session.getSessionId());
 		String messageDetail = MessageUtil.getMessage("message.sessionCreatedDetail", session.getStartTime());
@@ -87,10 +94,10 @@ public class SessionManager implements Serializable {
 		sessionTimer.startSession(session);
 
 		String messageSummary = MessageUtil.getMessage("message.sessionStartedSummary", session.getChamber().getChamberId(), session.getSessionId());
-		String messageDetail = MessageUtil.getMessage("message.sessionStartedDetail", session.getStartTime(), session.getPatient().getName());
+		String messageDetail = MessageUtil.getMessage("message.sessionStartedDetail", session.getStartTime());
 
 		EventBus eventBus = EventBusFactory.getDefault().eventBus();
-		eventBus.publish("/notify", new NotificationMessage(session.getChamber().getChamberEvent(EventType.INITIATION), messageSummary, messageDetail));
+		eventBus.publish("/notify", new NotificationMessage(session.getChamber().getChamberEvent(EventType.START), messageSummary, messageDetail));
 	}
 
 	public void resetSession(Session session) {
@@ -110,9 +117,60 @@ public class SessionManager implements Serializable {
 		initializeSession();
 	}
 
+	public void setPatientSessionStatus(PatientSession patientSession, PatientSessionStatus patientSessionStatus) {
+		patientSession.setStatus(patientSessionStatus);
+		sessionService.updatePatientSession(patientSession);
+	}
+
+	public void addPatientsToSession() {
+		if (patients.size() + session.getPatientSessions().size() > session.getChamber().getMaxNumberOfPatients()) {
+			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", session.getChamber().getMaxNumberOfPatients()));
+			return;
+		}
+
+		sessionService.addPatientsToSession(session, patients);
+		session = sessionService.getSession(session.getSessionId());
+		patients.clear();
+	}
+
+	public void removePatientFromSession(PatientSession patientSession) {
+		sessionService.deletePatientSession(patientSession);
+		session.getPatientSessions().remove(patientSession);
+	}
+
 	public void duplicateSessions() {
-		sessionService.duplicateSessions(previousDailySessionsDate);
+		sessionService.duplicateSessions(previousDailySessionsDate, sessionDate);
 		initializeSession();
+	}
+
+	public void previousSessionDate() {
+		sessionDate = LocalDate.fromDateFields(sessionDate).minusDays(1).toDate();
+		initializeSession();
+	}
+
+	public void nextSessionDate() {
+		sessionDate = LocalDate.fromDateFields(sessionDate).plusDays(1).toDate();
+		initializeSession();
+	}
+
+	public Long[] getChamberOccupationData(Session session) {
+		if (session == null) {
+			return new Long[0];
+		}
+
+		Long[] chamberOccupation = new Long[session.getChamber().getMaxNumberOfPatients()];
+		int i = 0;
+
+		for (PatientSession patientSession : session.getPatientSessions()) {
+			chamberOccupation[i] = patientSession.getStatus() == PatientSessionStatus.ACTIVE ? 1l : 2l;
+			i++;
+		}
+
+		for (int j = i; j < chamberOccupation.length; j++) {
+			chamberOccupation[j] = 0l;
+		}
+
+		return chamberOccupation;
 	}
 
 	public void initializePreviousDailySessionsDate() {
@@ -121,6 +179,7 @@ public class SessionManager implements Serializable {
 
 	private void initializeSession() {
 		session = new Session();
+		patients.clear();
 	}
 
 	public Session getSession() {
@@ -129,6 +188,14 @@ public class SessionManager implements Serializable {
 
 	public void setSession(Session session) {
 		this.session = session;
+	}
+
+	public List<Patient> getPatients() {
+		return patients;
+	}
+
+	public void setPatients(List<Patient> patients) {
+		this.patients = patients;
 	}
 
 	public Date getSessionDate() {

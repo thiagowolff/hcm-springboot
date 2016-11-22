@@ -229,6 +229,14 @@ div .timer-progress-cell {
 	}
 }
 
+.ui-dialog-content .dialog-table table tr td {
+	padding: 4px;
+}
+
+.ui-selectcheckboxmenu-panel .ui-chkbox-icon {
+	background: @whiteThemeColor;
+}
+
 @colorCreatedStatus: #5e5e5e;
 @colorRunningStatus: #007d18;
 @colorDecompressingStatus: #eb8723;
@@ -245,6 +253,13 @@ div .timer-progress-cell {
 	}
 }
 
+.enum {
+	&-patientSessionStatus {
+		&-active { color: @colorRunningStatus;	}
+		&-absent { color:@colorShuttingDownStatus; }
+	}
+}
+
 .ui-progressbar {
 	&.decompressing {
 		div.ui-progressbar-value { border-color: @colorDecompressingStatus; background:  @colorDecompressingStatus; }
@@ -256,8 +271,10 @@ div .timer-progress-cell {
 
 .ui-growl-image.ui-growl-image {
 	&-creation { .icon("\e109", 36px, #ffffff, #ffffff); }
-	&-initiation { .icon("\e0b4", 36px, #00b01f, #00b01f); }
+	&-start { .icon("\e0b4", 36px, #00b01f, #00b01f); }
 	&-decompression { .icon("\f071", 36px, #fc9723, #fc9723); }
+	&-wear-mask { .icon("\f05a", 36px, #ff809d, #ff809d); }
+	&-remove-mask { .icon("\f05a", 36px, #cb8a00, #cb8a00); }
 	&-transport { .icon("\f041", 36px, #ffef17, #ffef17); }
 	&-shutdown { .icon("\f011", 36px, #e25447, #e25447); }
 	&-completion { .icon("\f00c", 36px, #467de3, #467de3); }

@@ -1,13 +1,12 @@
 package br.com.litecode.application;
 
-import java.text.MessageFormat;
-import java.util.ResourceBundle;
+import org.omnifaces.util.Messages;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-
-import org.omnifaces.util.Messages;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 @WebListener
 public class ContextInitializer implements ServletContextListener {

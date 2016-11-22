@@ -19,6 +19,9 @@ public class Chamber implements Serializable {
 	@Column
 	private String name;
 
+	@Column(name = "max_patients")
+	private Integer maxNumberOfPatients;
+
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "chamber_id")
 	private List<ChamberEvent> chamberEvents;
@@ -29,6 +32,10 @@ public class Chamber implements Serializable {
 
 	public String getName() {
 		return name;
+	}
+
+	public Integer getMaxNumberOfPatients() {
+		return maxNumberOfPatients;
 	}
 
 	public ChamberEvent getChamberEvent(EventType eventType) {
