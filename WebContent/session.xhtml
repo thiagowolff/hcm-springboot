@@ -47,12 +47,13 @@
 				<p:dataTable id="periodsTable" value="#{sessionManager.getSessions(chamber.chamberId).entrySet()}" var="sessionsByPeriod" rows="9" emptyMessage="#{msg['message.noSessionsFound']}">
 					<f:facet name="header">
 						#{chamber.name}
+						<div style="float: right;"><i class="fa fa-exclamation-circle"></i> #{msg['message.absentPatient']}</div>
 					</f:facet>
 
 					<p:columnGroup type="header">
 						<p:column headerText="#{msg['label.id']}" width="35"/>
 						<p:column headerText="#{msg['label.patients']}" width="220" />
-						<p:column headerText="#{msg['label.capacity']}" width="52"/>
+						<p:column headerText="#{msg['label.capacity']}" width="70"/>
 						<p:column headerText="#{msg['label.time']}" width="75" />
 						<p:column headerText="#{msg['label.startTime']}" width="75"/>
 						<p:column headerText="#{msg['label.decompressionTime']}" width="75"/>
@@ -73,14 +74,22 @@
 						<p:column style="text-align: left; vertical-align: top;">
 							<ui:repeat value="#{chamberSession.patientSessions}" var="patientSession" varStatus="status">
 								<div style="white-space: nowrap;">
-									<h:outputText value="#{patientSession.patient.name}" style="#{patientSession.status eq 'ABSENT' ? 'color: #b14538' : ''}" />
+									<h:outputText value="#{patientSession.patient.name}" style="#{patientSession.status eq 'ABSENT' ? 'color: #b14538' : chamberSession.running ? 'color: #007d18' : ''}" />
+									<h:panelGroup rendered="#{patientSession.status eq 'ABSENT'}"> <i class="fa fa-exclamation-circle" style="font-size: 9px"></i> </h:panelGroup>
 								</div>
 							</ui:repeat>
 						</p:column>
 						<p:column style="text-align: left;">
-							<ui:repeat value="#{sessionManager.getChamberOccupationData(chamberSession)}" var="occupationStatus">
-								<i class="fa fa-circle fa-2x" style="color: #{occupationStatus eq 0 ? '#d3d3d3' : occupationStatus eq 1 ? '#466b8e' : '#b14538'}" />
-							</ui:repeat>
+							<div class="ui-g">
+								<ui:repeat value="#{sessionManager.getChamberOccupationData(chamberSession)}" var="occupationStatus">
+									<div class="ui-g-4" style="padding: 0px;">
+										<span class="fa-stack fa-2x" style="font-size: 12px;">
+											<i class="fa fa-circle fa-stack-2x" style="#{occupationStatus eq 0 ? 'color: #d3d3d3' : occupationStatus eq 1 ? 'color: #466b8e' : 'color: #b14538'}"></i>
+											<h:panelGroup styleClass="fa fa-circle-o-notch fa-spin fa-fw fa-stack-1x" style="color: #1ee84a;" rendered="#{chamberSession.running and occupationStatus eq 1}"/>
+										</span>
+									</div>
+								</ui:repeat>
+							</div>
 						</p:column>
 						<p:column>
 							<h:outputText value="#{chamberSession.sessionTime}">
@@ -109,8 +118,8 @@
 						<p:column>
 							<div class="timer-progress-cell">
 								<div id="currentTime-#{chamberSession.sessionId}">
-									<h:outputText value="#{sessionTracker.getSession(chamberSession.sessionId).timeRemaining}" rendered="#{chamberSession.status eq 'RUNNING'}"/>
-									<h:outputText value="00:00:00" rendered="#{chamberSession.status ne 'RUNNING'}"/>
+									<h:outputText value="#{sessionTracker.getSession(chamberSession.sessionId).timeRemaining}" rendered="#{chamberSession.running}"/>
+									<h:outputText value="00:00:00" rendered="#{not chamberSession.running}"/>
 								</div>
 								<div>
 									<p:progressBar widgetVar="progress-#{chamberSession.sessionId}" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status ne 'FINISHED'}"/>

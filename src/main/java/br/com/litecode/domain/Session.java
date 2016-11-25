@@ -13,7 +13,7 @@ import java.util.List;
 @Entity
 @Table(name = "session")
 public class Session implements Serializable {
-	public enum SessionStatus { CREATED, RUNNING, DECOMPRESSING, SHUTTING_DOWN, FINISHED }
+	public enum SessionStatus { CREATED, COMPRESSING, O2_ON, O2_OFF, SHUTTING_DOWN, FINISHED }
 	public enum TimePeriod { MORNING, AFTERNOON, NIGHT }
 
 	@Id
@@ -25,7 +25,7 @@ public class Session implements Serializable {
 	@JoinColumn(name = "chamber_id")
 	private Chamber chamber;
 
-	@OneToMany(mappedBy = "session", cascade = { CascadeType.REMOVE, CascadeType.MERGE })
+	@OneToMany(mappedBy = "session", cascade = CascadeType.REMOVE)
 	private List<PatientSession> patientSessions;
 
 	@Column(name = "session_time")
@@ -74,6 +74,10 @@ public class Session implements Serializable {
 
 	public Date getShutdownTime() {
 		return LocalDateTime.fromDateFields(startTime).plusMillis(chamber.getChamberEvent(EventType.SHUTDOWN).getTimeout()).toDate();
+	}
+
+	public boolean isRunning() {
+		return status != SessionStatus.CREATED && status != SessionStatus.FINISHED;
 	}
 
 	public String getTimeRemaining() {

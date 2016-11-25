@@ -3,12 +3,15 @@ import org.lesscss.LessCompiler
 buildscript {
     repositories {
         mavenCentral()
+        jcenter()
     }
 
     dependencies {
         classpath "org.lesscss:lesscss:1.7.0.1.1"
+        classpath 'net.nemerosa:versioning:2.0.0'
     }
 }
+
 
 plugins {
     id "org.hidetake.ssh" version "2.7.0"
@@ -17,6 +20,7 @@ plugins {
 apply plugin: "java"
 apply plugin: "war"
 apply plugin: "org.hidetake.ssh"
+apply plugin: 'net.nemerosa.versioning'
 
 repositories {
     mavenCentral()
@@ -50,6 +54,8 @@ dependencies {
 }
 
 task compileLess << {
+    println versioning.info.full
+
     def lessCompiler = new LessCompiler()
 
     ant.replace(file: "$lessDir/style.less", token: "?ln=less", value: "")
@@ -83,6 +89,13 @@ task deploy << {
             execute "service wildfly restart"
         }
     }
+}
+
+webAppDirName = "WebContent"
+
+versioning {
+    releases = ["master"]
+    releaseMode = "snapshot"
 }
 
 war.dependsOn "compileLess"

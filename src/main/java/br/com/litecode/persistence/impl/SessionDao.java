@@ -12,7 +12,7 @@ import java.util.List;
 
 public class SessionDao extends AbstractDao<Session> {
 	public List<Session> findChamberSessionsByDate(Integer chamberId, Date date) {
-		String qlString = "select distinct s from Session s left join fetch s.patientSessions where s.chamber.chamberId = :chamberId and s.sessionTime between :startOfDay and :endOfDay order by s.sessionTime";
+		String qlString = "select distinct s from Session s left join fetch s.patientSessions ps where s.chamber.chamberId = :chamberId and s.sessionTime between :startOfDay and :endOfDay order by s.sessionTime, ps.patient.name";
 
 		TypedQuery<Session> query = entityManager.createQuery(qlString, Session.class);
 		query.setParameter("chamberId", chamberId);

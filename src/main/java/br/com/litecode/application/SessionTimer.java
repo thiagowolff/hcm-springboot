@@ -95,8 +95,11 @@ public class SessionTimer {
 
 	private void handleSessionEventNotification(ChamberEvent chamberEvent, Session session) {
 		switch (chamberEvent.getEventType()) {
-			case DECOMPRESSION:
-				session.setStatus(SessionStatus.DECOMPRESSING);
+			case WEAR_MASK:
+				session.setStatus(SessionStatus.O2_ON);
+				break;
+			case REMOVE_MASK:
+				session.setStatus(SessionStatus.O2_OFF);
 				break;
 			case SHUTDOWN:
 				session.setStatus(SessionStatus.SHUTTING_DOWN);

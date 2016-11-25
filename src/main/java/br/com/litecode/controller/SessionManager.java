@@ -88,7 +88,7 @@ public class SessionManager implements Serializable {
 		session.setStartTime(startTime.toDate());
 		session.setEndTime(startTime.plusMillis(session.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout()).toDate());
 		session.setCurrentProgress(0);
-		session.setStatus(SessionStatus.RUNNING);
+		session.setStatus(SessionStatus.COMPRESSING);
 		sessionService.updateSession(session);
 		sessionTracker.registerActiveSession(session);
 		sessionTimer.startSession(session);
@@ -135,7 +135,7 @@ public class SessionManager implements Serializable {
 
 	public void removePatientFromSession(PatientSession patientSession) {
 		sessionService.deletePatientSession(patientSession);
-		session.getPatientSessions().remove(patientSession);
+		session = sessionService.getSession(patientSession.getSession().getSessionId());
 	}
 
 	public void duplicateSessions() {

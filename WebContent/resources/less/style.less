@@ -39,8 +39,8 @@
 		border: none;
 
 		img {
-			margin: 10px 0px 0px 15px;
-			width: 65px;
+			margin: 12px 0px 0px 8px;
+			width: 85px;
 		}
 	}
 
@@ -238,16 +238,18 @@ div .timer-progress-cell {
 }
 
 @colorCreatedStatus: #5e5e5e;
-@colorRunningStatus: #007d18;
-@colorDecompressingStatus: #eb8723;
+@colorCompressingStatus: #008ed0;
+@colorO2OnStatus: #007d18;
+@colorO2OffStatus: #eb8723;
 @colorShuttingDownStatus: #b14538;
-@colorFinishedStatus: #221d9e;
+@colorFinishedStatus: #004d9e;
 
 .enum {
 	&-sessionStatus {
 		&-created { color: @colorCreatedStatus;	}
-		&-running { color: @colorRunningStatus; }
-		&-decompressing { color: @colorDecompressingStatus; }
+		&-compressing { color: @colorCompressingStatus; }
+		&-o2_on { color: @colorO2OnStatus; }
+		&-o2_off { color: @colorO2OffStatus; }
 		&-shutting_down { color:@colorShuttingDownStatus; }
 		&-finished { color: @colorFinishedStatus; }
 	}
@@ -255,14 +257,17 @@ div .timer-progress-cell {
 
 .enum {
 	&-patientSessionStatus {
-		&-active { color: @colorRunningStatus;	}
+		&-active { color: @colorCompressingStatus;	}
 		&-absent { color:@colorShuttingDownStatus; }
 	}
 }
 
 .ui-progressbar {
-	&.decompressing {
-		div.ui-progressbar-value { border-color: @colorDecompressingStatus; background:  @colorDecompressingStatus; }
+	&.o2_on {
+		div.ui-progressbar-value { border-color: @colorO2OnStatus; background:  @colorO2OnStatus; }
+	}
+	&.o2_off {
+		div.ui-progressbar-value { border-color: @colorO2OffStatus; background:  @colorO2OffStatus; }
 	}
 	&.shutting_down {
 		div.ui-progressbar-value { border-color:@colorShuttingDownStatus; background: @colorShuttingDownStatus; }
@@ -271,13 +276,11 @@ div .timer-progress-cell {
 
 .ui-growl-image.ui-growl-image {
 	&-creation { .icon("\e109", 36px, #ffffff, #ffffff); }
-	&-start { .icon("\e0b4", 36px, #00b01f, #00b01f); }
-	&-decompression { .icon("\f071", 36px, #fc9723, #fc9723); }
-	&-wear-mask { .icon("\f05a", 36px, #ff809d, #ff809d); }
-	&-remove-mask { .icon("\f05a", 36px, #cb8a00, #cb8a00); }
-	&-transport { .icon("\f041", 36px, #ffef17, #ffef17); }
-	&-shutdown { .icon("\f011", 36px, #e25447, #e25447); }
-	&-completion { .icon("\f00c", 36px, #467de3, #467de3); }
+	&-start { .icon("\e0b4", 36px, @colorCompressingStatus, @colorCompressingStatus); }
+	&-wear_mask { .icon("\f05a", 36px, @colorO2OnStatus, @colorO2OnStatus); }
+	&-remove_mask { .icon("\f05a", 36px, @colorO2OffStatus, @colorO2OffStatus); }
+	&-shutdown { .icon("\f011", 36px, @colorShuttingDownStatus, @colorShuttingDownStatus); }
+	&-completion { .icon("\f00c", 36px, @colorFinishedStatus, @colorFinishedStatus); }
 	&-info { .icon("\f05a", 36px, #ffffff, #ffffff); }
 }
 
@@ -285,11 +288,13 @@ div .timer-progress-cell {
 	animation: blink 1s steps(5, start) infinite;
 	-webkit-animation: blink 1s steps(5, start) infinite;
 }
+
 @keyframes blink {
 	to {
 		visibility: hidden;
 	}
 }
+
 @-webkit-keyframes blink {
 	to {
 		visibility: hidden;
