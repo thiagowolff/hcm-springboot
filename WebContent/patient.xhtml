@@ -17,11 +17,17 @@
 			<p:dataTable id="patientsTable" widgetVar="patientsTable" value="#{patientManager.patients}" var="patient" paginator="true" rows="15" paginatorAlwaysVisible="false" filteredValue="#{patientManager.filteredPatients}"
 				paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="15,30,100,500" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
 				
-				<p:column headerText="#{msg['label.name']}" sortBy="#{patient.name}" style="text-align: left;">
+				<p:column headerText="#{msg['label.name']}" sortBy="#{patient.name}" filterBy="#{patient.name}" style="text-align: left;">
 	          		<h:outputText value="#{patient.name}" />
 				</p:column>
-				<p:column headerText="#{msg['label.folderNumber']}" sortBy="#{patient.folderNumber}" width="120">
+				<p:column headerText="#{msg['label.patientRecord']}" filterBy="#{patient.patientRecord}" styleClass="medium-column">
+	          		<h:outputText value="#{patient.patientRecord}" />
+				</p:column>
+				<p:column headerText="#{msg['label.folderNumber']}" filterBy="#{patient.folderNumber}" styleClass="medium-column">
 	          		<h:outputText value="#{patient.folderNumber}" />
+				</p:column>
+				<p:column headerText="#{msg['label.healthInsurance']}" filterBy="#{patient.healthInsurance}" styleClass="medium-column">
+	          		<h:outputText value="#{patient.healthInsurance}" />
 				</p:column>
 				<p:column headerText="#{msg['label.numberOfSessions']}" width="70">
 					<h:outputText value="#{patientManager.patientSessionStats[patient.patientId].totalNumberOfSessions}" />
@@ -32,18 +38,16 @@
 				<p:column headerText="#{msg['label.numberOfAbsentSessions']}" width="70">
 					<h:outputText value="#{patientManager.patientSessionStats[patient.patientId].numberOfAbsentSessions}" />
 				</p:column>
-				<p:column headerText="#{msg['label.email']}" width="100">
-					<h:outputText value="#{patient.email}" />
-				</p:column>
-				<p:column headerText="#{msg['label.phone']}" width="100">
+				<p:column headerText="#{msg['label.contact']}" width="100" styleClass="xs-hidden">
+					<h:outputText value="#{patient.email}" /><br/>
 					<h:outputText value="#{patient.phoneNumber}" />
 				</p:column>
-				<p:column headerText="#{msg['label.creationDate']}" sortBy="#{patient.creationDate}" width="120">
+				<p:column headerText="#{msg['label.creationDate']}" sortBy="#{patient.creationDate}" styleClass="xs-hidden medium-column">
 					<h:outputText value="#{patient.creationDate}">
 						<f:convertDateTime pattern="dd/MM/yyyy" />
 					</h:outputText>
 				</p:column>
-				<p:column headerText="#{msg['label.action']}" width="60">
+				<p:column headerText="#{msg['label.action']}" styleClass="small-column" style="padding: 1px">
 					<p:commandButton process="@this" actionListener="#{patientManager.setPatient(patient)}" update=":patientInputForm" oncomplete="PF('patientDialog').show();" icon="ui-icon-pencil" title="#{msg['button.edit']}">
 						<p:resetInput target=":patientInputForm:patientGrid" />
 					</p:commandButton>
@@ -62,8 +66,14 @@
 				<p:outputLabel value="#{msg['label.name']}" for="patientName" />
 				<p:inputText id="patientName" value="#{patient.name}" required="true" maxlength="150" size="50" />
 
+				<p:outputLabel value="#{msg['label.patientRecord']}" for="patientRecord" />
+				<p:inputText id="patientRecord" value="#{patient.patientRecord}" maxlength="30" size="15" />
+
 				<p:outputLabel value="#{msg['label.folderNumber']}" for="folderNumber" />
 				<p:inputText id="folderNumber" value="#{patient.folderNumber}" maxlength="30" size="15" />
+
+				<p:outputLabel value="#{msg['label.healthInsurance']}" for="folderNumber" />
+				<p:inputText id="healthInsurance" value="#{patient.healthInsurance}" maxlength="30" size="15" />
 
 				<p:outputLabel value="#{msg['label.email']}" for="patientEmail" />
 				<p:inputText id="patientEmail" value="#{patient.email}" maxlength="75" size="50" />

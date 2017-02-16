@@ -6,7 +6,7 @@
 		<welcome-file>/index.xhtml</welcome-file>
 	</welcome-file-list>
 	<session-config>
-		<session-timeout>90</session-timeout>
+		<session-timeout>360</session-timeout>
 		<tracking-mode>COOKIE</tracking-mode>
 	</session-config>
 

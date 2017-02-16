@@ -2,6 +2,7 @@
 
 @defaultFontFamily: open-sans-regular;
 @defaultFontSize: 11px;
+@fontSizeLarge: 10px;
 
 @primaryThemeColor: #2d353a;
 @secondaryThemeColor: #4e88be;
@@ -31,8 +32,8 @@
 @menuTextColor: #979a9f;
 @menuIconHoverColor: @whiteThemeColor;
 @menuTextHoverColor: @whiteThemeColor;
-@menuIconSize: 32px;
-@leftMenuWidth: 85px;
+@menuIconSize: 24px;
+@leftMenuWidth: 0px;
 
 
 /* Reset */
@@ -79,6 +80,10 @@ body, input, select, textarea, button,
 	font-family: @defaultFontFamily;
 	font-size: @defaultFontSize !important;
 	font-weight: normal !important;
+
+	@media screen and (max-width: 1280px) {
+		font-size: @fontSizeLarge !important;
+	}
 }
 
 .ajax-status {
@@ -127,4 +132,14 @@ div[class^="ui-grid-col-"] {
 
 .ui-grid-col-3 {
 	min-width: 300px;
+}
+
+.text-left {
+	text-align: left;
+}
+
+.long-text {
+	text-overflow: ellipsis;
+	overflow:hidden;
+	white-space:nowrap;
 }

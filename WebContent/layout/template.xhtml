@@ -40,14 +40,17 @@
 						</h:panelGroup>
 					</div>
 				</div>
+				<ui:remove>
 				<div class="left-sidebar">
 					<ui:include src="/layout/leftMenu.xhtml" />
 				</div>
+				</ui:remove>
 				<div class="footer">
 					<h:outputText value="#{msg['title.poweredBy']} &#8211; v. #{version['version']}" />
 				</div>
 			</div>
 		</div>
+
 		<script>
 			function calculateHeight() {
 				var height = $(window).height();
@@ -59,7 +62,6 @@
 				calculateHeight();
 				$(window).bind('resize', calculateHeight);
 			});
-
 		</script>
 	</h:body>
 </f:view>

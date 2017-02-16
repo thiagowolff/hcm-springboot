@@ -5,15 +5,14 @@
 				xmlns:h="http://xmlns.jcp.org/jsf/html"
 				xmlns:p="http://primefaces.org/ui"
 				xmlns:pe="http://primefaces.org/ui/extensions"
+				xmlns:of="http://omnifaces.org/functions"
 				xmlns:lcf="http://litecode.com.br/functions">
 
 	<p:growl id="growl" widgetVar="growl" showDetail="true" life="10000"/>
 
 	<div class="content-wrapper">
 		<h:form id="form">
-			<h:panelGrid id="sessionGrid" columns="10" styleClass="input-grid">
-				<p:outputLabel value="#{msg['label.date']}"/>
-
+			<h:panelGrid id="sessionGrid" columns="6" styleClass="input-grid">
 				<h:panelGroup>
 					<p:commandButton icon="fa fa-chevron-left" actionListener="#{sessionManager.previousSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
 					<p:calendar id="sessionDate" value="#{sessionManager.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="10">
@@ -22,16 +21,13 @@
 					<p:commandButton icon="fa fa-chevron-right" actionListener="#{sessionManager.nextSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
 				</h:panelGroup>
 
-				<p:outputLabel value="#{msg['label.chamber']}"/>
 				<p:selectOneMenu id="sessionChamber" value="#{sessionManager.session.chamber}" converter="omnifaces.SelectItemsConverter">
 					<f:selectItems value="#{chamberManager.chambers}" var="chamber" itemValue="#{chamber}" itemLabel="#{chamber.name}"/>
 				</p:selectOneMenu>
 
-				<p:outputLabel value="#{msg['label.time']}" for="sessionTime"/>
-				<pe:timePicker id="sessionTime" widgetVar="sessionTime" value="#{sessionManager.session.sessionTime}" mode="spinner" startHours="6" endHours="22" showOn="focus" intervalMinutes="15" required="true" />
+				<pe:timePicker id="sessionTime" label="#{msg['label.time']}" widgetVar="sessionTime" value="#{sessionManager.session.sessionTime}" mode="spinner" startHours="6" endHours="22" showOn="focus" intervalMinutes="15" required="true" />
 
-				<p:outputLabel value="#{msg['label.patients']}" for="sessionPatients"/>
-				<p:selectCheckboxMenu id="sessionPatients" label="#{msg['label.select']}" value="#{sessionManager.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true" style="width: 160px" panelStyle="width: 250px">
+				<p:selectCheckboxMenu id="sessionPatients" label="#{msg['label.patients']}" value="#{sessionManager.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true" style="width: 160px" panelStyle="width: 250px">
 					<f:selectItems value="#{patientManager.patients}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
 				</p:selectCheckboxMenu>
 
@@ -39,7 +35,7 @@
 					<p:resetInput target="@form" />
 				</p:commandButton>
 
-				<p:commandButton value="#{msg['button.duplicateSessions']}" process="@this" actionListener="#{sessionManager.initializePreviousDailySessionsDate()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()"/>
+				<p:commandButton icon="fa fa-clone" value="#{msg['button.duplicateSessions']}" process="@this" actionListener="#{sessionManager.initializePreviousDailySessionsDate()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()"/>
 				<p:messages id="messages"/>
 			</h:panelGrid>
 
@@ -51,16 +47,18 @@
 					</f:facet>
 
 					<p:columnGroup type="header">
-						<p:column headerText="#{msg['label.id']}" width="35"/>
-						<p:column headerText="#{msg['label.patients']}" width="220" />
-						<p:column headerText="#{msg['label.capacity']}" width="70"/>
-						<p:column headerText="#{msg['label.time']}" width="75" />
-						<p:column headerText="#{msg['label.startTime']}" width="75"/>
-						<p:column headerText="#{msg['label.decompressionTime']}" width="75"/>
-						<p:column headerText="#{msg['label.endTime']}" width="75"/>
-						<p:column headerText="#{msg['label.status']}" width="90"/>
-						<p:column headerText="#{msg['label.progress']}" width="120"/>
-						<p:column headerText="#{msg['label.action']}" width="120"/>
+						<p:column headerText="#{msg['label.id']}" style="width: 1.5em;" />
+						<p:column headerText="#{msg['label.patient']}" styleClass="large-column" />
+						<p:column headerText="#{msg['label.healthInsurance']}" styleClass="small-column" />
+						<p:column headerText="#{msg['label.numberOfSessions']}" styleClass="small-column" style="white-space: nowrap" />
+						<p:column headerText="#{msg['label.capacity']}" style="width: 6.5em;" />
+						<p:column headerText="#{msg['label.time']}" styleClass="small-column" />
+						<p:column headerText="#{msg['label.startTime']}" styleClass="small-column" />
+						<p:column headerText="#{msg['label.decompressionTime']}" styleClass="small-column" />
+						<p:column headerText="#{msg['label.endTime']}" styleClass="small-column" />
+						<p:column headerText="#{msg['label.status']}" styleClass="medium-column" />
+						<p:column headerText="#{msg['label.progress']}" styleClass="medium-column" />
+						<p:column headerText="#{msg['label.action']}" styleClass="medium-column" />
 					</p:columnGroup>
 
 					<p:subTable id="sessionsTable" widgetVar="sessionsTable" value="#{sessionsByPeriod.value}" var="chamberSession">
@@ -71,15 +69,37 @@
 						<p:column>
 							<h:outputText value="#{chamberSession.sessionId}"/>
 						</p:column>
-						<p:column style="text-align: left; vertical-align: top;">
-							<ui:repeat value="#{chamberSession.patientSessions}" var="patientSession" varStatus="status">
-								<div style="white-space: nowrap;">
-									<h:outputText value="#{patientSession.patient.name}" style="#{patientSession.status eq 'ABSENT' ? 'color: #b14538' : chamberSession.running ? 'color: #007d18' : ''}" />
+
+						<p:column>
+							<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
+								<div class="long-text text-left" style="padding: 2px 0px 2px">
+									<h:outputText
+											styleClass="patient-#{patientSession.id}"
+											value="#{patientSession.patient.name}"
+											title="#{patientSession.patient.displayName}"
+											style="#{patientSession.status eq 'ABSENT' ? 'color: #b14538' : chamberSession.running ? 'color: #007d18' : ''}" />
 									<h:panelGroup rendered="#{patientSession.status eq 'ABSENT'}"> <i class="fa fa-exclamation-circle" style="font-size: 9px"></i> </h:panelGroup>
 								</div>
 							</ui:repeat>
 						</p:column>
-						<p:column style="text-align: left;">
+
+						<p:column>
+							<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
+								<div style="padding: 2px 0px 2px">
+									<h:outputText value="#{of:coalesce(patientSession.patient.healthInsurance, '-')}" />
+								</div>
+							</ui:repeat>
+						</p:column>
+
+						<p:column>
+							<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
+								<div style="padding: 2px 0px 2px">
+									<h:outputText value="#{patientManager.getPatientSessionStats(patientSession.patient.patientId, sessionManager.sessionDate).numberOfCompletedSessions}" />
+								</div>
+							</ui:repeat>
+						</p:column>
+
+						<p:column styleClass="text-left">
 							<div class="ui-g">
 								<ui:repeat value="#{sessionManager.getChamberOccupationData(chamberSession)}" var="occupationStatus">
 									<div class="ui-g-4" style="padding: 0px;">
@@ -91,26 +111,31 @@
 								</ui:repeat>
 							</div>
 						</p:column>
+
 						<p:column>
 							<h:outputText value="#{chamberSession.sessionTime}">
 								<f:convertDateTime pattern="HH:mm:ss"/>
 							</h:outputText>
 						</p:column>
+
 						<p:column>
 							<h:outputText value="#{chamberSession.startTime}" style="color: #007d18;">
 								<f:convertDateTime pattern="HH:mm:ss"/>
 							</h:outputText>
 						</p:column>
+
 						<p:column>
 							<h:outputText value="#{chamberSession.shutdownTime}" style="color: #6e6e6e;">
 								<f:convertDateTime pattern="HH:mm:ss"/>
 							</h:outputText>
 						</p:column>
+
 						<p:column>
 							<h:outputText value="#{chamberSession.endTime}" style="color: #b14538;">
 								<f:convertDateTime pattern="HH:mm:ss"/>
 							</h:outputText>
 						</p:column>
+
 						<p:column>
 							<h:outputText value="#{lcf:enum(chamberSession.status)}" styleClass="#{lcf:enumStyle(chamberSession.status)}"/>
 						</p:column>
@@ -127,10 +152,11 @@
 								</div>
 							</div>
 						</p:column>
-						<p:column>
+
+						<p:column style="padding: 1px">
 							<p:commandButton title="#{msg['button.startSession']}" icon="ui-icon-play" actionListener="#{sessionManager.startSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{chamberSession.status ne 'CREATED'}"/>
 							<p:commandButton title="#{msg['button.reset']}" icon="ui-icon-stop" actionListener="#{sessionManager.resetSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'CREATED'}"/>
-							<p:commandButton title="#{msg['button.edit']}" icon="ui-icon-pencil" actionListener="#{sessionManager.setSession(chamberSession)}" oncomplete="PF('sessionDialog').show()" process=":form:chambersGrid" update=":editSessionForm" global="false"/>
+							<p:commandButton title="#{msg['button.edit']}" icon="ui-icon-pencil" actionListener="#{sessionManager.setCreatedSession(chamberSession)}" oncomplete="PF('sessionDialog').show()" process=":form:chambersGrid" update=":editSessionForm" global="false"/>
 							<p:commandButton title="#{msg['button.delete']}" icon="ui-icon-trash" actionListener="#{sessionManager.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false"/>
 						</p:column>
 					</p:subTable>
@@ -140,18 +166,18 @@
 	</div>
 
 	<h:form id="editSessionForm">
-		<p:dialog header="#{msg['label.session']} #{sessionManager.session.sessionId}" widgetVar="sessionDialog" width="50%" resizable="false" showEffect="fade" hideEffect="fade" modal="true" dynamic="true">
+		<p:dialog header="#{msg['label.session']} #{sessionManager.createdSession.sessionId}" widgetVar="sessionDialog" width="50%" resizable="false" showEffect="fade" hideEffect="fade" modal="true" dynamic="true">
 			<p:messages id="sessionMessages" autoUpdate="true" />
 
 			<div style="padding: 8px 0px 8px 0px; text-align: right;">
 				<p:selectCheckboxMenu id="newSessionPatients" label="#{msg['label.addPatients']}" value="#{sessionManager.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true" style="width: 160px" panelStyle="width: 250px">
-					<f:selectItems value="#{patientManager.getAvailabePatientsForSession(sessionManager.session.sessionId)}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
+					<f:selectItems value="#{patientManager.getAvailabePatientsForSession(sessionManager.createdSession.sessionId)}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
 				</p:selectCheckboxMenu>
 
 				<p:commandButton icon="fa fa-plus" actionListener="#{sessionManager.addPatientsToSession()}" process="@this, newSessionPatients" update=":form:chambersGrid, sessionPatientsTable, sessionMessages, newSessionPatients" />
 			</div>
 
-			<p:dataTable id="sessionPatientsTable" styleClass="dialog-table" var="sessionPatient" value="#{sessionManager.session.patientSessions}" emptyMessage="#{msg['message.noData']}">
+			<p:dataTable id="sessionPatientsTable" styleClass="dialog-table" var="sessionPatient" value="#{sessionManager.createdSession.patientSessions}" emptyMessage="#{msg['message.noData']}">
 				<p:column headerText="#{msg['label.id']}" width="25">
 					<h:outputText value="#{sessionPatient.patient.patientId}" />
 				</p:column>
