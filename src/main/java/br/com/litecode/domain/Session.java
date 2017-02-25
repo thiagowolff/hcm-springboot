@@ -1,18 +1,30 @@
 package br.com.litecode.domain;
 
 import br.com.litecode.domain.ChamberEvent.EventType;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.*;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Entity
 @Table(name = "session")
-public class Session implements Serializable {
+@Cacheable
+@NamedQuery(
+		name = "findChamberSessionsByDate",
+		query = "select distinct s from Session s where s.chamber.chamberId = :chamberId and s.sessionTime between :startOfDay and :endOfDay order by s.sessionTime, s.sessionId",
+		hints = { @QueryHint (name = "org.hibernate.cacheable", value = "true") }
+)
+public class Session implements Comparable<Session>, Serializable {
 	public enum SessionStatus { CREATED, COMPRESSING, O2_ON, O2_OFF, SHUTTING_DOWN, FINISHED }
 	public enum TimePeriod { MORNING, AFTERNOON, NIGHT }
 
@@ -26,7 +38,8 @@ public class Session implements Serializable {
 	private Chamber chamber;
 
 	@OneToMany(mappedBy = "session", cascade = CascadeType.REMOVE)
-	private List<PatientSession> patientSessions;
+	@SortNatural
+	private SortedSet<PatientSession> patientSessions;
 
 	@Column(name = "session_time")
 	private Date sessionTime;
@@ -47,7 +60,7 @@ public class Session implements Serializable {
 	private long currentProgress;
 
 	public Session() {
-		patientSessions = new ArrayList<>();
+		patientSessions = new TreeSet<>();
 		status = SessionStatus.CREATED;
 		currentProgress = 0;
 	}
@@ -108,11 +121,11 @@ public class Session implements Serializable {
 		this.chamber = chamber;
 	}
 
-	public List<PatientSession> getPatientSessions() {
+	public SortedSet<PatientSession> getPatientSessions() {
 		return patientSessions;
 	}
 
-	public void setPatientSessions(List<PatientSession> patientSessions) {
+	public void setPatientSessions(SortedSet<PatientSession> patientSessions) {
 		this.patientSessions = patientSessions;
 	}
 
@@ -142,5 +155,24 @@ public class Session implements Serializable {
 
 	public void setEndTime(Date endTime) {
 		this.endTime = endTime;
+	}
+
+	@Override
+	public int compareTo(Session session) {
+		return startTime.compareTo(session.getStartTime());
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		Session session = (Session) o;
+		return sessionId.equals(session.sessionId);
+	}
+
+	@Override
+	public int hashCode() {
+		return sessionId.hashCode();
 	}
 }

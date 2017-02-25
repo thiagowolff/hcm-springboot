@@ -5,16 +5,13 @@ import br.com.litecode.domain.Session;
 import br.com.litecode.persistence.AbstractDao;
 import org.joda.time.LocalDateTime;
 
-import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import java.util.Date;
 import java.util.List;
 
 public class SessionDao extends AbstractDao<Session> {
 	public List<Session> findChamberSessionsByDate(Integer chamberId, Date date) {
-		String qlString = "select distinct s from Session s left join fetch s.patientSessions ps where s.chamber.chamberId = :chamberId and s.sessionTime between :startOfDay and :endOfDay order by s.sessionTime, ps.patient.name";
-
-		TypedQuery<Session> query = entityManager.createQuery(qlString, Session.class);
+		TypedQuery<Session> query = entityManager.createNamedQuery("findChamberSessionsByDate", Session.class);
 		query.setParameter("chamberId", chamberId);
 		query.setParameter("startOfDay", LocalDateTime.fromDateFields(date).withTime(0, 0, 0, 0).toDate());
 		query.setParameter("endOfDay", LocalDateTime.fromDateFields(date).withTime(23, 59, 59, 999).toDate());
@@ -42,21 +39,16 @@ public class SessionDao extends AbstractDao<Session> {
 		return query.getResultList();
 	}
 
-	public Long countSessionsPerPatient(Integer patientId) {
-		String qlString = "select count(*) from Session s join s.patientSessions ps where ps.patient.patientId = :patientId and s.status = 'FINISHED' and ps.status = 'ACTIVE'" ;
-
-		TypedQuery<Long> query = entityManager.createQuery(qlString, Long.class);
+	public List<PatientSession> findPatientSessionsByDate(Integer patientId, Date sessionDate) {
+		TypedQuery<PatientSession> query = entityManager.createNamedQuery("findPatientSessionsByDate", PatientSession.class);
 		query.setParameter("patientId", patientId);
+		query.setParameter("sessionDate", LocalDateTime.fromDateFields(sessionDate).withTime(23, 59, 59, 999).toDate());
 
-		try {
-			return query.getSingleResult();
-		} catch(NoResultException e) {
-			return 0L;
-		}
+		return query.getResultList();
 	}
 
 	public Session findSessionById(Integer sessionId) {
-		String qlString = "select distinct s from Session s join fetch s.patientSessions where s.sessionId = :sessionId";
+		String qlString = "select distinct s from Session s left join fetch s.patientSessions where s.sessionId = :sessionId";
 		TypedQuery<Session> query = entityManager.createQuery(qlString, Session.class);
 		query.setParameter("sessionId", sessionId);
 		return query.getSingleResult();

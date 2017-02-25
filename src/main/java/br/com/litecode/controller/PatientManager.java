@@ -5,12 +5,14 @@ import br.com.litecode.domain.PatientSession;
 import br.com.litecode.domain.PatientSession.PatientSessionStatus;
 import br.com.litecode.domain.Session.SessionStatus;
 import br.com.litecode.service.PatientService;
+import br.com.litecode.service.SessionService;
 import br.com.litecode.service.UserService;
 
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,7 @@ public class PatientManager implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Inject	private PatientService patientService;
+	@Inject	private SessionService sessionService;
 	@Inject private UserService userService;
 
 	private Patient patient;
@@ -96,6 +99,27 @@ public class PatientManager implements Serializable {
 
 	public Map<Integer, SessionStats> getPatientSessionStats() {
 		return patientSessionStats;
+	}
+
+	public SessionStats getPatientSessionStats(Integer patientId, Date sessionDate) {
+		List<PatientSession> patientSessions = sessionService.getPatientSessions(patientId, sessionDate);
+
+		int numberOfSessions = patientSessions.size();
+		int completedSessions = 0;
+		int absentSessions = 0;
+
+		for (PatientSession patientSession : patientSessions) {
+			if (patientSession.getStatus() == PatientSessionStatus.ABSENT) {
+				absentSessions++;
+				continue;
+			}
+
+			if (patientSession.getSession().getStatus() == SessionStatus.FINISHED) {
+				completedSessions++;
+			}
+		}
+
+		return new SessionStats(completedSessions, absentSessions, numberOfSessions);
 	}
 
 	public static class SessionStats {

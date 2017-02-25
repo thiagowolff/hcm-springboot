@@ -5,7 +5,13 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "patient_session")
-public class PatientSession implements Serializable {
+@Cacheable
+@NamedQuery(
+		name = "findPatientSessionsByDate",
+		query = "select ps from PatientSession ps where ps.patient.patientId = :patientId and ps.session.sessionTime <= :sessionDate",
+		hints = { @QueryHint (name = "org.hibernate.cacheable", value = "true") }
+)
+public class PatientSession implements Comparable<PatientSession>, Serializable {
 	public enum PatientSessionStatus { ACTIVE, ABSENT }
 
 	@Id
@@ -32,6 +38,11 @@ public class PatientSession implements Serializable {
 		this();
 		this.patient = patient;
 		this.session = session;
+	}
+
+	@Override
+	public int compareTo(PatientSession patientSession) {
+		return patient.getName().compareTo(patientSession.getPatient().getName());
 	}
 
 	public Integer getId() {

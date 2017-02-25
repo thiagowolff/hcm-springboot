@@ -3,7 +3,11 @@ package br.com.litecode.domain;
 import javax.persistence.*;
 import javax.validation.constraints.Pattern;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static br.com.litecode.util.MessageUtil.getMessage;
 
 @Entity
 @Table(name = "patient")
@@ -17,8 +21,14 @@ public class Patient {
 	@Column
 	private String name;
 
+	@Column(name = "patient_record")
+	private String patientRecord;
+
 	@Column(name = "folder_number")
 	private String folderNumber;
+
+	@Column(name = "health_insurance")
+	private String healthInsurance;
 
 	@Column
 	@Pattern(regexp = "^([_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,}))?$")
@@ -39,6 +49,12 @@ public class Patient {
 	public Patient() {
 		creationDate = Date.from(Instant.now());
 		patientSessions = new ArrayList<>();
+	}
+
+	public String getDisplayName() {
+		String folderNumber = this.folderNumber != null && !this.folderNumber.isEmpty() ? this.folderNumber.trim() : "-";
+		String patientRecord = this.patientRecord != null && !this.patientRecord.isEmpty() ? this.patientRecord.trim() : "-";
+		return String.format("%s [%s: %s | %s: %s]", name, getMessage("label.folderNumber"), folderNumber, getMessage("label.patientRecord"), patientRecord);
 	}
 
 	public Integer getPatientId() {
@@ -63,6 +79,14 @@ public class Patient {
 
 	public void setFolderNumber(String folderNumber) {
 		this.folderNumber = folderNumber;
+	}
+
+	public String getHealthInsurance() {
+		return healthInsurance;
+	}
+
+	public void setHealthInsurance(String healthInsurance) {
+		this.healthInsurance = healthInsurance;
 	}
 
 	public void setCreationDate(Date creationDate) {
@@ -103,6 +127,14 @@ public class Patient {
 
 	public void setPatientSessions(List<PatientSession> patientSessions) {
 		this.patientSessions = patientSessions;
+	}
+
+	public String getPatientRecord() {
+		return patientRecord;
+	}
+
+	public void setPatientRecord(String patientRecord) {
+		this.patientRecord = patientRecord;
 	}
 
 	@Override

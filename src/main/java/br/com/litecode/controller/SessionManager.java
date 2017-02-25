@@ -2,6 +2,7 @@ package br.com.litecode.controller;
 
 import br.com.litecode.application.SessionTimer;
 import br.com.litecode.application.push.NotificationMessage;
+import br.com.litecode.domain.Chamber;
 import br.com.litecode.domain.ChamberEvent.EventType;
 import br.com.litecode.domain.Patient;
 import br.com.litecode.domain.PatientSession;
@@ -36,13 +37,15 @@ public class SessionManager implements Serializable {
 	@Inject private SessionTimer sessionTimer;
 	@Inject private SessionTracker sessionTracker;
 
-	private Session session;
+	private Chamber selectedChamber;
+	private Date selectedTime;
+	private Session selectedSession;
 	private List<Patient> patients;
 	private Date sessionDate;
 	private Date previousDailySessionsDate;
 
 	public SessionManager() {
-		session = new Session();
+		selectedChamber = new Chamber();
 		patients = new ArrayList<>();
 		sessionDate = new Date();
 	}
@@ -53,21 +56,23 @@ public class SessionManager implements Serializable {
 	}
 
 	public void addSession() {
-		int sessionDuration = session.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout();
-		LocalDateTime sessionTime = LocalDate.fromDateFields(sessionDate).toLocalDateTime(LocalTime.fromDateFields(session.getSessionTime()));
+		int sessionDuration = selectedChamber.getChamberEvent(EventType.COMPLETION).getTimeout();
+		LocalDateTime sessionTime = LocalDate.fromDateFields(sessionDate).toLocalDateTime(LocalTime.fromDateFields(selectedTime));
 		Date endTime = sessionTime.plusMillis(sessionDuration).toDate();
 
-		List<Session> sessions = sessionService.getSessionsByPeriod(session.getChamber().getChamberId(), sessionTime.toDate());
+		List<Session> sessions = sessionService.getSessionsByPeriod(selectedChamber.getChamberId(), sessionTime.toDate());
 		if (!sessions.isEmpty()) {
 			Messages.addGlobalError(MessageUtil.getMessage("error.sessionAlreadyCreatedForPeriod"));
 			return;
 		}
 
-		if (patients.size() > session.getChamber().getMaxNumberOfPatients()) {
-			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", session.getChamber().getMaxNumberOfPatients()));
+		if (patients.size() > selectedChamber.getMaxNumberOfPatients()) {
+			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", selectedChamber.getMaxNumberOfPatients()));
 			return;
 		}
 
+		Session session = new Session();
+		session.setChamber(selectedChamber);
 		session.setSessionTime(sessionTime.toDate());
 		session.setStartTime(session.getSessionTime());
 		session.setEndTime(endTime);
@@ -112,8 +117,8 @@ public class SessionManager implements Serializable {
 	}
 
 	public void deleteSession() {
-		sessionTracker.removeActiveSession(session);
-		sessionService.deleteSession(session);
+		sessionTracker.removeActiveSession(selectedSession);
+		sessionService.deleteSession(selectedSession);
 		initializeSession();
 	}
 
@@ -123,19 +128,19 @@ public class SessionManager implements Serializable {
 	}
 
 	public void addPatientsToSession() {
-		if (patients.size() + session.getPatientSessions().size() > session.getChamber().getMaxNumberOfPatients()) {
-			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", session.getChamber().getMaxNumberOfPatients()));
+		if (patients.size() + selectedSession.getPatientSessions().size() > selectedSession.getChamber().getMaxNumberOfPatients()) {
+			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", selectedSession.getChamber().getMaxNumberOfPatients()));
 			return;
 		}
 
-		sessionService.addPatientsToSession(session, patients);
-		session = sessionService.getSession(session.getSessionId());
+		sessionService.addPatientsToSession(selectedSession, patients);
+		selectedSession = sessionService.getSession(selectedSession.getSessionId());
 		patients.clear();
 	}
 
 	public void removePatientFromSession(PatientSession patientSession) {
 		sessionService.deletePatientSession(patientSession);
-		session = sessionService.getSession(patientSession.getSession().getSessionId());
+		selectedSession = sessionService.getSession(patientSession.getSession().getSessionId());
 	}
 
 	public void duplicateSessions() {
@@ -178,16 +183,32 @@ public class SessionManager implements Serializable {
 	}
 
 	private void initializeSession() {
-		session = new Session();
+		selectedSession = new Session();
 		patients.clear();
 	}
 
-	public Session getSession() {
-		return session;
+	public Session getSelectedSession() {
+		return selectedSession;
 	}
 
-	public void setSession(Session session) {
-		this.session = session;
+	public void setSelectedSession(Session selectedSession) {
+		this.selectedSession = selectedSession;
+	}
+
+	public Date getSelectedTime() {
+		return selectedTime;
+	}
+
+	public void setSelectedTime(Date selectedTime) {
+		this.selectedTime = selectedTime;
+	}
+
+	public Chamber getSelectedChamber() {
+		return selectedChamber;
+	}
+
+	public void setSelectedChamber(Chamber selectedChamber) {
+		this.selectedChamber = selectedChamber;
 	}
 
 	public List<Patient> getPatients() {

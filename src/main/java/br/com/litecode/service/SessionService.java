@@ -9,6 +9,7 @@ import br.com.litecode.domain.Session.SessionStatus;
 import br.com.litecode.persistence.impl.AlarmDao;
 import br.com.litecode.persistence.impl.PatientDao;
 import br.com.litecode.persistence.impl.SessionDao;
+import org.hibernate.Hibernate;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
@@ -29,15 +30,17 @@ public class SessionService {
 	}
 
 	public List<Session> getSessions(Integer chamberId, Date date) {
-		return sessionDao.findChamberSessionsByDate(chamberId, date);
+		List<Session> sessions = sessionDao.findChamberSessionsByDate(chamberId, date);
+
+		for (Session session: sessions ) {
+			Hibernate.initialize(session.getPatientSessions());
+		}
+
+		return sessions;
 	}
 
 	public List<Session> getSessionsByPeriod(Integer chamberId, Date sessionTime) {
 		return sessionDao.findChamberSessionsByPeriod(chamberId, sessionTime);
-	}
-
-	public Long getNumberOfPatientSessions(Integer patientId) {
-		return sessionDao.countSessionsPerPatient(patientId);
 	}
 
 	public void createSession(Session session) {
@@ -94,6 +97,10 @@ public class SessionService {
 
 	public void deletePatientSession(PatientSession patientSession) {
 		sessionDao.deletePatientSession(patientSession);
+	}
+
+	public List<PatientSession> getPatientSessions(Integer patientId, Date sessionDate) {
+		return sessionDao.findPatientSessionsByDate(patientId, sessionDate);
 	}
 
 	public List<Alarm> getAlarms() {

@@ -12,7 +12,7 @@ import java.util.List;
 @Named
 @ViewScoped
 public class ChamberManager implements Serializable {
-	@Inject private ChamberService chamberService;
+	private ChamberService chamberService;
 
 	private List<Chamber> chambers;
 	private Chamber chamber;
@@ -26,6 +26,11 @@ public class ChamberManager implements Serializable {
 			chambers = chamberService.getChambers();
 		}
 		return chambers;
+	}
+
+	@Inject
+	public void setChamberService(ChamberService chamberService) {
+		this.chamberService = chamberService;
 	}
 
 	public Chamber getChamber() {

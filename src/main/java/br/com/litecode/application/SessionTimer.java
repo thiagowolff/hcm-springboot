@@ -90,7 +90,10 @@ public class SessionTimer {
 		}
 
 		handleSessionEventNotification(timerConfig.getChamberEvent(), session);
-		sessionService.updateSession(session);
+
+		Session currentSession = sessionService.getSession(session.getSessionId());
+		currentSession.setStatus(session.getStatus());
+		sessionService.updateSession(currentSession);
 	}
 
 	private void handleSessionEventNotification(ChamberEvent chamberEvent, Session session) {

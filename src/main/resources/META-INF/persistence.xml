@@ -7,11 +7,10 @@
 		<shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
 		<properties>
         	<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
-        	<property name="hibernate.show_sql" value="false" />
+        	<property name="hibernate.show_sql" value="true" />
         	<property name="hibernate.format_sql" value="false" />
 			<property name="hibernate.cache.use_second_level_cache" value="true"/>
-			<property name="hibernate.cache.use_query_cache" value="false"/>
-			<!--<property name="hibernate.cache.region.factory_class" value="org.jboss.as.jpa.hibernate4.infinispan.InfinispanRegionFactory" />-->
+			<property name="hibernate.cache.use_query_cache" value="true"/>
 			<property name="hibernate.cache.infinispan.cachemanager" value="java:jboss/infinispan/hibernate"/>
 		</properties>
 	</persistence-unit>

@@ -48,7 +48,7 @@
 					</h:outputText>
 				</p:column>
 				<p:column headerText="#{msg['label.action']}" styleClass="small-column" style="padding: 1px">
-					<p:commandButton process="@this" actionListener="#{patientManager.setPatient(patient)}" update=":patientInputForm" oncomplete="PF('patientDialog').show();" icon="ui-icon-pencil" title="#{msg['button.edit']}">
+					<p:commandButton process="@this" actionListener="#{patientManager.setPatient(patient)}" update=":patientInputForm" oncomplete="PF('patientDialog').show();" icon="ui-icon-pencil" title="#{msg['button.edit']}" global="false">
 						<p:resetInput target=":patientInputForm:patientGrid" />
 					</p:commandButton>
 					<p:commandButton process="@this" actionListener="#{patientManager.setPatient(patient)}" onclick="PF('confirmDeletePatientDialog').show();" icon="ui-icon-trash" title="#{msg['button.delete']}" />

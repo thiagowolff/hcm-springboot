@@ -1,6 +1,8 @@
 package br.com.litecode.domain;
 
 import br.com.litecode.domain.ChamberEvent.EventType;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -24,6 +26,7 @@ public class Chamber implements Serializable {
 
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "chamber_id")
+	@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 	private List<ChamberEvent> chamberEvents;
 
 	public Integer getChamberId() {
@@ -53,12 +56,10 @@ public class Chamber implements Serializable {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof Chamber)) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 
 		Chamber chamber = (Chamber) o;
-
-		return chamberId.equals(chamber.chamberId);
-
+		return chamberId != null ? chamberId.equals(chamber.chamberId) : chamber.chamberId == null;
 	}
 
 	@Override
