@@ -251,6 +251,13 @@ div.timer-progress-cell {
 @colorShuttingDownStatus: #b14538;
 @colorFinishedStatus: #004d9e;
 
+@bgColorCreatedStatus: #f7f7f7;
+@bgColorCompressingStatus: rgba(0, 142, 208, 0.05);;
+@bgColorO2OnStatus: rgba(237, 255, 241, 0.25);
+@bgColorO2OffStatus: rgba(235, 135, 35, 0.05);
+@bgColorShuttingDownStatus: rgba(177, 69, 56, 0.05);
+@bgColorFinishedStatus: #ffffff;
+
 .enum {
 	&-sessionStatus {
 		&-created { color: @colorCreatedStatus;	}
@@ -259,6 +266,14 @@ div.timer-progress-cell {
 		&-o2_off { color: @colorO2OffStatus; }
 		&-shutting_down { color:@colorShuttingDownStatus; }
 		&-finished { color: @colorFinishedStatus; }
+	}
+	&-sessionStatus {
+		&-created-bg { background: @bgColorCreatedStatus;	}
+		&-compressing-bg { background: @bgColorCompressingStatus; }
+		&-o2_on-bg { background: @bgColorO2OnStatus; }
+		&-o2_off-bg { background: @bgColorO2OffStatus; }
+		&-shutting_down-bg { background:@bgColorShuttingDownStatus; }
+		&-finished-bg { background: @bgColorFinishedStatus; }
 	}
 }
 

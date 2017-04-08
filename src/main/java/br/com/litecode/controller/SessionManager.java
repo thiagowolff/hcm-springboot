@@ -101,8 +101,7 @@ public class SessionManager implements Serializable {
 		String messageSummary = MessageUtil.getMessage("message.sessionStartedSummary", session.getChamber().getChamberId(), session.getSessionId());
 		String messageDetail = MessageUtil.getMessage("message.sessionStartedDetail", session.getStartTime());
 
-		EventBus eventBus = EventBusFactory.getDefault().eventBus();
-		eventBus.publish("/notify", new NotificationMessage(session.getChamber().getChamberEvent(EventType.START), messageSummary, messageDetail));
+		EventBusFactory.getDefault().eventBus().publish("/notify", new NotificationMessage(session.getChamber().getChamberEvent(EventType.START), messageSummary, messageDetail));
 	}
 
 	public void resetSession(Session session) {
@@ -114,12 +113,14 @@ public class SessionManager implements Serializable {
 		sessionTracker.removeActiveSession(session);
 		sessionService.updateSession(session);
 		initializeSession();
+		EventBusFactory.getDefault().eventBus().publish("/refresh", "{}");
 	}
 
 	public void deleteSession() {
 		sessionTracker.removeActiveSession(selectedSession);
 		sessionService.deleteSession(selectedSession);
 		initializeSession();
+		EventBusFactory.getDefault().eventBus().publish("/refresh", "{}");
 	}
 
 	public void setPatientSessionStatus(PatientSession patientSession, PatientSessionStatus patientSessionStatus) {

@@ -10,7 +10,6 @@ import java.util.ResourceBundle;
 
 @WebListener
 public class ContextInitializer implements ServletContextListener {
-
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		System.setProperty("org.apache.el.parser.COERCE_TO_ZERO", "false");

@@ -1,18 +1,16 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
 				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 				xmlns:f="http://xmlns.jcp.org/jsf/core"
-				xmlns:fn="http://java.sun.com/jsp/jstl/functions"
 				xmlns:h="http://xmlns.jcp.org/jsf/html"
 				xmlns:p="http://primefaces.org/ui"
 				xmlns:pe="http://primefaces.org/ui/extensions"
-				xmlns:of="http://omnifaces.org/functions"
-				xmlns:lcf="http://litecode.com.br/functions">
+>
 
 	<p:growl id="growl" widgetVar="growl" showDetail="true" life="10000"/>
 
 	<div class="content-wrapper">
 		<h:form id="form">
-			<h:panelGrid id="sessionGrid" columns="6" styleClass="input-grid">
+			<h:panelGrid id="sessionGrid" columns="7" styleClass="input-grid">
 				<h:panelGroup>
 					<p:commandButton icon="fa fa-chevron-left" actionListener="#{sessionManager.previousSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
 					<p:calendar id="sessionDate" value="#{sessionManager.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="10">
@@ -66,11 +64,11 @@
 							<h:outputText value="#{lcf:enum(sessionsByPeriod.key)}"/>
 						</f:facet>
 
-						<p:column>
+						<p:column styleClass="#{lcf:enumStyle(chamberSession.status)}-bg">
 							<h:outputText value="#{chamberSession.sessionId}"/>
 						</p:column>
 
-						<p:column style="vertical-align: top">
+						<p:column styleClass="#{lcf:enumStyle(chamberSession.status)}-bg" style="vertical-align: top">
 							<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
 								<div class="long-text text-left">
 									<h:outputText
@@ -83,7 +81,7 @@
 							</ui:repeat>
 						</p:column>
 
-						<p:column style="vertical-align: top">
+						<p:column styleClass="#{lcf:enumStyle(chamberSession.status)}-bg" style="vertical-align: top">
 							<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
 								<div class="long-text text-left">
 									<h:outputText value="#{patientSession.patient.healthInsurance}" title="#{patientSession.patient.healthInsurance}" />
@@ -91,7 +89,7 @@
 							</ui:repeat>
 						</p:column>
 
-						<p:column style="vertical-align: top">
+						<p:column styleClass="#{lcf:enumStyle(chamberSession.status)}-bg" style="vertical-align: top">
 							<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
 								<div style="padding: 2px 0px 2px">
 									<h:outputText value="#{patientManager.getPatientSessionStats(patientSession.patient.patientId, sessionManager.sessionDate).numberOfCompletedSessions}" />
@@ -99,7 +97,7 @@
 							</ui:repeat>
 						</p:column>
 
-						<p:column styleClass="text-left">
+						<p:column styleClass="#{lcf:enumStyle(chamberSession.status)}-bg text-left">
 							<div class="ui-g">
 								<ui:repeat value="#{sessionManager.getChamberOccupationData(chamberSession)}" var="occupationStatus">
 									<div class="ui-g-4" style="padding: 0px;">
@@ -112,35 +110,35 @@
 							</div>
 						</p:column>
 
-						<p:column>
+						<p:column styleClass="#{lcf:enumStyle(chamberSession.status)}-bg">
 							<h:outputText value="#{chamberSession.sessionTime}">
 								<f:convertDateTime pattern="HH:mm:ss"/>
 							</h:outputText>
 						</p:column>
 
-						<p:column>
+						<p:column styleClass="#{lcf:enumStyle(chamberSession.status)}-bg">
 							<h:outputText value="#{chamberSession.startTime}" style="color: #007d18;">
 								<f:convertDateTime pattern="HH:mm:ss"/>
 							</h:outputText>
 						</p:column>
 
-						<p:column>
+						<p:column styleClass="#{lcf:enumStyle(chamberSession.status)}-bg">
 							<h:outputText value="#{chamberSession.shutdownTime}" style="color: #6e6e6e;">
 								<f:convertDateTime pattern="HH:mm:ss"/>
 							</h:outputText>
 						</p:column>
 
-						<p:column>
+						<p:column styleClass="#{lcf:enumStyle(chamberSession.status)}-bg">
 							<h:outputText value="#{chamberSession.endTime}" style="color: #b14538;">
 								<f:convertDateTime pattern="HH:mm:ss"/>
 							</h:outputText>
 						</p:column>
 
-						<p:column>
+						<p:column styleClass="#{lcf:enumStyle(chamberSession.status)}-bg">
 							<h:outputText value="#{lcf:enum(chamberSession.status)}" styleClass="#{lcf:enumStyle(chamberSession.status)}"/>
 						</p:column>
 
-						<p:column>
+						<p:column styleClass="#{lcf:enumStyle(chamberSession.status)}-bg">
 							<div class="timer-progress-cell">
 								<div id="currentTime-#{chamberSession.sessionId}">
 									<h:outputText value="#{sessionTracker.getSession(chamberSession.sessionId).timeRemaining}" rendered="#{chamberSession.running}"/>
@@ -153,7 +151,7 @@
 							</div>
 						</p:column>
 
-						<p:column>
+						<p:column styleClass="#{lcf:enumStyle(chamberSession.status)}-bg">
 							<div class="ui-g">
 								<div class="ui-g-12 ui-md-6 ui-lg-3"><p:commandButton title="#{msg['button.startSession']}" icon="ui-icon-play" actionListener="#{sessionManager.startSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{chamberSession.status ne 'CREATED'}"/></div>
 								<div class="ui-g-12 ui-md-6 ui-lg-3"><p:commandButton title="#{msg['button.reset']}" icon="ui-icon-stop" actionListener="#{sessionManager.resetSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'CREATED'}"/></div>
@@ -219,8 +217,14 @@
 	<p:socket onMessage="handleMessage" channel="/notify">
 		<p:ajax event="message" update=":form:chambersGrid" global="false"/>
 	</p:socket>
+
 	<p:socket onMessage="handleAlarm" channel="/alarm"/>
+
 	<p:socket onMessage="updateTimer" channel="/progress"/>
+
+	<p:socket channel="/refresh">
+		<p:ajax event="message" update=":form:chambersGrid" global="false"/>
+	</p:socket>
 
 	<script type="text/javascript">
 		function handleMessage(notificationMessage) {
