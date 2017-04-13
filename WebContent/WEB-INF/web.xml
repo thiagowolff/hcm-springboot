@@ -78,7 +78,7 @@
 	</context-param>
 	<context-param>
 		<param-name>primefaces.THEME</param-name>
-		<param-value>next</param-value>
+		<param-value>hcm</param-value>
 	</context-param>
 	<context-param>
 		<param-name>primefaces.SUBMIT</param-name>
