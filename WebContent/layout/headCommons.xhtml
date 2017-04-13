@@ -15,5 +15,7 @@
 		<link type="text/css" rel="stylesheet#{development ? '/less' : ''}" href="#{request.contextPath}/javax.faces.resource/style.#{stylesheet}?ln=#{stylesheet}" />
 		<h:outputScript library="js" name="less-1.7.3.min.js" rendered="#{facesContext.application.projectStage eq 'Development'}" />
 		<h:outputScript library="js" name="locale-primefaces.js" target="body" />
+
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 	</ui:composition>
 </html>

@@ -77,7 +77,7 @@ task deploy << {
     ssh.run {
         session(remotes.remoteServer) {
             println("Backing up previous release...")
-            def today = new Date().format('yyyyMMdd')
+            def today = new Date().format('yyyyMMddHHmmss')
             execute "cp /opt/wildfly/standalone/deployments/HCM.war /opt/wildfly/standalone/releases/HCM-" + today + ".war"
 
             println("Uploading WAR...")

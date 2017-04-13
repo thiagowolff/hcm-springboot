@@ -236,14 +236,6 @@ div.timer-progress-cell {
 	background: @whiteThemeColor;
 }
 
-#userMenu_menu > ul > li:nth-child(1) .ui-state-disabled {
-	opacity: 1;
-	span {
-		color: @secondaryThemeColor;
-		font-size: 14px;
-	}
-}
-
 @colorCreatedStatus: #5e5e5e;
 @colorCompressingStatus: #008ed0;
 @colorO2OnStatus: #007d18;
@@ -309,6 +301,14 @@ div.timer-progress-cell {
 .blink {
 	animation: blink 1s steps(5, start) infinite;
 	-webkit-animation: blink 1s steps(5, start) infinite;
+}
+
+.chart {
+	height: 300px;
+}
+
+.chart-lg {
+	height: 600px;
 }
 
 @keyframes blink {

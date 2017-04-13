@@ -18,5 +18,4 @@ public class NavigationController implements Serializable {
 			this.activePage = activePage;
 		}
 	}
-
 }

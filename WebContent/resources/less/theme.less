@@ -33,7 +33,7 @@
 		&-page, &-first, &-last, &-prev, &-next  {
 			padding: 3px 6px 2px;
 			border: 1px solid @greyThemeColor;
-			
+
 			&.ui-state-default {
 				background: @whiteThemeColor;
 				color: @primaryThemeColor;
@@ -47,13 +47,13 @@
 			}
 		}
 	}
-	
+
 	.paginator-icon {
 		background-image: none !important;
 		text-indent: 2px !important;
 		overflow: hidden;
 	}
-	
+
 	.ui-icon {
 		&-seek-prev {
 			.icon("\e607", 14px, @primaryThemeColor);
@@ -72,18 +72,18 @@
 			.paginator-icon;
 		}
 	}
-	
+
 	.ui-icon {
 		position: relative;
 		height: 12px;
 		top: 2px;
 		margin-top: -3px;
 	}
-	
-	.ui-paginator-rpp-options { 
+
+	.ui-paginator-rpp-options {
 		border: none;
 		height: 17px;
-		outline: none; 
+		outline: none;
 		.rounded(@baseRadius);
 	}
 }
@@ -437,16 +437,23 @@ fieldset {
 }
 
 .ui-button-icon-left.ui-icon.ui-c.ui-icon-triangle-1-s {
-	#userMenu_button & { .icon("\f013", 24px, @darkGreyThemeColor, @darkGreyThemeColor); margin-left: 25px; }
-	#notificationsMenu_button & { .icon("\e10f", 20px, @darkGreyThemeColor, @darkGreyThemeColor); margin-left: 15px; }
+	#userMenu_button & { .icon("\f013", 24px, @darkGreyThemeColor, @darkGreyThemeColor); margin-left: 15px; }
 	color: @darkGreyThemeColor !important;
 	left: -2px;
 	top: 25px;
 }
 
+#userMenu_menu > ul > li:nth-child(1) .ui-state-disabled {
+	opacity: 1;
+	span {
+		color: @secondaryThemeColor;
+		font-size: 14px;
+	}
+}
+
 .top-button-menu .ui-button .ui-button-text {
 	line-height: 0px;
-	margin-left: 25px;
+	margin-left: 15px;
 }
 
 /* Message */

@@ -29,24 +29,27 @@
 
 					<span>#{msg['title.appTitle']}</span>
 				</div>
+
+				<ui:param name="isDev" value="#{facesContext.application.projectStage eq 'Development'}" />
+
 				<div class="login-inner-panel">
 					<div class="login-error-message">
 						<p:messages />
 					</div>
 					<div class="login-input">
-						<p:inputText id="username" value="#{loginManager.username}" required="#{facesContext.application.projectStage eq 'Production'}" requiredMessage="#{msg['error.loginRequired']}" label="#{msg['label.username']}" size="50" />
+						<p:inputText id="username" value="#{loginManager.username}" required="#{not isDev}" requiredMessage="#{msg['error.loginRequired']}" label="#{msg['label.username']}" size="50" />
 						<p:watermark for="login:username" value="#{msg['label.login']}" />
 						<div class="input-icon"><div>@</div></div>
 					</div>
 					<div class="login-input">
-						<p:password id="password" value="#{loginManager.password}" required="#{facesContext.application.projectStage eq 'Production'}" requiredMessage="#{msg['error.passwordRequired']}" label="#{msg['label.password']}" size="50" />
+						<p:password id="password" value="#{loginManager.password}" required="#{not isDev}" requiredMessage="#{msg['error.passwordRequired']}" label="#{msg['label.password']}" size="50" />
 						<p:watermark for="login:password" value="#{msg['label.password']}" />
 						<div class="input-icon"><span class="ui-icon-password" /></div>
 					</div>
-					<p:commandButton value="#{msg['button.login']}" process="@form" action="#{loginManager.login}" ajax="false" rendered="#{facesContext.application.projectStage eq 'Production'}" />
-					<h:panelGroup styleClass="login-input" rendered="#{facesContext.application.projectStage eq 'Development'}">
-						<p:commandButton value="#{msg['button.login']}" process="@form" action="#{loginManager.login}" ajax="false" style="width: 80%;"/>
-						<p:commandButton icon="fa fa-wrench fa-lg" value="DEV" process="@form" action="#{loginManager.login}" ajax="false" style="width: 18%;">
+					<h:panelGroup styleClass="login-input">
+						<p:commandButton value="#{msg['button.login']}" process="@form" action="#{loginManager.login}" ajax="false" rendered="#{not isDev}" />
+						<p:commandButton value="#{msg['button.login']}" process="@form" action="#{loginManager.login}" ajax="false" style="width: 80%;" rendered="#{isDev}"/>
+						<p:commandButton icon="fa fa-wrench fa-lg" value="DEV" process="@form" action="#{loginManager.login}" ajax="false" style="width: 18%;" rendered="#{isDev}">
 							<f:setPropertyActionListener value="thiago" target="#{loginManager.username}" />
 							<f:setPropertyActionListener value="admin" target="#{loginManager.password}" />
 						</p:commandButton>
