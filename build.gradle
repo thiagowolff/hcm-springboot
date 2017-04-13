@@ -39,7 +39,6 @@ dependencies {
     providedCompile "org.hibernate:hibernate-entitymanager:5.0.10.Final"
 
     compile "org.primefaces:primefaces:6.0"
-    compile "br.com.litecode:primefaces-theme-next:1.1"
     compile "br.com.litecode:litefaces-enum-i18n:1.0.1"
     compile "org.primefaces.extensions:primefaces-extensions:6.0.0"
     compile "org.omnifaces:omnifaces:2.5.1"
