@@ -21,4 +21,8 @@ public class ReportService {
 	public List<Object[]> getSessionsPerHealthInsurance() {
 		return reportDao.findSessionsPerHealthInsurance();
 	}
+
+	public List<Object[]> getPresencesPerMonth() {
+		return reportDao.findPresencesPerMonth();
+	}
 }

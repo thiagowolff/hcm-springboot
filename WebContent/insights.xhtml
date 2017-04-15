@@ -11,6 +11,7 @@
 			drawChart('Sessões por mês', '#{insightsManager.monthlySessionsModel}', 'monthlySessionsChart', google.visualization.ColumnChart);
 			drawChart('Sessões por câmara', '#{insightsManager.sessionsPerChamberModel}', 'sessionsPerChamberChart', google.visualization.BarChart, { colors: ['#2f353e'] });
 			drawChart('Sessões por convênio', '#{insightsManager.sessionsPerHealthInsuranceModel}', 'sessionsPerHealthInsuranceChart', google.visualization.PieChart, { legend: { position: 'right' }});
+			drawChart('Presenças por mês', '#{insightsManager.presencesPerMonth}', 'presencesPerMonthChart', google.visualization.LineChart, { legend: { position: 'right' }});
 		}
 
 		function drawChart(title, dataArray, elementId, chartType, additionalOptions) {
@@ -36,7 +37,7 @@
 		<div class="content-wrapper">
 			<div class="ui-g">
 				<div class="ui-g-6">
-					<div id="monthlySessionsChart" class="chart"></div>
+					<div id="presencesPerMonthChart" class="chart"></div>
 				</div>
 				<div class="ui-g-6">
 					<div id="sessionsPerChamberChart" class="chart"></div>
@@ -45,6 +46,9 @@
 			<div class="ui-g">
 				<div class="ui-g-6">
 					<div id="sessionsPerHealthInsuranceChart" class="chart"></div>
+				</div>
+				<div class="ui-g-6">
+					<div id="monthlySessionsChart" class="chart"></div>
 				</div>
 			</div>
 		</div>

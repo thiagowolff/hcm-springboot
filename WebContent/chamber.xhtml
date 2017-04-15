@@ -3,29 +3,39 @@
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
 				xmlns:p="http://primefaces.org/ui"
-				xmlns:lc="http://java.sun.com/jsf/composite/components">
+				xmlns:lc="http://java.sun.com/jsf/composite/components"
+				xmlns:lcf="http://litecode.com.br/functions">
 	
 	<h:form id="chambersForm">
 		<lc:headerPanel title="#{msg['title.chambers']}" />
 
 		<div class="content-wrapper">
-			<p:dataTable id="chamberTable" var="chamber" value="#{chamberManager.chambers}" emptyMessage="#{msg['message.noData']}">
-				<p:column headerText="#{msg['label.id']}" sortBy="#{chamber.chamberId}">
+			<p:dataTable id="chamberTable" var="chamber" value="#{chamberManager.chambers}" emptyMessage="#{msg['message.noData']}" style="width: 50%">
+				<p:column headerText="#{msg['label.id']}" sortBy="#{chamber.chamberId}" width="50">
 					<h:outputText value="#{chamber.chamberId}" />
 				</p:column>
 				
-				<p:column headerText="#{msg['label.name']}" sortBy="#{chamber.name}">
+				<p:column headerText="#{msg['label.name']}" sortBy="#{chamber.name}" width="200">
 					<h:outputText value="#{chamber.name}" />
 				</p:column>
 
-				<p:column headerText="#{msg['label.maxNumberOfPatients']}">
+				<p:column headerText="#{msg['label.maxNumberOfPatients']}" width="80">
 					<h:outputText value="#{chamber.maxNumberOfPatients}" />
 				</p:column>
 
 				<p:column headerText="#{msg['label.events']}" style="text-align: left">
-					<ui:repeat value="#{chamber.chamberEvents}" var="event">
-						<h:outputText value="#{event.eventType}: #{event.timeout / 60 / 1000} min&lt;br /&gt;" escape="false" rendered="#{event.timeout gt 0}" />
-					</ui:repeat>
+					<div class="ui-g">
+						<ui:repeat value="#{chamber.chamberEvents}" var="event">
+							<h:panelGroup rendered="#{event.timeout gt 0}">
+							<div class="ui-g-4">
+								<h:outputText value="#{lcf:enum(event.eventType)}" />
+							</div>
+							<div class="ui-g-8">
+								<h:outputText value="#{event.duration}" />
+							</div>
+							</h:panelGroup>
+						</ui:repeat>
+					</div>
 				</p:column>
 			</p:dataTable>
 		</div>

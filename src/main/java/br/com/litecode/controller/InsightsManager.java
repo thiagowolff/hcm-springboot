@@ -26,6 +26,10 @@ public class InsightsManager {
 		return loadChartData(reportService::getSessionsPerHealthInsurance, "Câmara", "Sessōes");
 	}
 
+	public String getPresencesPerMonth() {
+		return loadChartData(reportService::getPresencesPerMonth, "Mês", "Presenças");
+	}
+
 	private String loadChartData(Supplier<List<Object[]>> dao, String... headers) {
 		List<Object[]> results = dao.get();
 
