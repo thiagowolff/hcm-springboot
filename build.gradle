@@ -3,19 +3,20 @@ import org.lesscss.LessCompiler
 buildscript {
     repositories {
         mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
 
     dependencies {
         classpath "org.lesscss:lesscss:1.7.0.1.1"
+        classpath "org.hidetake:gradle-ssh-plugin:2.8.0"
     }
-}
-
-plugins {
-    id "org.hidetake.ssh" version "2.8.0"
 }
 
 apply plugin: "java"
 apply plugin: "war"
+apply plugin: "org.hidetake.ssh"
 
 repositories {
     mavenCentral()
@@ -48,17 +49,18 @@ dependencies {
 
 task compileLess << {
     def lessCompiler = new LessCompiler()
+    def resourcesDir = "$webAppDirName/resources"
 
     ant.replace(file: "$lessDir/style.less", token: "?ln=less", value: "")
-    lessCompiler.compile(file("$projectDir/$lessDir/style.less"), file("$projectDir/$cssDir/style.css"))
-    ant.replace(file: "$lessDir/style.less", token: ".less", value: ".less?ln=less")
+    lessCompiler.compile(file("$projectDir/$resourcesDir/less/style.less"), file("$projectDir/$resourcesDir/css/style.css"))
+    ant.replace(file: "$resourcesDir/less/style.less", token: ".less", value: ".less?ln=less")
 }
 
 remotes {
     remoteServer {
-        host = serverHost
-        user = serverUser
-        password = serverPassword
+        host = project.hasProperty("serverHost") ? serverHost : ""
+        user = project.hasProperty("serverUser") ? serverUser : ""
+        password = project.hasProperty("serverPassword") ? serverPassword : ""
         knownHosts = allowAnyHosts
     }
 }
