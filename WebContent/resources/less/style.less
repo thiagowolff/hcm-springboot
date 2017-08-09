@@ -269,11 +269,9 @@ div.timer-progress-cell {
 	}
 }
 
-.enum {
-	&-patientSessionStatus {
-		&-active { color: @colorCompressingStatus;	}
-		&-absent { color:@colorShuttingDownStatus; }
-	}
+.patient {
+	&-present { color: @colorCompressingStatus;	}
+	&-absent { color:@colorShuttingDownStatus; }
 }
 
 .ui-progressbar {
@@ -298,6 +296,11 @@ div.timer-progress-cell {
 	&-info { .icon("\f05a", 36px, #ffffff, #ffffff); }
 }
 
+.ui-progressbar .ui-progressbar-label {
+	top: 8px;
+	color: #d7d7d7;
+}
+
 .blink {
 	animation: blink 1s steps(5, start) infinite;
 	-webkit-animation: blink 1s steps(5, start) infinite;
@@ -309,6 +312,10 @@ div.timer-progress-cell {
 
 .chart-lg {
 	height: 600px;
+}
+
+.ui-datepicker td.session-day a {
+	color: #1bff47;
 }
 
 @keyframes blink {

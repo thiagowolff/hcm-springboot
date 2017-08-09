@@ -9,7 +9,7 @@
 			<div class="top-button-menu">
 				<div class="header-menu-panel">
 					<p:menuButton id="userMenu" value="#{''}" styleClass="header-menu">
-						<p:menuitem value="#{loggedUser.fullName}" icon="fa fa-user-md" disabled="true" />
+						<p:menuitem value="#{loggedUser.name}" icon="fa fa-user-md" disabled="true" />
 						<p:menuitem value="#{msg['menu.sessions']}" actionListener="#{navigationController.setActivePage('/session.xhtml')}" update=":content" icon="ui-icon-clock" />
 						<p:menuitem value="#{msg['menu.patients']}" actionListener="#{navigationController.setActivePage('/patient.xhtml')}" update=":content" icon="ui-icon-persons" rendered="#{loginManager.hasAdminRights()}" />
 						<p:menuitem value="#{msg['menu.chambers']}" actionListener="#{navigationController.setActivePage('/chamber.xhtml')}" update=":content" icon="ui-icon-archive" rendered="#{loginManager.hasAdminRights()}" />

@@ -51,7 +51,7 @@ task compileLess << {
     def lessCompiler = new LessCompiler()
     def resourcesDir = "$webAppDirName/resources"
 
-    ant.replace(file: "$lessDir/style.less", token: "?ln=less", value: "")
+    ant.replace(file: "$resourcesDir/less/style.less", token: "?ln=less", value: "")
     lessCompiler.compile(file("$projectDir/$resourcesDir/less/style.less"), file("$projectDir/$resourcesDir/css/style.css"))
     ant.replace(file: "$resourcesDir/less/style.less", token: ".less", value: ".less?ln=less")
 }
@@ -66,7 +66,7 @@ remotes {
 }
 
 task deploy << {
-    def cssFile = new File("$cssDir/style.css")
+    def cssFile = new File("$webAppDirName/resources/css/style.css")
     cssFile.delete()
 
     ssh.run {

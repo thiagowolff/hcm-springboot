@@ -1,9 +1,5 @@
 package br.com.litecode.persistence.impl;
 
-import br.com.litecode.controller.PatientManager;
-import br.com.litecode.domain.PatientSession;
-import br.com.litecode.domain.PatientSession.PatientSessionStatus;
-import br.com.litecode.domain.Session;
 import br.com.litecode.domain.Session.SessionStatus;
 import br.com.litecode.persistence.AbstractDao;
 
@@ -13,10 +9,10 @@ import java.util.List;
 public class ReportDao extends AbstractDao<Object[]> {
 	public List<Object[]> findMonthlySessions() {
 		String sqlString =
-				"select date_format(session_time, '%Y-%m') as month, count(*) as numberOfSessions " +
+				"select date_format(scheduled_time, '%Y-%m') as month, count(*) as numberOfSessions " +
 				"from session " +
 				"where status = 'FINISHED'" +
-				"group by date_format(session_time, '%Y-%m') " +
+				"group by date_format(scheduled_time, '%Y-%m') " +
 				"order by month";
 
 		Query query = entityManager.createNativeQuery(sqlString);
@@ -47,10 +43,10 @@ public class ReportDao extends AbstractDao<Object[]> {
 
 	public List<Object[]> findPresencesPerMonth() {
 		String sqlString =
-				"select date_format(session_time, '%Y-%m') as month, count(*) as numberOfSessions " +
+				"select date_format(scheduled_time, '%Y-%m') as month, count(*) as numberOfSessions " +
 				"from session s join patient_session ps using (session_id) " +
-				"where s.status = '" + SessionStatus.FINISHED + "' and ps.status = '" + PatientSessionStatus.ACTIVE + "'" +
-				"group by date_format(session_time, '%Y-%m') " +
+				"where s.status = '" + SessionStatus.FINISHED + "' and ps.absent = 0 " +
+				"group by date_format(scheduled_time, '%Y-%m') " +
 				"order by month";
 
 		Query query = entityManager.createNativeQuery(sqlString);

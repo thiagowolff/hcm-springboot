@@ -15,7 +15,7 @@
 			<h:panelGrid id="sessionGrid" columns="7" styleClass="input-grid">
 				<h:panelGroup>
 					<p:commandButton icon="fa fa-chevron-left" actionListener="#{sessionManager.previousSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
-					<p:calendar id="sessionDate" value="#{sessionManager.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="10">
+					<p:calendar id="sessionDate" value="#{sessionManager.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="10" beforeShowDay="sessionDates">
 						<p:ajax event="dateSelect" process="@this" update="chambersGrid"/>
 					</p:calendar>
 					<p:commandButton icon="fa fa-chevron-right" actionListener="#{sessionManager.nextSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
@@ -35,7 +35,7 @@
 					<p:resetInput target="@form" />
 				</p:commandButton>
 
-				<p:commandButton icon="fa fa-clone" value="#{msg['button.duplicateSessions']}" process="@this" actionListener="#{sessionManager.initializePreviousDailySessionsDate()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()"/>
+				<p:commandButton icon="fa fa-clone" value="#{msg['button.duplicateSessions']}" disabled="true" process="@this" actionListener="#{sessionManager.initializePreviousDailySessionsDate()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()"/>
 				<p:messages id="messages"/>
 			</h:panelGrid>
 
@@ -77,8 +77,8 @@
 											styleClass="patient-#{patientSession.id}"
 											value="#{patientSession.patient.name}"
 											title="#{patientSession.patient.displayName}"
-											style="#{patientSession.status eq 'ABSENT' ? 'color: #b14538' : chamberSession.running ? 'color: #007d18' : ''}" />
-									<h:panelGroup rendered="#{patientSession.status eq 'ABSENT'}"> <i class="fa fa-exclamation-circle" style="font-size: 9px"></i> </h:panelGroup>
+											style="#{patientSession.absent ? 'color: #b14538' : chamberSession.running ? 'color: #007d18' : ''}" />
+									<h:panelGroup rendered="#{patientSession.absent}"> <i class="fa fa-exclamation-circle" style="font-size: 9px"></i> </h:panelGroup>
 								</div>
 							</ui:repeat>
 						</p:column>
@@ -113,7 +113,7 @@
 						</p:column>
 
 						<p:column styleClass="#{lcf:enumStyle(chamberSession.status)}-bg">
-							<h:outputText value="#{chamberSession.sessionTime}">
+							<h:outputText value="#{chamberSession.scheduledTime}">
 								<f:convertDateTime pattern="HH:mm:ss"/>
 							</h:outputText>
 						</p:column>
@@ -147,8 +147,8 @@
 									<h:outputText value="00:00:00" rendered="#{not chamberSession.running}"/>
 								</div>
 								<div>
-									<p:progressBar widgetVar="progress-#{chamberSession.sessionId}" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status ne 'FINISHED'}"/>
-									<p:progressBar value="100" displayOnly="true" rendered="#{chamberSession.status eq 'FINISHED'}"/>
+									<p:progressBar widgetVar="progress-#{chamberSession.sessionId}" labelTemplate="{value}%" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status ne 'FINISHED'}"/>
+									<p:progressBar value="100" displayOnly="true" labelTemplate="100%" rendered="#{chamberSession.status eq 'FINISHED'}"/>
 								</div>
 							</div>
 						</p:column>
@@ -187,12 +187,12 @@
 					<h:outputText value="#{sessionPatient.patient.name}" />
 				</p:column>
 				<p:column headerText="#{msg['label.status']}" width="100">
-					<h:outputText value="#{lcf:enum(sessionPatient.status)}" styleClass="#{lcf:enumStyle(sessionPatient.status)}" />
+					<h:outputText value="#{enum[(sessionPatient.absent ? 'enum.patientSessionStatus.absent' : 'enum.patientSessionStatus.active')]}" styleClass="#{sessionPatient.absent ? 'patient-absent' : 'patient-present'}" />
 				</p:column>
 
 				<p:column headerText="#{msg['label.action']}" width="50">
-					<p:commandButton process="@this" update=":form:chambersGrid, :editSessionForm:sessionPatientsTable" actionListener="#{sessionManager.setPatientSessionStatus(sessionPatient, 'ACTIVE')}" icon="fa fa-calendar-check-o" title="#{msg['button.active']}" rendered="#{sessionPatient.status eq 'ABSENT'}" />
-					<p:commandButton process="@this" update=":form:chambersGrid, :editSessionForm:sessionPatientsTable" actionListener="#{sessionManager.setPatientSessionStatus(sessionPatient, 'ABSENT')}" icon="fa fa-calendar-times-o" title="#{msg['button.absent']}" rendered="#{sessionPatient.status eq 'ACTIVE'}" />
+					<p:commandButton process="@this" update=":form:chambersGrid, :editSessionForm:sessionPatientsTable" actionListener="#{sessionManager.setPatientSessionStatus(sessionPatient, false)}" icon="fa fa-calendar-check-o" title="#{msg['button.active']}" rendered="#{sessionPatient.absent}" />
+					<p:commandButton process="@this" update=":form:chambersGrid, :editSessionForm:sessionPatientsTable" actionListener="#{sessionManager.setPatientSessionStatus(sessionPatient, true)}" icon="fa fa-calendar-times-o" title="#{msg['button.absent']}" rendered="#{not sessionPatient.absent}" />
 					<p:commandButton process="@this" update=":form:chambersGrid, :editSessionForm:sessionPatientsTable, :editSessionForm:newSessionPatients" actionListener="#{sessionManager.removePatientFromSession(sessionPatient)}" icon="ui-icon-trash" title="#{msg['button.delete']}" />
 				</p:column>
 			</p:dataTable>
@@ -208,10 +208,12 @@
 
 	<h:form id="duplicateSessionsForm">
 		<p:dialog header="#{msg['title.duplicateSessions']}" widgetVar="duplicateSessionDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
-			<h:panelGrid columns="3">
-				<p:outputLabel value="#{msg['label.date']}"/>
+			<h:panelGrid columns="5">
+				<p:outputLabel value="#{msg['label.from']}"/>
 				<p:calendar id="previousSessionsDate" value="#{sessionManager.previousDailySessionsDate}" required="true" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="10"/>
-				<p:commandButton value="#{msg['button.duplicate']}" process="@this, previousSessionsDate" update=":form:chambersGrid" actionListener="#{sessionManager.duplicateSessions()}" oncomplete="PF('duplicateSessionDialog').hide()"/>
+				<p:outputLabel value="#{msg['label.to']}"/>
+				<p:calendar id="newSessionsDate" value="#{sessionManager.newDailySessionsDate}" required="true" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="10"/>
+				<p:commandButton value="#{msg['button.duplicate']}" process="@this, previousSessionsDate, newSessionsDate" update=":form:chambersGrid" actionListener="#{sessionManager.duplicateSessions()}" oncomplete="PF('duplicateSessionDialog').hide()"/>
 			</h:panelGrid>
 		</p:dialog>
 	</h:form>
@@ -241,13 +243,13 @@
 		}
 
 		function playSound(audioFile) {
-			var audio = document.getElementById("audio");
-			audio.src = "#{request.contextPath}/javax.faces.resource/sounds/" + audioFile;
+			var audio = document.getElementById('audio');
+			audio.src = '#{request.contextPath}/javax.faces.resource/sounds/' + audioFile;
 			audio.play();
 		}
 
 		function updateTimer(session) {
-			$("#currentTime-" + session.sessionId).text(session.timeRemaining);
+			$('#currentTime-' + session.sessionId).text(session.timeRemaining);
 			progressStep(session);
 		}
 
@@ -267,6 +269,14 @@
 
 			PF('growl').show([facesMessage]);
 			playSound(alarm.notificationSound);
+		}
+
+		var dates = #{sessionManager.sessionDates};
+
+		function sessionDates(date) {
+			var isoDate = date.getFullYear() + '-' + (date.getMonth() &lt; 9 ? '0' : '') + (date.getMonth() + 1) + '-' + (date.getDate() &lt; 10 ? '0' : '') + date.getDate();
+			var styleClass = dates.indexOf(isoDate) != -1 ? 'session-day' : '';
+			return [ true,  styleClass]
 		}
 	</script>
 </ui:composition>

@@ -69,8 +69,21 @@
 				<p:outputLabel value="#{msg['label.folderNumber']}" for="folderNumber" />
 				<p:inputText id="folderNumber" value="#{patient.folderNumber}" maxlength="30" size="15" />
 
-				<p:outputLabel value="#{msg['label.healthInsurance']}" for="folderNumber" />
-				<p:inputText id="healthInsurance" value="#{patient.healthInsurance}" maxlength="30" size="15" />
+				<p:outputLabel value="#{msg['label.healthInsurance']}" for="healthInsurance" />
+				<p:selectOneMenu id="healthInsurance" value="#{patient.healthInsurance}" editable="true">
+					<f:selectItem itemLabel="" itemValue=""  />
+					<f:selectItem itemLabel="Bradesco" itemValue="Bradesco" />
+					<f:selectItem itemLabel="Centro Clínico Gaúcho" itemValue="Centro Clínico Gaúcho"  />
+					<f:selectItem itemLabel="Fusex" itemValue="Fusex" />
+					<f:selectItem itemLabel="Golden Cross" itemValue="Golden Cross" />
+					<f:selectItem itemLabel="Ipê" itemValue="Ipê" />
+					<f:selectItem itemLabel="Life" itemValue="Life" />
+					<f:selectItem itemLabel="Particular" itemValue="Particular" />
+					<f:selectItem itemLabel="Saúde Paz" itemValue="Saúde Paz" />
+					<f:selectItem itemLabel="SUS" itemValue="SUS" />
+					<f:selectItem itemLabel="Unimed" itemValue="Unimed" />
+					<f:selectItem itemLabel="Verte" itemValue="Verte" />
+				</p:selectOneMenu>
 
 				<p:outputLabel value="#{msg['label.email']}" for="patientEmail" />
 				<p:inputText id="patientEmail" value="#{patient.email}" maxlength="75" size="50" />

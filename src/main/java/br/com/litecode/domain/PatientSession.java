@@ -8,12 +8,10 @@ import java.io.Serializable;
 @Cacheable
 @NamedQuery(
 		name = "findPatientSessionsByDate",
-		query = "select ps from PatientSession ps where ps.patient.patientId = :patientId and ps.session.sessionTime <= :sessionDate",
+		query = "select ps from PatientSession ps where ps.patient.patientId = :patientId and ps.session.scheduledTime <= :sessionDate",
 		hints = { @QueryHint (name = "org.hibernate.cacheable", value = "true") }
 )
 public class PatientSession implements Comparable<PatientSession>, Serializable {
-	public enum PatientSessionStatus { ACTIVE, ABSENT }
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "patient_session_id")
@@ -27,11 +25,10 @@ public class PatientSession implements Comparable<PatientSession>, Serializable 
 	@JoinColumn(name = "session_id")
 	private Session session;
 
-	@Enumerated(EnumType.STRING)
-	private PatientSessionStatus status;
+	@Column
+	private boolean absent;
 
 	public PatientSession() {
-		status = PatientSessionStatus.ACTIVE;
 	}
 
 	public PatientSession(Patient patient, Session session) {
@@ -69,11 +66,11 @@ public class PatientSession implements Comparable<PatientSession>, Serializable 
 		this.session = session;
 	}
 
-	public PatientSessionStatus getStatus() {
-		return status;
+	public boolean isAbsent() {
+		return absent;
 	}
 
-	public void setStatus(PatientSessionStatus status) {
-		this.status = status;
+	public void setAbsent(boolean absent) {
+		this.absent = absent;
 	}
 }

@@ -16,6 +16,7 @@ import org.joda.time.LocalTime;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.Query;
 import java.util.Date;
 import java.util.List;
 
@@ -69,13 +70,13 @@ public class SessionService {
 	public void duplicateSessions(Date fromDate, Date toDate) {
 		List<Session> sessions = sessionDao.findSessionsByDate(fromDate);
 		sessions.forEach(s -> {
-			LocalTime time = LocalDateTime.fromDateFields(s.getSessionTime()).toLocalTime();
+			LocalTime time = LocalDateTime.fromDateFields(s.getScheduledTime()).toLocalTime();
 			LocalDateTime sessionTime = LocalDate.fromDateFields(toDate).toLocalDateTime(time);
 			int sessionDuration = s.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout();
 
 			Session session = new Session();
 			session.setChamber(s.getChamber());
-			session.setSessionTime(sessionTime.toDate());
+			session.setScheduledTime(sessionTime.toDate());
 			session.setStartTime(sessionTime.toDate());
 			session.setEndTime(sessionTime.plusMillis(sessionDuration).toDate());
 			session.setStatus(SessionStatus.CREATED);
@@ -85,6 +86,10 @@ public class SessionService {
 				sessionDao.insertPatientSession(new PatientSession(ps.getPatient(), session));
 			});
 		});
+	}
+
+	public List<Date> loadSessionDates() {
+		return sessionDao.findSessionDates();
 	}
 
 	public void updateSession(Session session) {

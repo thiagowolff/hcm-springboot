@@ -8,10 +8,10 @@
 		google.charts.setOnLoadCallback(drawCharts);
 
 		function drawCharts() {
-			drawChart('Sessões por mês', '#{insightsManager.monthlySessionsModel}', 'monthlySessionsChart', google.visualization.ColumnChart);
+			drawChart('Presenças por mês', '#{insightsManager.presencesPerMonth}', 'presencesPerMonthChart', google.visualization.ColumnChart);
 			drawChart('Sessões por câmara', '#{insightsManager.sessionsPerChamberModel}', 'sessionsPerChamberChart', google.visualization.BarChart, { colors: ['#2f353e'] });
 			drawChart('Sessões por convênio', '#{insightsManager.sessionsPerHealthInsuranceModel}', 'sessionsPerHealthInsuranceChart', google.visualization.PieChart, { legend: { position: 'right' }});
-			drawChart('Presenças por mês', '#{insightsManager.presencesPerMonth}', 'presencesPerMonthChart', google.visualization.LineChart, { legend: { position: 'right' }});
+			drawChart('Sessões por mês', '#{insightsManager.monthlySessionsModel}', 'monthlySessionsChart', google.visualization.LineChart);
 		}
 
 		function drawChart(title, dataArray, elementId, chartType, additionalOptions) {

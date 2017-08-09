@@ -3,6 +3,10 @@ package br.com.litecode.controller;
 import br.com.litecode.domain.User;
 import br.com.litecode.domain.User.Role;
 import br.com.litecode.service.UserService;
+import com.google.common.base.Strings;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.CharSource;
+import com.google.common.io.CharStreams;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -14,6 +18,8 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.Instant;
 import java.util.Date;
 
@@ -35,6 +41,12 @@ public class LoginManager {
 			
 			User user = userService.getUserByUsername(username);
 			user.setLastAccess(Date.from(Instant.now()));
+
+			String lastAccessLocation = getLastAccessLocation();
+			if (lastAccessLocation != null) {
+				user.setLastAccessLocation(lastAccessLocation);
+			}
+
 			userService.updateUser(user);
 			
 			Faces.getSessionMap().put("loggedUser", user);
@@ -45,6 +57,18 @@ public class LoginManager {
 		} catch (IOException e) {
 			Messages.addGlobalError(e.getMessage());
 		}
+	}
+
+	private String getLastAccessLocation() {
+		try {
+			URL url = new URL("http://ipinfo.io/" + Faces.getRemoteAddr() + "/json");
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("GET");
+			return new String(ByteStreams.toByteArray(connection.getInputStream()));
+		} catch (Exception e) {
+			return null;
+		}
+
 	}
 	
 	public void logout() {

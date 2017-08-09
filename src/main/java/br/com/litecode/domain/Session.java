@@ -1,7 +1,6 @@
 package br.com.litecode.domain;
 
 import br.com.litecode.domain.ChamberEvent.EventType;
-import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.*;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
@@ -21,7 +20,7 @@ import java.util.TreeSet;
 @Cacheable
 @NamedQuery(
 		name = "findChamberSessionsByDate",
-		query = "select distinct s from Session s where s.chamber.chamberId = :chamberId and s.sessionTime between :startOfDay and :endOfDay order by s.sessionTime, s.sessionId",
+		query = "select distinct s from Session s where s.chamber.chamberId = :chamberId and s.scheduledTime between :startOfDay and :endOfDay order by s.scheduledTime, s.sessionId",
 		hints = { @QueryHint (name = "org.hibernate.cacheable", value = "true") }
 )
 public class Session implements Comparable<Session>, Serializable {
@@ -41,8 +40,8 @@ public class Session implements Comparable<Session>, Serializable {
 	@SortNatural
 	private SortedSet<PatientSession> patientSessions;
 
-	@Column(name = "session_time")
-	private Date sessionTime;
+	@Column(name = "scheduled_time")
+	private Date scheduledTime;
 
 	@Column(name = "start_time")
 	private Date startTime;
@@ -73,7 +72,7 @@ public class Session implements Comparable<Session>, Serializable {
 	}
 
 	public TimePeriod getTimePeriod() {
-		LocalTime startTime = LocalTime.fromDateFields(sessionTime);
+		LocalTime startTime = LocalTime.fromDateFields(scheduledTime);
 		if (startTime.isBefore(LocalTime.parse("12:00:00"))) {
 			return TimePeriod.MORNING;
 		}
@@ -137,12 +136,12 @@ public class Session implements Comparable<Session>, Serializable {
 		this.status = status;
 	}
 
-	public Date getSessionTime() {
-		return sessionTime;
+	public Date getScheduledTime() {
+		return scheduledTime;
 	}
 
-	public void setSessionTime(Date sessionTime) {
-		this.sessionTime = sessionTime;
+	public void setScheduledTime(Date sessionTime) {
+		this.scheduledTime = sessionTime;
 	}
 
 	public Date getStartTime() {

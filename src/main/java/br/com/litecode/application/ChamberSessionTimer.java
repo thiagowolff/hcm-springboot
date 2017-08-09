@@ -142,7 +142,7 @@ public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBe
 		eventBus.publish("/notify", new NotificationMessage(chamberEvent, messageSummary, messageDetail));
 	}
 
-	@Schedule(second = "*/2", minute = "*", hour = "*", persistent = false)
+	@Schedule(second = "*/1", minute = "*", hour = "*", persistent = false)
 	private void clockTimeout() {
 		timerService.getTimers().forEach(timer -> {
 			if (!timer.isCalendarTimer()) {

@@ -24,18 +24,21 @@ public class User implements Serializable  {
 	@Column
 	private String password;
 	
-	@Column(name = "full_name")
-	private String fullName;
+	@Column
+	private String name;
 
 	@Enumerated(EnumType.STRING)
 	private Role role;
 	
 	@Column(name = "last_access")
 	private Date lastAccess;
-	
+
 	@Column(name = "creation_date")
 	private Date creationDate;
-	
+
+	@Column(name = "last_access_location")
+	private String lastAccessLocation;
+
     public User() {
     	creationDate = Date.from(Instant.now());
     }
@@ -60,12 +63,12 @@ public class User implements Serializable  {
 		this.password = password;
 	}
 	
-	public String getFullName() {
-		return this.fullName;
+	public String getName() {
+		return this.name;
 	}
 	
-	public void setFullName(String fullName) {
-		this.fullName = fullName;
+	public void setName(String fullName) {
+		this.name = fullName;
 	}
 
 	public Role getRole() {
@@ -86,6 +89,14 @@ public class User implements Serializable  {
 
 	public Date getCreationDate() {
 		return creationDate;
+	}
+
+	public String getLastAccessLocation() {
+		return lastAccessLocation;
+	}
+
+	public void setLastAccessLocation(String lastAccessLocation) {
+		this.lastAccessLocation = lastAccessLocation;
 	}
 
 	@Override

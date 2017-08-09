@@ -6,13 +6,16 @@ import br.com.litecode.domain.Chamber;
 import br.com.litecode.domain.ChamberEvent.EventType;
 import br.com.litecode.domain.Patient;
 import br.com.litecode.domain.PatientSession;
-import br.com.litecode.domain.PatientSession.PatientSessionStatus;
 import br.com.litecode.domain.Session;
 import br.com.litecode.domain.Session.SessionStatus;
 import br.com.litecode.domain.Session.TimePeriod;
 import br.com.litecode.service.PatientService;
 import br.com.litecode.service.SessionService;
 import br.com.litecode.util.MessageUtil;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
@@ -20,6 +23,7 @@ import org.omnifaces.util.Messages;
 import org.primefaces.push.EventBus;
 import org.primefaces.push.EventBusFactory;
 
+import javax.annotation.PostConstruct;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -43,11 +47,18 @@ public class SessionManager implements Serializable {
 	private List<Patient> patients;
 	private Date sessionDate;
 	private Date previousDailySessionsDate;
+	private Date newDailySessionsDate;
+	private List<Date> sessionDates;
 
 	public SessionManager() {
 		selectedChamber = new Chamber();
 		patients = new ArrayList<>();
 		sessionDate = new Date();
+	}
+
+	@PostConstruct
+	private void init() {
+		sessionDates = sessionService.loadSessionDates();
 	}
 
 	public Map<TimePeriod, List<Session>> getSessions(Integer chamberId) {
@@ -66,15 +77,15 @@ public class SessionManager implements Serializable {
 			return;
 		}
 
-		if (patients.size() > selectedChamber.getMaxNumberOfPatients()) {
-			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", selectedChamber.getMaxNumberOfPatients()));
+		if (patients.size() > selectedChamber.getCapacity()) {
+			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", selectedChamber.getCapacity()));
 			return;
 		}
 
 		Session session = new Session();
 		session.setChamber(selectedChamber);
-		session.setSessionTime(sessionTime.toDate());
-		session.setStartTime(session.getSessionTime());
+		session.setScheduledTime(sessionTime.toDate());
+		session.setStartTime(session.getScheduledTime());
 		session.setEndTime(endTime);
 
 		sessionService.createSession(session, patients);
@@ -105,9 +116,9 @@ public class SessionManager implements Serializable {
 	}
 
 	public void resetSession(Session session) {
-		session.setSessionTime(session.getSessionTime());
-		session.setStartTime(session.getSessionTime());
-		session.setEndTime(LocalDateTime.fromDateFields(session.getSessionTime()).plusMillis(session.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout()).toDate());
+		session.setScheduledTime(session.getScheduledTime());
+		session.setStartTime(session.getScheduledTime());
+		session.setEndTime(LocalDateTime.fromDateFields(session.getScheduledTime()).plusMillis(session.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout()).toDate());
 		session.setStatus(SessionStatus.CREATED);
 		session.setCurrentProgress(0);
 		sessionTracker.removeActiveSession(session);
@@ -123,14 +134,14 @@ public class SessionManager implements Serializable {
 		EventBusFactory.getDefault().eventBus().publish("/refresh", "{}");
 	}
 
-	public void setPatientSessionStatus(PatientSession patientSession, PatientSessionStatus patientSessionStatus) {
-		patientSession.setStatus(patientSessionStatus);
+	public void setPatientSessionStatus(PatientSession patientSession, boolean absent) {
+		patientSession.setAbsent(absent);
 		sessionService.updatePatientSession(patientSession);
 	}
 
 	public void addPatientsToSession() {
-		if (patients.size() + selectedSession.getPatientSessions().size() > selectedSession.getChamber().getMaxNumberOfPatients()) {
-			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", selectedSession.getChamber().getMaxNumberOfPatients()));
+		if (patients.size() + selectedSession.getPatientSessions().size() > selectedSession.getChamber().getCapacity()) {
+			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", selectedSession.getChamber().getCapacity()));
 			return;
 		}
 
@@ -145,7 +156,7 @@ public class SessionManager implements Serializable {
 	}
 
 	public void duplicateSessions() {
-		sessionService.duplicateSessions(previousDailySessionsDate, sessionDate);
+		sessionService.duplicateSessions(previousDailySessionsDate, newDailySessionsDate);
 		initializeSession();
 	}
 
@@ -164,11 +175,11 @@ public class SessionManager implements Serializable {
 			return new Long[0];
 		}
 
-		Long[] chamberOccupation = new Long[session.getChamber().getMaxNumberOfPatients()];
+		Long[] chamberOccupation = new Long[session.getChamber().getCapacity()];
 		int i = 0;
 
 		for (PatientSession patientSession : session.getPatientSessions()) {
-			chamberOccupation[i] = patientSession.getStatus() == PatientSessionStatus.ACTIVE ? 1L : 2L;
+			chamberOccupation[i] = patientSession.isAbsent() ? 2L : 1L;
 			i++;
 		}
 
@@ -181,6 +192,7 @@ public class SessionManager implements Serializable {
 
 	public void initializePreviousDailySessionsDate() {
 		previousDailySessionsDate = LocalDate.now().minusDays(1).toDate();
+		newDailySessionsDate = LocalDate.now().toDate();
 	}
 
 	private void initializeSession() {
@@ -234,5 +246,18 @@ public class SessionManager implements Serializable {
 
 	public void setPreviousDailySessionsDate(Date previousDailySessionsDate) {
 		this.previousDailySessionsDate = previousDailySessionsDate;
+	}
+
+	public Date getNewDailySessionsDate() {
+		return newDailySessionsDate;
+	}
+
+	public void setNewDailySessionsDate(Date newDailySessionsDate) {
+		this.newDailySessionsDate = newDailySessionsDate;
+	}
+
+	public String getSessionDates() {
+		List<String> dates = sessionDates.stream().map(d -> LocalDate.fromDateFields(d).toString()).collect(Collectors.toList());
+		return new Gson().toJson(dates);
 	}
 }

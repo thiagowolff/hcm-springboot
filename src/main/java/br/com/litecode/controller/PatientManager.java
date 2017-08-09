@@ -2,7 +2,6 @@ package br.com.litecode.controller;
 
 import br.com.litecode.domain.Patient;
 import br.com.litecode.domain.PatientSession;
-import br.com.litecode.domain.PatientSession.PatientSessionStatus;
 import br.com.litecode.domain.Session.SessionStatus;
 import br.com.litecode.service.PatientService;
 import br.com.litecode.service.SessionService;
@@ -47,7 +46,7 @@ public class PatientManager implements Serializable {
 				int absentSessions = 0;
 
 				for (PatientSession patientSession : patient.getPatientSessions()) {
-					if (patientSession.getStatus() == PatientSessionStatus.ABSENT) {
+					if (patientSession.isAbsent()) {
 						absentSessions++;
 						continue;
 					}
@@ -109,7 +108,7 @@ public class PatientManager implements Serializable {
 		int absentSessions = 0;
 
 		for (PatientSession patientSession : patientSessions) {
-			if (patientSession.getStatus() == PatientSessionStatus.ABSENT) {
+			if (patientSession.isAbsent()) {
 				absentSessions++;
 				continue;
 			}
