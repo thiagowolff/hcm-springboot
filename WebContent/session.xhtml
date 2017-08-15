@@ -35,7 +35,7 @@
 					<p:resetInput target="@form" />
 				</p:commandButton>
 
-				<p:commandButton icon="fa fa-clone" value="#{msg['button.duplicateSessions']}" disabled="true" process="@this" actionListener="#{sessionManager.initializePreviousDailySessionsDate()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()"/>
+				<p:commandButton icon="fa fa-clone" value="#{msg['button.duplicateSessions']}" process="@this" actionListener="#{sessionManager.initializePreviousDailySessionsDate()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()"/>
 				<p:messages id="messages"/>
 			</h:panelGrid>
 

@@ -8,7 +8,7 @@ import java.util.List;
 
 public class PatientDao extends AbstractDao<Patient> {
 	public List<Patient> findPatients() {
-		String qlString = "select distinct p from Patient p left join fetch p.patientSessions ps order by p.name, p.patientId";
+		String qlString = "select distinct p from Patient p left join fetch p.patientSessions ps where p.active = true order by p.name, p.patientId";
 		TypedQuery<Patient> query = entityManager.createQuery(qlString, Patient.class);
 		return query.getResultList();
 	}

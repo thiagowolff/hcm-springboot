@@ -16,6 +16,8 @@ import com.google.common.base.Splitter;
 import org.joda.time.LocalDateTime;
 import org.primefaces.push.EventBus;
 import org.primefaces.push.EventBusFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -29,6 +31,8 @@ import java.util.List;
 @Singleton
 @Startup
 public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBean {
+	private static final Logger logger = LoggerFactory.getLogger("chapters.introduction.HelloWorld1");
+
 	@Resource TimerService timerService;
 	@Inject	private SessionTracker sessionTracker;
 	@Inject	private SessionService sessionService;
@@ -64,7 +68,17 @@ public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBe
 
 			TimerConfig timerConfig = new TimerConfig(alarm, false);
 			timerService.createCalendarTimer(scheduleExpression, timerConfig);
+
+			logger.info("Alarm {} initialized.", alarm);
 		}
+	}
+
+	@Override
+	public void pushAlarm(String name, String message) {
+		Alarm alarm = new Alarm(name, message, "coins.mp3");
+
+		EventBus eventBus = EventBusFactory.getDefault().eventBus();
+		eventBus.publish("/alarm", alarm);
 	}
 
 	@Override

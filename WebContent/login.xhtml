@@ -12,22 +12,13 @@
 	</h:head>
 	
 	<h:body styleClass="login-page">
-		<p:ajaxStatus styleClass="ajax-status">
-			<f:facet name="start">
-				<h:graphicImage value="/resources/images/loading.gif" />
-			</f:facet>
-			<f:facet name="complete">
-				<h:outputText value="" />
-			</f:facet>
-		</p:ajaxStatus>	
-		
 		<h:form id="login">
 			<div class="login-panel">
 				<div class="login-logo">
 					<p:graphicImage id="logo" value="/resources/images/logo-white.png" styleClass="animate-0 zoomIn" />
 					<pe:tooltip for="logo" value="" />
 
-					<span>#{msg['title.appTitle']}</span>
+					<span>#{msg['title.appTitle']}</span><span class="version animate-2 fadeIn" style="#{applicationScope['newVersion'] ? 'color: #57f547' : ''}">#{version['version']}</span>
 				</div>
 
 				<ui:param name="isDev" value="#{facesContext.application.projectStage eq 'Development'}" />
@@ -57,6 +48,10 @@
 				</div>
 			</div>
         </h:form>
+
+		<script type="text/javascript">
+			mixpanel.track("Login page");
+		</script>
 	</h:body>
 </f:view>
 </html>

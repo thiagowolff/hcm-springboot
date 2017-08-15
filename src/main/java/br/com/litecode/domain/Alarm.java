@@ -24,6 +24,15 @@ public class Alarm implements Serializable {
 	@Column(name = "notification_sound")
 	private String notificationSound;
 
+	public Alarm() {
+	}
+
+	public Alarm(String name, String message, String notificationSound) {
+		this.name = name;
+		this.message = message;
+		this.notificationSound = notificationSound;
+	}
+
 	public String getCronExpression() {
 		return cronExpression;
 	}
@@ -38,5 +47,10 @@ public class Alarm implements Serializable {
 
 	public String getNotificationSound() {
 		return notificationSound;
+	}
+
+	@Override
+	public String toString() {
+		return "ID: " + alarmId + ", cronExpression='" + cronExpression + ", name='" + name + ", notificationSound='" + notificationSound;
 	}
 }

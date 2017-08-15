@@ -7,7 +7,10 @@ import java.util.Date;
 
 @Entity
 @Table(name = "user")
-@NamedQuery(name = "findUserByUsername", query = "select u from User u where u.username = ?1", hints = { @QueryHint(name = "org.hibernate.cacheable", value = "true") })
+@NamedQueries({
+	@NamedQuery(name = "findUserByUsername", query = "select u from User u where u.username = ?1", hints = {@QueryHint(name = "org.hibernate.cacheable", value = "true")}),
+	@NamedQuery(name = "findUserBySessionId", query = "select u from User u where u.sessionId = ?1")
+})
 public class User implements Serializable  {
     private static final long serialVersionUID = 1L;
 
@@ -38,6 +41,9 @@ public class User implements Serializable  {
 
 	@Column(name = "last_access_location")
 	private String lastAccessLocation;
+
+	@Column(name = "session_id")
+	private String sessionId;
 
     public User() {
     	creationDate = Date.from(Instant.now());
@@ -97,6 +103,14 @@ public class User implements Serializable  {
 
 	public void setLastAccessLocation(String lastAccessLocation) {
 		this.lastAccessLocation = lastAccessLocation;
+	}
+
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
 	}
 
 	@Override

@@ -28,6 +28,7 @@ public class PatientService {
 	}
 
 	public void delete(Patient patient) {
-		patientDao.delete(patient);
+		patient.setActive(false);
+		patientDao.update(patient);
 	}
 }

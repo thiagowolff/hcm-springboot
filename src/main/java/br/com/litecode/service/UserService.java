@@ -6,6 +6,7 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.Query;
 import java.util.List;
 
 @Stateless
@@ -19,7 +20,15 @@ public class UserService {
 	public User getUserByUsername(String username) {
 		return userDao.findByUsername(username);
 	}
-	
+
+	public User getUserBySessionId(String sessionId) {
+		return userDao.findBySessionId(sessionId);
+	}
+
+	public void initializeUserSessions() {
+		userDao.initializeUserSessions();
+	}
+
 	public User getUser(Integer userId) {
 		return userDao.findById(userId);
 	}	

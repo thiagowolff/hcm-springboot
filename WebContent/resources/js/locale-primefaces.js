@@ -29,7 +29,7 @@
 
 PrimeFacesExt.locales.TimePicker['pt'] = {
     hourText: 'Horas',
-    minuteText: 'Minutos',
+    minuteText: 'Min',
     amPmText: ['AM', 'PM'] ,
     closeButtonText: 'Fechar',
     nowButtonText: 'Agora',

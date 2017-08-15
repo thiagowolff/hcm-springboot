@@ -2,7 +2,9 @@ package br.com.litecode.controller;
 
 import br.com.litecode.domain.User;
 import br.com.litecode.domain.User.Role;
+import br.com.litecode.security.UserSessionTracker;
 import br.com.litecode.service.UserService;
+import br.com.litecode.util.MessageUtil;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharSource;
@@ -15,8 +17,10 @@ import org.omnifaces.util.Faces;
 import org.omnifaces.util.Messages;
 
 import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -27,6 +31,7 @@ import java.util.Date;
 @RequestScoped
 public class LoginManager {
 	@Inject private UserService userService;
+	@Inject private UserSessionTracker userSessionTracker;
 
 	private String username;
 	private String password;
@@ -38,17 +43,23 @@ public class LoginManager {
 
 		try {
 			currentUser.login(token);
-			
 			User user = userService.getUserByUsername(username);
-			user.setLastAccess(Date.from(Instant.now()));
 
+			HttpSession userSession = userSessionTracker.getUserSession(user);
+			if (userSession != null && !userSession.getId().equals(Faces.getSessionId())) {
+				userSessionTracker.killUserSession(user);
+			}
+
+			user.setLastAccess(Date.from(Instant.now()));
+			user.setSessionId(Faces.getSessionId());
 			String lastAccessLocation = getLastAccessLocation();
 			if (lastAccessLocation != null) {
 				user.setLastAccessLocation(lastAccessLocation);
 			}
 
 			userService.updateUser(user);
-			
+			userSessionTracker.addUserSession(user, Faces.getSession());
+
 			Faces.getSessionMap().put("loggedUser", user);
 			
 			Faces.redirect("index.xhtml");

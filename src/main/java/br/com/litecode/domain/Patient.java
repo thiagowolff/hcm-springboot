@@ -46,9 +46,13 @@ public class Patient {
 	@OneToMany(mappedBy = "patient")
 	private List<PatientSession> patientSessions;
 
+	@Column
+	private boolean active;
+
 	public Patient() {
 		creationDate = Date.from(Instant.now());
 		patientSessions = new ArrayList<>();
+		active = true;
 	}
 
 	public String getDisplayName() {
@@ -135,6 +139,14 @@ public class Patient {
 
 	public void setPatientRecord(String patientRecord) {
 		this.patientRecord = patientRecord;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
 	@Override

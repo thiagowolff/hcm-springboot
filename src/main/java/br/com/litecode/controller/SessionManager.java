@@ -137,6 +137,7 @@ public class SessionManager implements Serializable {
 	public void setPatientSessionStatus(PatientSession patientSession, boolean absent) {
 		patientSession.setAbsent(absent);
 		sessionService.updatePatientSession(patientSession);
+		EventBusFactory.getDefault().eventBus().publish("/refresh", "{}");
 	}
 
 	public void addPatientsToSession() {
@@ -148,16 +149,19 @@ public class SessionManager implements Serializable {
 		sessionService.addPatientsToSession(selectedSession, patients);
 		selectedSession = sessionService.getSession(selectedSession.getSessionId());
 		patients.clear();
+		EventBusFactory.getDefault().eventBus().publish("/refresh", "{}");
 	}
 
 	public void removePatientFromSession(PatientSession patientSession) {
 		sessionService.deletePatientSession(patientSession);
 		selectedSession = sessionService.getSession(patientSession.getSession().getSessionId());
+		EventBusFactory.getDefault().eventBus().publish("/refresh", "{}");
 	}
 
 	public void duplicateSessions() {
 		sessionService.duplicateSessions(previousDailySessionsDate, newDailySessionsDate);
 		initializeSession();
+		EventBusFactory.getDefault().eventBus().publish("/refresh", "{}");
 	}
 
 	public void previousSessionDate() {

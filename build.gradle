@@ -42,6 +42,7 @@ dependencies {
     compile "org.atmosphere:atmosphere-runtime:2.4.9"
     compile "org.apache.shiro:shiro-core:1.3.2"
     compile "org.apache.shiro:shiro-web:1.3.2"
+    compile "ch.qos.logback:logback-classic:1.2.3"
 
     testCompile "junit:junit:4.+"
     testCompile "org.mockito:mockito-core:2.+"
@@ -56,6 +57,24 @@ task compileLess << {
     ant.replace(file: "$resourcesDir/less/style.less", token: ".less", value: ".less?ln=less")
 }
 
+task updateVersion << {
+    def versionFile = "$projectDir/src/main/resources/version.properties"
+    def versionProperties = new Properties()
+    file(versionFile).withInputStream { versionProperties.load(it) }
+
+    def version = versionProperties.version.split("\\.")
+    def minorVersion = version[2]
+    minorVersion++
+    def newVersion = version[0] + "." + version[1] + "." + minorVersion
+
+    ant.propertyfile(file: versionFile) {
+        entry( key: "version", value: newVersion)
+        entry( key: "versionDate", value: new Date().format('dd/MM/yyyy'))
+    }
+
+    println("New version: $newVersion")
+}
+
 remotes {
     remoteServer {
         host = project.hasProperty("serverHost") ? serverHost : ""
@@ -65,7 +84,7 @@ remotes {
     }
 }
 
-task deploy << {
+task deploy(dependsOn: ["war", "updateVersion"]) << {
     def cssFile = new File("$webAppDirName/resources/css/style.css")
     cssFile.delete()
 
@@ -85,6 +104,4 @@ task deploy << {
 }
 
 webAppDirName = "WebContent"
-
 war.dependsOn "compileLess"
-deploy.dependsOn "war"

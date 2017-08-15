@@ -49,8 +49,9 @@
 					<ui:include src="/layout/leftMenu.xhtml" />
 				</div>
 				</ui:remove>
-				<div class="footer">
-					<h:outputText value="#{msg['title.poweredBy']} &#8211; v. #{version['version']}" />
+				<div class="footer animate-1 bounceInLeft">
+					<span >#{msg['title.poweredBy']} &#8211;</span>
+					<span class="animate-3 fadeIn" style="#{applicationScope['newVersion'] ? 'color: green' : ''}">v. #{version['version']} (#{version['versionUpdatedOn']} #{version['versionDate']})</span>
 				</div>
 			</div>
 		</div>
