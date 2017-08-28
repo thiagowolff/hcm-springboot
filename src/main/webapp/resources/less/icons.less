@@ -1,0 +1,165 @@
+/* Icons */
+
+.icon(@code, @size: 14px, @color: @defaultIconColor, @hoverColor: @defaultIconHoverColor) {
+	font-family: 'icomoon';
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+	-webkit-font-smoothing: antialiased;
+	background: none !important;
+	text-indent: 0px !important;
+	font-size: @size !important;
+	color: @color;
+	.transition-duration();
+	&:before { content: @code; }
+	&:hover { color: @hoverColor; }
+	& when (@size > 14px) {	width: @size; height: @size; }
+}
+
+@icons:
+	document "\e0d9",
+	folder "\e135",
+	folder-empty "\e137",
+	pencil "\e006",
+	locked "\e31d",
+	trash "\e2f6",
+	refresh "\e1f2",
+	grip-dotted-vertical "\f00b",
+	mail-closed "\f003",
+	print "\f02f",
+	folder-collapsed "\e138",
+	folder-open "\e139",
+	bookmark "\e08e",
+	scissors "\f0c4",
+	clipboard "\f0ea",
+	tag "\f0e8",
+	stop "\e605",
+	arrowthickstop-1-s "\f0ed",
+	box "\e05c",
+	archive "\e3d5",
+	th-list "\f00b",
+	battery-0 "\e2a0",
+	triangle-2-e-w "\e0ec",
+	search "\e333",
+	transfer-e-w "\f079",
+	arrowreturnthick-1-n "\e011",
+	arrowrefresh-1-n "\e07a",
+	extlink "\e12b",
+	key "\e321",
+	password "\e321",
+	cancel "\e274",
+	plus "\e071",
+	plus-thick "\f067",
+	cross "\e069",
+	alert "\e266",
+	mail-folder "\e3df",
+	cabinet "\e360",
+	cog "\f013",
+	user "\e00d",
+	group "\f0c0",
+	graph "\e316",
+	session "\e007",
+	log "\e3d5",
+	database "\e058",
+	type "\e129",
+	profile "\e010",
+	key "\e31f",
+	exit "\e212",
+	search "\e333",
+	find "\e334",
+	switch "\e07c",
+	hierarchy "\e2c6",
+	clock "\f017",
+	pending "\e3e2",
+	switch "\e080",
+	remove "\f00d",
+	process "\e12b",
+	link "\e2a2",
+	previous "\e1f7",
+	next "\e0a8",
+	newspaper "\e017",
+	persons "\e00e",
+	tools "\e31c",
+	reports "\e317",
+	excel "\e00a",
+	pdf "\e00b",
+	download "\e2ac",
+	document-type "\f02e",
+	project "\e05a",
+	cut "\f0c4",
+	paste "\f0ea",
+	request "\f07a",
+	upload "\e2ad",
+	documents "\e259",
+	google "\e01a",
+	bubble "\e396",
+	check "\e1f0",
+	calendar "\e3da",
+	play "\e602",
+	details "\e10b",
+	flag "\e292",
+	followup "\e02e",
+	appeal "\f02e",
+	client "\e355",
+	office "\e01f",
+	minus "\f056",
+	bell "\e10f",
+	bubble "\e385",
+	sitemap "\f0e8",
+	return "\e37d",
+	key "\e321",
+	site "\e3e5",
+	envelope "\f003",
+	clock "\e037",
+	history "\e085",
+	first "\e608",
+	arrow-1-e "\e3b1",
+	arrowstop-1-e "\e3af",
+	arrow-1-w "\e3b3",
+	arrowstop-1-w "\e3ae";
+
+.ui-icon- {
+	.for(@icons); .-each(@value) {
+		@name: extract(@value, 1);
+		@code: extract(@value, 2);
+		&@{name} {
+			.icon(@code);
+		}
+	}
+}
+
+.ui-menu-icon {
+	font-size: @menuIconSize;
+	color: @menuIconColor;
+	width: @menuIconSize;
+	height: @menuIconSize;
+	padding: 0px 2px 0px 2px;
+	&:hover { color: @menuIconColor; }
+}
+
+.ui-icon-16px {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+}
+
+.ui-table-icon {
+	padding-right: 8px;
+	position: relative;
+	top: 1px;
+	&:hover { color: @defaultIconColor; }
+}
+
+.ui-bordered-icon {
+	border: 1px solid @greyThemeColor;
+	padding: 5px;
+	top: 3px !important;
+	.rounded();
+}
+
+.ui-menuitem-icon.fa {
+	font-size: 16px;
+}
+

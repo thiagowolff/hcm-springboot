@@ -1,0 +1,56 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+				xmlns:h="http://xmlns.jcp.org/jsf/html"
+				xmlns:lc="http://java.sun.com/jsf/composite/components">
+
+	<script type="text/javascript">
+		google.charts.load('current', {'packages':['corechart']});
+		google.charts.setOnLoadCallback(drawCharts);
+
+		function drawCharts() {
+			drawChart('Presenças por mês', '#{chartsController.presencesPerMonth}', 'presencesPerMonthChart', google.visualization.ColumnChart);
+			drawChart('Sessões por câmara', '#{chartsController.sessionsPerChamberModel}', 'sessionsPerChamberChart', google.visualization.BarChart, { colors: ['#2f353e'] });
+			drawChart('Sessões por convênio', '#{chartsController.sessionsPerHealthInsuranceModel}', 'sessionsPerHealthInsuranceChart', google.visualization.PieChart, { legend: { position: 'right' }});
+			drawChart('Sessões por mês', '#{chartsController.monthlySessionsModel}', 'monthlySessionsChart', google.visualization.LineChart);
+		}
+
+		function drawChart(title, dataArray, elementId, chartType, additionalOptions) {
+			if (!dataArray) return;
+
+			var options = {
+				title: title,
+				legend: { position: 'none' },
+				colors: [ '#4e88be', '#466b8e', '#2f353e', '#336c37', '#2c3e50', '#3e382f', '#6c3368', '#287474', '#454e5b', '#438f49', '#503e2c' ]
+			};
+
+			options = $.extend({}, options, additionalOptions)
+
+			var data = google.visualization.arrayToDataTable(JSON.parse(dataArray));
+			var chart = new chartType(document.getElementById(elementId));
+			chart.draw(data, options);
+		}
+	</script>
+
+	<h:form>
+		<lc:headerPanel title="#{msg['title.statistics']}" />
+
+		<div class="content-wrapper">
+			<div class="ui-g">
+				<div class="ui-g-6">
+					<div id="presencesPerMonthChart" class="chart"></div>
+				</div>
+				<div class="ui-g-6">
+					<div id="sessionsPerChamberChart" class="chart"></div>
+				</div>
+			</div>
+			<div class="ui-g">
+				<div class="ui-g-6">
+					<div id="sessionsPerHealthInsuranceChart" class="chart"></div>
+				</div>
+				<div class="ui-g-6">
+					<div id="monthlySessionsChart" class="chart"></div>
+				</div>
+			</div>
+		</div>
+	</h:form>
+</ui:composition>
