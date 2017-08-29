@@ -1,7 +1,6 @@
 package br.com.litecode.controller;
 
 import br.com.litecode.annotation.ScopeSession;
-import br.com.litecode.annotation.ScopeView;
 import br.com.litecode.domain.model.Chamber;
 import br.com.litecode.domain.model.ChamberEvent.EventType;
 import br.com.litecode.domain.model.Patient;
@@ -15,6 +14,7 @@ import br.com.litecode.service.push.PushService;
 import br.com.litecode.service.push.message.NotificationMessage;
 import br.com.litecode.service.timer.SessionTimer;
 import br.com.litecode.util.MessageUtil;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -47,11 +47,15 @@ public class SessionController implements Serializable {
 	@Autowired
 	private PushService pushService;
 
-	private SessionInput sessionInput;
 	private Map<String, List<Session>> chamberSessions;
 
+	@Getter @Setter
+	private SessionInput sessionInput;
 
+	@Getter @Setter
 	private LocalDate fromSessionsDate;
+
+	@Getter @Setter
 	private LocalDate toSessionsDate;
 
 	private List<LocalDateTime> scheduledSessionDates;
@@ -244,16 +248,13 @@ public class SessionController implements Serializable {
 		sessionInput.reset();
 	}
 
-	public SessionInput getSessionInput() {
-		return sessionInput;
-	}
-
 	public String getScheduledSessionDates() {
 		Set<LocalDate> sessionDates = scheduledSessionDates.stream().map(LocalDateTime::toLocalDate).collect(Collectors.toSet());
 		return sessionDates.stream().map(date -> "'" + date + "'").collect(Collectors.joining(","));
 	}
 
-	@Getter @Setter
+	@Getter
+	@Setter
 	public static class SessionInput {
 		private Chamber chamber;
 		private Session session;
@@ -268,25 +269,21 @@ public class SessionController implements Serializable {
 			sessionDate = LocalDate.now();
 		}
 
+		public static SessionInput of(Chamber chamber, LocalDate sessionDate, LocalTime sessionTime, Patient... patients) {
+			SessionInput sessionInput = new SessionInput();
+			sessionInput.chamber = chamber;
+			sessionInput.sessionDate = sessionDate;
+			sessionInput.sessionTime = sessionTime;
+
+			for (Patient patient : patients) {
+				sessionInput.patients.add(patient);
+			}
+			return sessionInput;
+		}
+
 		public void reset() {
 			session = new Session();
 			patients.clear();
 		}
-	}
-
-	public LocalDate getFromSessionsDate() {
-		return fromSessionsDate;
-	}
-
-	public void setFromSessionsDate(LocalDate fromSessionsDate) {
-		this.fromSessionsDate = fromSessionsDate;
-	}
-
-	public LocalDate getToSessionsDate() {
-		return toSessionsDate;
-	}
-
-	public void setToSessionsDate(LocalDate toSessionsDate) {
-		this.toSessionsDate = toSessionsDate;
 	}
 }

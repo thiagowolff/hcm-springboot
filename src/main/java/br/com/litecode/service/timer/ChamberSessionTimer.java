@@ -10,8 +10,6 @@ import br.com.litecode.service.push.message.NotificationMessage;
 import br.com.litecode.service.push.message.ProgressMessage;
 import br.com.litecode.util.JmxUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
