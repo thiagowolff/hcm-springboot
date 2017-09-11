@@ -1,26 +1,24 @@
 package br.com.litecode.service.push.message;
 
-import br.com.litecode.domain.model.ChamberEvent;
-import br.com.litecode.domain.model.ChamberEvent.EventType;
 import br.com.litecode.domain.model.Session;
 import br.com.litecode.util.MessageUtil;
 import lombok.Value;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Value
 public class NotificationMessage implements Serializable {
 	private String eventType;
-	private String notificationSound;
 	private String messageSummary;
 	private String messageDetail;
 
-	public static NotificationMessage create(Session session, EventType eventType) {
-		String messageKey = "message." + eventType.toString().toLowerCase();
+	public static NotificationMessage create(Session session, String eventType) {
+		String messageKey = "message." + eventType.toLowerCase();
 		String messageSummary = MessageUtil.getMessage(messageKey + ".summary", session.getChamber().getName(), session.getSessionId());
-		String messageDetail = MessageUtil.getMessage(messageKey + ".detail", session.getStartTime());
+		String messageDetail = MessageUtil.getMessage(messageKey + ".detail", LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
 
-		ChamberEvent chamberEvent = session.getChamber().getChamberEvent(eventType);
-		return new NotificationMessage(chamberEvent.toString(), chamberEvent.getNotificationSound(), messageSummary, messageDetail);
+		return new NotificationMessage(eventType.toLowerCase(), messageSummary, messageDetail);
 	}
 }

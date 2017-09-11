@@ -2,6 +2,7 @@ package br.com.litecode.domain.repository;
 
 import br.com.litecode.domain.model.Chamber;
 import br.com.litecode.domain.model.Patient;
+import br.com.litecode.domain.model.PatientSession;
 import br.com.litecode.domain.model.Session;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,25 +36,14 @@ public class SessionRepositoryTest {
 
     @Before
     public void setUp() {
-        chamber = new Chamber();
-        chamber.setName("Chamber");
-        chamber = chamberRepository.save(chamber);
-
-        patientX = new Patient();
-        patientX.setName("Patient X");
-        patientX = patientRepository.save(patientX);
-
-        patientY = new Patient();
-        patientY.setName("Patient Y");
-        patientY = patientRepository.save(patientY);
-
-        session = new Session();
-        session.setChamber(chamber);
-        session = sessionRepository.save(session);
+        chamber = chamberRepository.findOne(1);
+        session = sessionRepository.findOne(1);
+        patientX = patientRepository.findOne(1);
+        patientY = patientRepository.findOne(2);
     }
 
     @Test
-    public void createEmptySession() throws Exception {
+    public void createEmptySession() {
         Session session = new Session();
         session.setChamber(chamber);
         session.setScheduledTime(LocalDateTime.now());
@@ -63,11 +53,11 @@ public class SessionRepositoryTest {
     }
 
     @Test
-    public void createSession() throws Exception {
+    public void createSession() {
         Session session = new Session();
         session.setChamber(chamber);
-		session.addPatient(patientX);
-		session.addPatient(patientY);
+        session.addPatient(patientX);
+        session.addPatient(patientY);
         session = sessionRepository.save(session);
 
         Session createdSession = sessionRepository.findOne(session.getSessionId());
@@ -77,7 +67,7 @@ public class SessionRepositoryTest {
     }
 
     @Test
-    public void addPatientToSession() throws Exception {
+    public void addPatientToSession() {
         session.addPatient(patientX);
         session.addPatient(patientY);
         sessionRepository.save(session);
@@ -86,14 +76,38 @@ public class SessionRepositoryTest {
     }
 
     @Test
-    public void removePatientFromSession() throws Exception {
+    public void updatePatientSession() {
+        session.addPatient(patientX);
+        session.addPatient(patientY);
+        session = sessionRepository.save(session);
+
+        for (PatientSession patientSession : session.getPatientSessions()) {
+            assertThat(patientSession.isAbsent()).isFalse();
+        }
+
+        session.getPatientSessions().first().setAbsent(true);
+        session = sessionRepository.save(session);
+
+        assertThat(session.getPatientSessions().first().isAbsent()).isTrue();
+        assertThat(session.getPatientSessions().last().isAbsent()).isFalse();
+    }
+
+    @Test
+    public void removePatientFromSession() {
         session.addPatient(patientX);
         session.addPatient(patientY);
         sessionRepository.save(session);
 
-        session.getPatientSessions().remove(session.getPatientSessions().iterator().next());
+        session.getPatientSessions().remove(session.getPatientSessions().first());
         sessionRepository.save(session);
 
         assertThat(session.getPatientSessions()).hasSize(1);
+    }
+
+    @Test
+    public void deleteSession() {
+        sessionRepository.delete(session);
+        Session deletedSession = sessionRepository.findOne(session.getSessionId());
+        assertThat(deletedSession).isNull();
     }
 }

@@ -2,7 +2,6 @@ package br.com.litecode.controller;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.io.Serializable;
 

@@ -1,15 +1,11 @@
 package br.com.litecode;
 
-import br.com.litecode.config.ViewScope;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
-import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletComponentScan;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCache;
@@ -20,12 +16,8 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.web.filter.CharacterEncodingFilter;
 
-import javax.faces.webapp.FacesServlet;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
@@ -41,43 +33,18 @@ public class Application {
 	}
 
 	@Bean
-	public ServletRegistrationBean servletRegistrationBean() {
-		ServletRegistrationBean facesSservlet = new ServletRegistrationBean(new FacesServlet(), "*.xhtml", "/javax.faces.resource/*");
-		facesSservlet.setAsyncSupported(true);
-		return facesSservlet;
-	}
-
-	@Bean
-	public FilterRegistrationBean characterEncodingFilter() {
-		FilterRegistrationBean bean = new FilterRegistrationBean();
-		bean.addInitParameter("encoding", "UTF-8");
-		bean.addInitParameter("forceEncoding", "true");
-		bean.setFilter(new CharacterEncodingFilter());
-		bean.addUrlPatterns("/*");
-		return bean;
-	}
-
-	@Bean
-	public CustomScopeConfigurer viewScopeConfigurer() {
-		CustomScopeConfigurer customScopeConfigurer = new CustomScopeConfigurer();
-		Map<String, Object> scopes = new HashMap();
-		scopes.put("view", new ViewScope());
-		customScopeConfigurer.setScopes(scopes);
-		return customScopeConfigurer;
-	}
-
-	@Bean
 	public TaskScheduler taskScheduler() {
 		return new ThreadPoolTaskScheduler();
 	}
 
 	@Bean
 	public CacheManager cacheManager(Ticker ticker) {
-		CaffeineCache chartsCache = buildCache("charts", ticker, 5);
-		CaffeineCache patientStatsCache = buildCache("patientStats", ticker, 15);
+		CaffeineCache chartCache = buildCache("chart", ticker, 5);
+		CaffeineCache sessionCache = buildCache("session", ticker, 15);
+		CaffeineCache patientCache = buildCache("patient", ticker, 15);
 
 		SimpleCacheManager manager = new SimpleCacheManager();
-		manager.setCaches(Arrays.asList(chartsCache, patientStatsCache));
+		manager.setCaches(Arrays.asList(sessionCache, patientCache, chartCache));
 		return manager;
 	}
 

@@ -1,33 +1,35 @@
 package br.com.litecode.controller;
 
-import br.com.litecode.annotation.ScopeView;
 import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.UserRepository;
-import org.apache.shiro.SecurityUtils;
+import br.com.litecode.security.UserSessionTracker;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.shiro.crypto.hash.Sha256Hash;
-import org.omnifaces.util.Faces;
 import org.omnifaces.util.Messages;
 import org.primefaces.context.RequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
-import java.time.Instant;
-import java.util.List;
 
-@ScopeView
+@Scope("view")
 @Component
 public class UserController implements Serializable {
-	private static final long serialVersionUID = 1L;
-	
 	@Autowired
 	private UserRepository userRepository;
 
+	@Autowired
+	private UserSessionTracker userSessionTracker;
+
+	@Getter
+	@Setter
 	private User user;
-	private User currentUser;
+
+	@Setter
 	private Iterable<User> users;
-	private Integer selectedClientId;
 
 	@PostConstruct
 	public void init() {
@@ -55,9 +57,6 @@ public class UserController implements Serializable {
 
 		if (user.getUserId() == null) {
 			user.setPassword(createPasswordHash(user.getPassword()));
-		} else {
-			String passwordHash = createPasswordHash(user.getPassword());
-			user.setPassword(passwordHash);
 		}
 
 		userRepository.save(user);
@@ -81,28 +80,13 @@ public class UserController implements Serializable {
 		userRepository.delete(user);
 		users = null;
 	}
-	
+
+	public void killUserSession(User user) {
+		userSessionTracker.killUserSession(user);
+		users = null;
+	}
+
 	public void newUser() {
 		user = new User();
-	}
-	
-	public User getUser() {
-		return user;
-	}
-	
-	public void setUser(User user) {
-		this.user = user;
-	}
-	
-	public void setUsers(List<User> users) {
-		this.users = users;
-	}
-
-	public Integer getSelectedClientId() {
-		return selectedClientId;
-	}
-
-	public void setSelectedClientId(Integer selectedClientId) {
-		this.selectedClientId = selectedClientId;
 	}
 }

@@ -2,7 +2,6 @@ package br.com.litecode.domain.repository;
 
 import br.com.litecode.domain.model.Patient;
 import br.com.litecode.domain.model.Patient.PatientStats;
-import br.com.litecode.domain.model.PatientSession;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 

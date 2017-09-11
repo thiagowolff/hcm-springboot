@@ -9,34 +9,25 @@ import br.com.litecode.service.push.PushService;
 import br.com.litecode.service.push.message.NotificationMessage;
 import br.com.litecode.service.push.message.ProgressMessage;
 import br.com.litecode.util.JmxUtil;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ScheduledFuture;
 
 @Service
-@Slf4j
 public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBean {
-
-	@Autowired
-	private ActiveSessionHolder activeSessionHolder;
-
 	@Autowired
 	private SessionRepository sessionRepository;
 
 	@Autowired
-	private TaskScheduler taskScheduler;
+	private PushService pushService;
 
 	@Autowired
-	private PushService pushService;
+	@Getter
+	private Clock<Session> sessionClock;
 
 	@PostConstruct
 	private void init() {
@@ -46,21 +37,12 @@ public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBe
 
 	@Override
 	public void startSession(Session session) {
-		if (activeSessionHolder.exists(session)) {
-			log.warn("Session {} already started", session.getSessionId());
-			return;
-		}
-
 		List<ChamberEvent> chamberEvents = session.getChamber().getChamberEvents();
-		List<ScheduledFuture> scheduledFutures = new ArrayList<>();
 
 		for (ChamberEvent chamberEvent : chamberEvents) {
-			if (chamberEvent.getTimeout() > 0) {
-				Date startTime = Date.from(Instant.now().plusSeconds(chamberEvent.getTimeout()));
-				scheduledFutures.add(taskScheduler.schedule(() -> sessionTimeout(session, chamberEvent), startTime));
-			}
+			sessionClock.register(session, () -> sessionTimeout(session, chamberEvent), chamberEvent.getTimeout());
 		}
-		activeSessionHolder.addSession(session, scheduledFutures);
+		sessionClock.start(session);
 	}
 
 	private void sessionTimeout(Session session, ChamberEvent chamberEvent) {
@@ -68,25 +50,20 @@ public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBe
 		sessionRepository.save(session);
 
 		if (session.getStatus() == SessionStatus.FINISHED) {
-			activeSessionHolder.removeSession(session);
+			sessionClock.stop(session);
 		}
 
-		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, chamberEvent.getEventType()), session.getManagedBy());
+		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, chamberEvent.toString()), session.getManagedBy());
 	}
 
 	@Override
 	public void stopSession(Session session) {
-		List<ScheduledFuture> scheduledTasks = activeSessionHolder.getScheduledTasks(session);
-
-		if (scheduledTasks != null) {
-			scheduledTasks.forEach(task -> task.cancel(true));
-			activeSessionHolder.removeSession(session);
-		}
+		sessionClock.stop(session);
 	}
 
 	@Scheduled(fixedRate = 1000)
 	private void clockTimeout() {
-		for (Session session : activeSessionHolder.getSessions()) {
+		for (Session session : sessionClock.getActiveListeners()) {
 			session.updateProgress();
 			pushService.publish(PushChannel.PROGRESS, ProgressMessage.create(session), session.getManagedBy());
 		}

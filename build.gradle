@@ -36,13 +36,11 @@ dependencies {
     compile "org.apache.myfaces.core:myfaces-impl:2.2.12"
     compile "org.apache.myfaces.core:myfaces-api:2.2.12"
     compile "org.apache.tomcat.embed:tomcat-embed-jasper:8.5.16"
-//    compile "jstl:jstl:1.2"
 
     compile "org.springframework.boot:spring-boot-starter-data-jpa"
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.springframework.boot:spring-boot-starter-cache"
     compile "org.springframework.boot:spring-boot-starter-websocket"
-//    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     compile "com.github.ben-manes.caffeine:caffeine"
     compile "org.hibernate:hibernate-ehcache"
 
@@ -51,6 +49,9 @@ dependencies {
     compile "org.primefaces:primefaces:6.1"
     compile "br.com.litecode:litefaces-enum-i18n:1.0.1"
     compile "org.primefaces.extensions:primefaces-extensions:6.1.1"
+
+    compile"com.github.adminfaces:admin-theme:1.0.0-RC9"
+
     compile "org.omnifaces:omnifaces:1.14.1"
     compile "com.google.guava:guava:23.0"
     compile "org.apache.shiro:shiro-core:1.4.0"
@@ -66,31 +67,35 @@ dependencies {
     testCompile "org.hsqldb:hsqldb"
 }
 
-task compileLess << {
-    def lessCompiler = new LessCompiler()
-    def resourcesDir = "$webAppDir/resources"
+task compileLess {
+    doLast {
+        def lessCompiler = new LessCompiler()
+        def resourcesDir = "$webAppDir/resources"
 
-    ant.replace(file: "$resourcesDir/less/style.less", token: "?ln=less", value: "")
-    lessCompiler.compile(file("$projectDir/$resourcesDir/less/style.less"), file("$projectDir/$resourcesDir/css/style.css"))
-    ant.replace(file: "$resourcesDir/less/style.less", token: ".less", value: ".less?ln=less")
+        ant.replace(file: "$resourcesDir/less/style.less", token: "?ln=less", value: "")
+        lessCompiler.compile(file("$projectDir/$resourcesDir/less/style.less"), file("$projectDir/$resourcesDir/css/style.css"))
+        ant.replace(file: "$resourcesDir/less/style.less", token: ".less", value: ".less?ln=less")
+    }
 }
 
-task updateVersion << {
-    def versionFile = "$projectDir/src/main/resources/version.properties"
-    def versionProperties = new Properties()
-    file(versionFile).withInputStream { versionProperties.load(it) }
+task updateVersion {
+    doLast {
+        def versionFile = "$projectDir/src/main/resources/version.properties"
+        def versionProperties = new Properties()
+        file(versionFile).withInputStream { versionProperties.load(it) }
 
-    def version = versionProperties.version.split("\\.")
-    def minorVersion = version[2]
-    minorVersion++
-    def newVersion = version[0] + "." + version[1] + "." + minorVersion
+        def version = versionProperties.version.split("\\.")
+        def minorVersion = version[2]
+        minorVersion++
+        def newVersion = version[0] + "." + version[1] + "." + minorVersion
 
-    ant.propertyfile(file: versionFile) {
-        entry( key: "version", value: newVersion)
-        entry( key: "versionDate", value: new Date().format('dd/MM/yyyy'))
+        ant.propertyfile(file: versionFile) {
+            entry(key: "version", value: newVersion)
+            entry(key: "versionDate", value: new Date().format('dd/MM/yyyy'))
+        }
+
+        println("New version: $newVersion")
     }
-
-    println("New version: $newVersion")
 }
 
 remotes {
@@ -102,23 +107,34 @@ remotes {
     }
 }
 
-task deploy(dependsOn: ["war", "updateVersion"]) << {
-    def cssFile = new File("$webAppDir/resources/css/style.css")
-    cssFile.delete()
+task deploy(dependsOn: ["war", "updateVersion"]) {
+    doLast {
+        def cssFile = new File("$webAppDir/resources/css/style.css")
+        cssFile.delete()
 
-    ssh.run {
-        session(remotes.remoteServer) {
-            println("Backing up previous release...")
-            def today = new Date().format('yyyyMMddHHmmss')
-            execute "cp /opt/wildfly/standalone/deployments/HCM.war /opt/wildfly/standalone/releases/HCM-" + today + ".war"
+        ssh.run {
+            session(remotes.remoteServer) {
+                println("Backing up previous release...")
+                def today = new Date().format('yyyyMMddHHmmss')
+                execute "cp /opt/wildfly/standalone/deployments/HCM.war /opt/wildfly/standalone/releases/HCM-" + today + ".war"
 
-            println("Uploading WAR...")
-            put from: "build/libs/HCM.war", into: "/opt/wildfly/standalone/deployments"
+                println("Uploading WAR...")
+                put from: "build/libs/HCM.war", into: "/opt/wildfly/standalone/deployments"
 
-            println("Initiating server...")
-            execute "service wildfly restart"
+                println("Initiating server...")
+                execute "service wildfly restart"
+            }
         }
     }
 }
 
+compileJava {
+    options.compilerArgs = [
+        "-parameters"
+    ]
+}
+
 jar.dependsOn "compileLess"
+jar.into('static') {
+    from('src/main/webapp')
+}

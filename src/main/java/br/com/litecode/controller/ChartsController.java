@@ -1,18 +1,18 @@
 package br.com.litecode.controller;
 
-import br.com.litecode.annotation.ScopeView;
 import br.com.litecode.domain.repository.ChartsRepository;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.function.Supplier;
 
-@ScopeView
+@Scope("view")
 @Component
-@Cacheable(cacheNames = "charts", key = "#root.methodName")
+@Cacheable(cacheNames = "chart", key = "#root.methodName")
 public class ChartsController {
 	@Autowired
 	private ChartsRepository chartsRepository;

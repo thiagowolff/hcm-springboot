@@ -7,7 +7,6 @@ import org.springframework.data.repository.CrudRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 public interface SessionRepository extends CrudRepository<Session, Integer> {
 	default List<Session> findSessionsByDate(LocalDate sessionDate) {

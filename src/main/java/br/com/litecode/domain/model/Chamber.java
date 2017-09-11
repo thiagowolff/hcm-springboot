@@ -2,6 +2,7 @@ package br.com.litecode.domain.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SortNatural;
 
 import javax.persistence.*;
 import java.util.List;
@@ -20,6 +21,7 @@ public class Chamber {
 
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "chamber_id")
+	@SortNatural
 	private List<ChamberEvent> chamberEvents;
 
 	public ChamberEvent getChamberEvent(ChamberEvent.EventType eventType) {

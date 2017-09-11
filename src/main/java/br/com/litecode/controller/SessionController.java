@@ -1,6 +1,5 @@
 package br.com.litecode.controller;
 
-import br.com.litecode.annotation.ScopeSession;
 import br.com.litecode.domain.model.Chamber;
 import br.com.litecode.domain.model.ChamberEvent.EventType;
 import br.com.litecode.domain.model.Patient;
@@ -14,7 +13,6 @@ import br.com.litecode.service.push.PushService;
 import br.com.litecode.service.push.message.NotificationMessage;
 import br.com.litecode.service.timer.SessionTimer;
 import br.com.litecode.util.MessageUtil;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +21,7 @@ import org.hibernate.Hibernate;
 import org.omnifaces.util.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +33,7 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@ScopeSession
+@Scope("session")
 @Component
 @Slf4j
 public class SessionController implements Serializable {
@@ -61,6 +60,7 @@ public class SessionController implements Serializable {
 	private List<LocalDateTime> scheduledSessionDates;
 
 	private enum ChamberPayloadStatus { AVAILABLE, OCCUPIED, ABSENT }
+	private enum SessionOperationType { CREATE_SESSION, DELETE_SESSION }
 
 	@PostConstruct
 	private void init() {
@@ -114,25 +114,24 @@ public class SessionController implements Serializable {
 		sessionInput.getPatients().forEach(session::addPatient);
 		sessionRepository.save(session);
 		invalidateSessionCache();
-		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, EventType.CREATION), session.getManagedBy());
+		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name()), session.getManagedBy());
 	}
 
 	@Transactional
 	public void startSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 		session.reset();
-		session.setStatus(SessionStatus.COMPRESSING);
 		session.setManagedBy((String) SecurityUtils.getSubject().getPrincipal());
 
-		sessionRepository.save(session);
+		//sessionRepository.save(session);
 		sessionTimer.startSession(session);
 		chamberSessions.remove(getSessionKey(session.getChamber().getChamberId()));
-		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, EventType.START), session.getManagedBy());
+		//pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, EventType.START), session.getManagedBy());
 	}
 
 	@PushRefresh
 	@Transactional
-	@CacheEvict(cacheNames = "patientStats", allEntries = true)
+	@CacheEvict(cacheNames = "patient", allEntries = true)
 	public void resetSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionTimer.stopSession(session);
@@ -143,7 +142,7 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@CacheEvict(cacheNames = "patientStats", allEntries = true)
+	@CacheEvict(cacheNames = "patient", allEntries = true)
 	public void finishSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionTimer.stopSession(session);
@@ -155,11 +154,12 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@CacheEvict(cacheNames = "patientStats", allEntries = true)
+	@CacheEvict(cacheNames = "patient", allEntries = true)
 	public void deleteSession() {
 		sessionTimer.stopSession(sessionInput.getSession());
 		sessionRepository.delete(sessionInput.getSession());
 		chamberSessions.remove(getSessionKey(sessionInput.getSession().getChamber().getChamberId()));
+		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(sessionInput.getSession(), SessionOperationType.DELETE_SESSION.name()), sessionInput.getSession().getManagedBy());
 	}
 
 	@PushRefresh
@@ -171,7 +171,7 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@CacheEvict(cacheNames = "patientStats", allEntries = true)
+	@CacheEvict(cacheNames = "patient", allEntries = true)
 	public void addPatientsToSession() {
 		if (sessionInput.getPatients().size() + sessionInput.getSession().getPatientSessions().size() > sessionInput.getSession().getChamber().getCapacity()) {
 			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", sessionInput.getSession().getChamber().getCapacity()));
@@ -186,7 +186,7 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@CacheEvict(cacheNames = "patientStats", allEntries = true)
+	@CacheEvict(cacheNames = "patient", allEntries = true)
 	public void removePatientFromSession(PatientSession patientSession) {
 		sessionInput.getSession().getPatientSessions().remove(patientSession);
 		sessionInput.setSession(sessionRepository.save(patientSession.getSession()));
@@ -274,10 +274,7 @@ public class SessionController implements Serializable {
 			sessionInput.chamber = chamber;
 			sessionInput.sessionDate = sessionDate;
 			sessionInput.sessionTime = sessionTime;
-
-			for (Patient patient : patients) {
-				sessionInput.patients.add(patient);
-			}
+			Collections.addAll(sessionInput.patients, patients);
 			return sessionInput;
 		}
 

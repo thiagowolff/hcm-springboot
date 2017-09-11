@@ -1,4 +1,4 @@
-package br.com.litecode.config;
+package br.com.litecode.web;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,11 +12,7 @@ public class ViewScope implements Scope {
 
 	public Object get(String name, ObjectFactory objectFactory) {
 		Map<String, Object> viewMap = getViewMap();
-		Object bean = viewMap.get(name);
-		if (bean == null) {
-			bean = objectFactory.getObject();
-			viewMap.put(name, bean);
-		}
+		Object bean = viewMap.computeIfAbsent(name, k -> objectFactory.getObject());
 		return bean;
 	}
 

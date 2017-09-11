@@ -13,13 +13,11 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 @Entity
 @Getter
 @Setter
-public class ChamberEvent {
+public class ChamberEvent implements Comparable<ChamberEvent> {
 	@AllArgsConstructor
-	@NoArgsConstructor
 	@Getter
 	public enum EventType {
-		CREATION,
-		START,
+		START(SessionStatus.COMPRESSING),
 		WEAR_MASK(SessionStatus.O2_ON),
 		REMOVE_MASK(SessionStatus.O2_OFF),
 		SHUTDOWN(SessionStatus.SHUTTING_DOWN),
@@ -37,11 +35,14 @@ public class ChamberEvent {
 	@Enumerated(value = EnumType.STRING)
 	private EventType eventType;
 
-	private String notificationSound;
-
 	public String getDuration() {
 		Duration duration = Duration.of(timeout, SECONDS);
 		return LocalTime.MIDNIGHT.plus(duration).format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+	}
+
+	@Override
+	public int compareTo(ChamberEvent chamberEvent) {
+		return timeout.compareTo(chamberEvent.getTimeout());
 	}
 
 	@Override

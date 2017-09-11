@@ -1,11 +1,12 @@
 package br.com.litecode.controller;
 
-import br.com.litecode.annotation.ScopeView;
 import br.com.litecode.domain.model.Patient;
 import br.com.litecode.domain.model.Patient.PatientStats;
 import br.com.litecode.domain.repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,8 +14,9 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
-@ScopeView
+@Scope("view")
 @Component
+@CacheConfig(cacheNames = "patient")
 public class PatientController implements Serializable {
 	@Autowired
 	private PatientRepository patientRepository;
@@ -35,12 +37,12 @@ public class PatientController implements Serializable {
 		return patients;
 	}
 
-	@Cacheable(cacheNames = "patientStats", key = "{ #sessionId, #sessionDate }")
+	@Cacheable(key = "{ #sessionId, #sessionDate }")
 	public List<PatientStats>  getPatientStats(Integer sessionId, LocalDate sessionDate) {
 		return patientRepository.findPatienStats(sessionId, sessionDate.plusDays(1).atStartOfDay());
 	}
 
-	@Cacheable(cacheNames = "patientStats", key = "#patientId")
+	@Cacheable(key = "#patientId")
 	public PatientStats getPatientStats(Integer patientId) {
 		return patientRepository.findPatienStats(patientId);
 	}
@@ -50,7 +52,8 @@ public class PatientController implements Serializable {
 	}
 	
 	public void deletePatient() {
-		patientRepository.delete(patient);
+		patient.setActive(false);
+		patientRepository.save(patient);
 		patients = null;
 	}
 	

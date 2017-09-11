@@ -1,6 +1,5 @@
 package br.com.litecode.controller;
 
-import br.com.litecode.annotation.ScopeRequest;
 import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.model.User.Role;
 import br.com.litecode.domain.repository.UserRepository;
@@ -14,6 +13,7 @@ import org.apache.shiro.subject.Subject;
 import org.omnifaces.util.Faces;
 import org.omnifaces.util.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
@@ -23,7 +23,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
 
-@ScopeRequest
+@Scope("request")
 @Component
 @Slf4j
 public class LoginController {
