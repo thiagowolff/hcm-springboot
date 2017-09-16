@@ -8,7 +8,7 @@
 		google.charts.setOnLoadCallback(drawCharts);
 
 		function drawCharts() {
-			drawChart('Presenças por mês', '#{chartsController.presencesPerMonth}', 'presencesPerMonthChart', google.visualization.ColumnChart);
+			drawChart('Presenças por mês', '#{chartsController.presencesPerMonth}', 'presencesPerMonthChart', google.visualization.ColumnChart, { colors: ['#3949ab'] });
 			drawChart('Sessões por câmara', '#{chartsController.sessionsPerChamberModel}', 'sessionsPerChamberChart', google.visualization.BarChart, { colors: ['#2f353e'] });
 			drawChart('Sessões por convênio', '#{chartsController.sessionsPerHealthInsuranceModel}', 'sessionsPerHealthInsuranceChart', google.visualization.PieChart, { legend: { position: 'right' }});
 			drawChart('Sessões por mês', '#{chartsController.monthlySessionsModel}', 'monthlySessionsChart', google.visualization.LineChart);
@@ -20,7 +20,10 @@
 			var options = {
 				title: title,
 				legend: { position: 'none' },
-				colors: [ '#4e88be', '#466b8e', '#2f353e', '#336c37', '#2c3e50', '#3e382f', '#6c3368', '#287474', '#454e5b', '#438f49', '#503e2c' ]
+				sliceVisibilityThreshold: 0.04,
+				pieResidueSliceColor: '#2f353e',
+				pieResidueSliceLabel: "Outros",
+				colors: [ '#d81b60', '#3949ab', '#00897b', '#e53935', '#546e7a', '#5e35b1', '#f06292', '#7986cb', '#4db6ac', '#e57373', '#e0e0e0', '#9575cd' ]
 			};
 
 			options = $.extend({}, options, additionalOptions)

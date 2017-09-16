@@ -7,7 +7,6 @@
 		<cc:attribute name="title" />
 		<cc:attribute name="update" />
 		<cc:attribute name="oncomplete" />
-		<cc:attribute name="gotoPage" />
 		<cc:attribute name="addButtonAction" method-signature="void actionListener(javax.faces.event.ActionEvent)" />
 		<cc:attribute name="addButtonLabel" default="#{msg['button.add']}" />
 	</cc:interface>
@@ -19,18 +18,11 @@
 					<p:outputLabel value="#{cc.attrs.title}" />
 				</div>
 				<div class="header-panel-button">
-					<p:commandButton process="@this" value="#{cc.attrs.addButtonLabel}"
-						 actionListener="#{cc.attrs.addButtonAction}"
-                         action="#{navigationController.setActivePage(cc.attrs.gotoPage)}"
-                         update=":content"
-                         oncomplete="#{cc.attrs.oncomplete}"
-                         rendered="#{not empty cc.attrs.addButtonAction and not empty cc.attrs.gotoPage}" />
-
-					<p:commandButton process="@this" value="#{cc.attrs.addButtonLabel}"
+					<p:commandButton process="@this" value="#{cc.attrs.addButtonLabel}" styleClass="btn-primary"
 						 actionListener="#{cc.attrs.addButtonAction}"
                          update="#{cc.attrs.update}"
                          oncomplete="#{cc.attrs.oncomplete}"
-                         rendered="#{not empty cc.attrs.addButtonAction and empty cc.attrs.gotoPage}" />
+                         rendered="#{not empty cc.attrs.addButtonAction}" />
 				</div>
 				<div class="header-panel-content">
 					<cc:insertChildren />

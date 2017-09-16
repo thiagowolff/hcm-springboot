@@ -1,7 +1,7 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-                xmlns:f="http://xmlns.jcp.org/jsf/core"
-                xmlns:h="http://xmlns.jcp.org/jsf/html"
+				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+				xmlns:f="http://xmlns.jcp.org/jsf/core"
+				xmlns:h="http://xmlns.jcp.org/jsf/html"
 				xmlns:p="http://primefaces.org/ui"
 				xmlns:o="http://omnifaces.org/ui"
 				xmlns:lcf="http://litecode.com.br/functions"
@@ -12,14 +12,14 @@
 
 		<div class="content-wrapper">
 			<p:dataTable id="userTable" var="user" value="#{userController.users}" paginator="true" rows="20" paginatorPosition="bottom" paginatorAlwaysVisible="false" emptyMessage="#{msg['message.noData']}">
-				<p:column headerText="#{msg['label.login']}" sortBy="#{user.username}">
-					<h:outputText value="#{user.username}" style="color: #{user.sessionId ne null ? '#00d02a' : '#000000'}" />
+				<p:column headerText="#{msg['label.login']}" sortBy="#{user.username}" styleClass="text-left" width="250">
+					<h:outputText id="username" value="#{user.username}" style="color: #{user.sessionId ne null ? '#00d02a' : '#000000'}" />
 				</p:column>
 				
-				<p:column headerText="#{msg['label.name']}" sortBy="#{user.name}">
+				<p:column headerText="#{msg['label.name']}" sortBy="#{user.name}" styleClass="text-left">
 					<h:outputText value="#{user.name}" />
 				</p:column>
-				<p:column headerText="#{msg['label.role']}">
+				<p:column headerText="#{msg['label.role']}" width="200" styleClass="text-left">
 					<h:outputText value="#{lcf:enum(user.role)}" />
 				</p:column>
 
@@ -27,18 +27,22 @@
 					<h:outputText value="#{user.creationDate}" converter="localDateTimeConverter" />
 				</p:column>
 				
-				<p:column headerText="#{msg['label.lastAccess']}" sortBy="#{user.lastAccess}" width="150">
+				<p:column headerText="#{msg['label.lastAccess']}" sortBy="#{user.lastAccess}" width="200">
 					<h:outputText value="#{user.lastAccess}">
-						<f:converter converterId="localDateTimeConverter" pattern="dd/MM/yyyy HH:mm:ss" />
+						<f:converter converterId="localDateTimeConverter" />
+						<f:attribute name="pattern" value="dd/MM/yyyy HH:mm:ss" />
 					</h:outputText>
 				</p:column>
 				
-				<p:column headerText="#{msg['label.action']}" width="100">
+				<p:column headerText="#{msg['label.action']}" width="150">
 					<p:commandButton process="@this" update=":userForm" actionListener="#{userController.setUser(user)}" oncomplete="PF('userDialog').show()" icon="fa fa-pencil" title="#{msg['button.edit']}" />
+					<p:commandButton process="@this" update=":content" actionListener="#{userController.killUserSession(user)}" icon="fa fa-sign-out" title="#{msg['button.killSession']}" rendered="#{loginController.hasDevRights() and user.sessionId ne null and loggedUser.username ne user.username}">
+						<f:setPropertyActionListener value="/user.xhtml" target="#{navigationController.activePage}" />
+					</p:commandButton>
 					<p:commandButton process="@this" update=":changePasswordForm" actionListener="#{userController.setUser(user)}" oncomplete="PF('changePasswordDialog').show()" icon="fa fa-lock" title="#{msg['button.changePassword']}" >
 						<p:resetInput target=":changePasswordForm" />
 					</p:commandButton>
-					<p:commandButton process="@this" actionListener="#{userController.setUser(user)}" onclick="PF('confirmDeleteUserDialog').show()" icon="fa fa-trash" title="#{msg['button.delete']}" disabled="#{facesContext.externalContext.userPrincipal.name eq user.username}" />
+					<p:commandButton process="@this" actionListener="#{userController.setUser(user)}" onclick="PF('confirmDeleteUserDialog').show()" icon="fa fa-trash" title="#{msg['button.delete']}" disabled="#{loggedUser.username eq user.username}" />
 				</p:column>
 			</p:dataTable>
 		</div>
@@ -46,11 +50,11 @@
 
 	<o:importConstants type="br.com.litecode.domain.model.User.Role" />
 
-	<h:form id="userForm">
-		<ui:param name="newUser" value="#{userController.user.userId eq null}" />
-		<p:dialog header="#{msg['label.user']}" widgetVar="userDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
+	<p:dialog header="#{msg['label.user']}" widgetVar="userDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
+		<h:form id="userForm">
+			<ui:param name="newUser" value="#{userController.user.userId eq null}" />
 			<p:messages id="userMessages" autoUpdate="true" />
-			<h:panelGrid id="userGrid" columns="2" styleClass="dialog-content">
+			<p:panelGrid id="userGrid" columns="2" styleClass="dialog-content">
 				<h:outputLabel value="#{msg['label.name']}" for="fullName" />
 				<p:inputText id="fullName" value="#{userController.user.name}" maxlength="80" required="true" size="50" />
 
@@ -69,32 +73,34 @@
 
 				<h:outputLabel value="#{msg['label.passwordConfirmation']}" for="matchPassword" rendered="#{newUser}"/>
 				<p:password id="matchPassword" value="#{userController.user.password}" maxlength="50" required="true" requiredMessage="#{msg['error.passwordConfirmationRequired']}" validatorMessage="#{msg['error.maxLength']}" rendered="#{newUser}" />
-			</h:panelGrid>
-			<h:panelGrid>
-				<p:commandButton value="#{msg['button.save']}" actionListener="#{userController.saveUser}" process="@form" update="userMessages, :usersForm:userTable" oncomplete="if (!args.validationFailed) PF('userDialog').hide()" validateClient="true" />
-			</h:panelGrid>
-		</p:dialog>
-	</h:form>
+			</p:panelGrid>
+
+			<p:separator />
+			<p:commandButton value="#{msg['button.cancel']}" type="button" onclick="PF('userDialog').hide()" styleClass="btn-danger pull-right" />
+			<p:commandButton value="#{msg['button.save']}" actionListener="#{userController.saveUser}" process="@form" update="userMessages, :usersForm:userTable" oncomplete="if (!args.validationFailed) PF('userDialog').hide()" validateClient="true" styleClass="btn-primary pull-right" />
+		</h:form>
+	</p:dialog>
 
 	<h:form id="confirmDeleteUserForm">
    		<p:confirmDialog message="#{msg['confirmation.deleteUser']}" header="#{msg['title.deleteUser']}" severity="alert" widgetVar="confirmDeleteUserDialog">  
-	    	<p:commandButton value="#{msg['button.delete']}" process="@this" update=":usersForm:userTable" oncomplete="PF('confirmDeleteUserDialog').hide()" actionListener="#{userController.deleteUser}" />
-	    	<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDeleteUserDialog').hide()" />
+	    	<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDeleteUserDialog').hide()" styleClass="btn-danger pull-right" />
+	    	<p:commandButton value="#{msg['button.delete']}" process="@this" update=":usersForm:userTable" oncomplete="PF('confirmDeleteUserDialog').hide()" actionListener="#{userController.deleteUser}" styleClass="btn-primary pull-right" />
 		</p:confirmDialog>
   	</h:form>
   	
   	<h:form id="changePasswordForm">
    		<p:dialog header="#{msg['label.password']}" widgetVar="changePasswordDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
    			<p:messages autoUpdate="true"/>
-   			<h:panelGrid id="changePasswordGrid" columns="2" styleClass="dialog-content">
+   			<p:panelGrid id="changePasswordGrid" columns="2" styleClass="dialog-content">
    				<p:outputLabel value="#{msg['label.password']}" for="newPassword" />
    				<p:password id="newPassword" value="#{userController.user.password}" required="true" match="matchNewPassword" requiredMessage="#{msg['error.passwordRequired']}" validatorMessage="#{msg['error.passwordMismatch']}" />
    				<p:outputLabel value="#{msg['label.passwordConfirmation']}" for="matchNewPassword" />
 				<p:password id="matchNewPassword" value="#{userController.user.password}" required="true" requiredMessage="#{msg['error.passwordConfirmationRequired']}"  />
-			</h:panelGrid>
-			<h:panelGrid>
-   				<p:commandButton value="#{msg['button.save']}" action="#{userController.saveUserPassword}" process="changePasswordForm" oncomplete="if (!args.validationFailed) { PF('changePasswordDialog').hide(); }" />
-   			</h:panelGrid>
+			</p:panelGrid>
+
+			<p:separator />
+			<p:commandButton value="#{msg['button.cancel']}" type="button" onclick="PF('changePasswordDialog').hide()" styleClass="btn-danger pull-right" />
+			<p:commandButton value="#{msg['button.save']}" action="#{userController.saveUserPassword}" process="changePasswordForm" oncomplete="if (!args.validationFailed) { PF('changePasswordDialog').hide(); }" styleClass="btn-primary pull-right" />
    		</p:dialog>
   	</h:form>
 </ui:composition>

@@ -26,7 +26,7 @@
 				<p:column headerText="#{msg['label.events']}" style="text-align: left">
 					<div class="ui-g">
 						<ui:repeat value="#{chamber.chamberEvents}" var="event">
-							<h:panelGroup rendered="#{event.timeout gt 0}">
+							<h:panelGroup>
 							<div class="ui-g-4">
 								<h:outputText value="#{lcf:enum(event.eventType)}" />
 							</div>

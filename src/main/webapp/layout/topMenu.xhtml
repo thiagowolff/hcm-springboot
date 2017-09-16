@@ -8,8 +8,9 @@
 		<h:form prependId="false">
 			<div class="top-button-menu">
 				<div class="header-menu-panel">
-					<p:menuButton id="userMenu" value="#{''}" styleClass="header-menu">
+					<p:menuButton id="userMenu" value="#{''}" styleClass="header-menu" icon="fa fa-ellipsis-v">
 						<p:menuitem value="#{loggedUser.name}" icon="fa fa-user-md" disabled="true" />
+						<p:separator/>
 						<p:menuitem value="#{msg['menu.sessions']}" actionListener="#{navigationController.setActivePage('/session.xhtml')}" update=":content" icon="fa fa-clock-o" />
 						<p:menuitem value="#{msg['menu.patients']}" actionListener="#{navigationController.setActivePage('/patient.xhtml')}" update=":content" icon="fa fa-id-badge" rendered="#{loginController.hasAdminRights()}" />
 						<p:menuitem value="#{msg['menu.chambers']}" actionListener="#{navigationController.setActivePage('/chamber.xhtml')}" update=":content" icon="fa fa-server" rendered="#{loginController.hasAdminRights()}" />
@@ -17,7 +18,7 @@
 						<p:separator rendered="#{loginController.hasAdminRights()}" />
 						<p:menuitem value="#{msg['menu.users']}" actionListener="#{navigationController.setActivePage('/user.xhtml')}" action="#{userController.setUsers(null)}" update=":content" icon="fa fa-user" rendered="#{loginController.hasAdminRights()}" />
 						<p:separator/>
-						<p:menuitem value="#{msg['menu.logout']}" process="@this" action="#{loginController.logout}" icon="ui-icon-exit" />
+						<p:menuitem value="#{msg['menu.logout']}" process="@this" action="#{loginController.logout}" icon="fa fa-sign-out" />
 					</p:menuButton>
 				</div>
 			</div>

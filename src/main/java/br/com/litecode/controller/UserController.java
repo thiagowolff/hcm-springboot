@@ -9,13 +9,13 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.omnifaces.util.Messages;
 import org.primefaces.context.RequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.faces.view.ViewScoped;
 import java.io.Serializable;
 
-@Scope("view")
+@ViewScoped
 @Component
 public class UserController implements Serializable {
 	@Autowired

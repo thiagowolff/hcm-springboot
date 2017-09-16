@@ -13,9 +13,9 @@ import org.apache.shiro.subject.Subject;
 import org.omnifaces.util.Faces;
 import org.omnifaces.util.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.enterprise.context.RequestScoped;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -23,7 +23,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
 
-@Scope("request")
+@RequestScoped
 @Component
 @Slf4j
 public class LoginController {

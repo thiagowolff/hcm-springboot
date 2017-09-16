@@ -3,12 +3,12 @@ package br.com.litecode.controller;
 import br.com.litecode.domain.model.Chamber;
 import br.com.litecode.domain.repository.ChamberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.faces.view.ViewScoped;
 import java.io.Serializable;
 
-@Scope("session")
+@ViewScoped
 @Component
 public class ChamberController implements Serializable {
 	@Autowired

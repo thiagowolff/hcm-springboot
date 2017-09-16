@@ -46,6 +46,8 @@ dependencies {
 
     runtime "mysql:mysql-connector-java"
 
+    compile "org.joinfaces:jsf-myfaces-spring-boot-starter:2.4.0"
+    compile "org.primefaces:primefaces:6.1"
     compile "org.primefaces:primefaces:6.1"
     compile "br.com.litecode:litefaces-enum-i18n:1.0.1"
     compile "org.primefaces.extensions:primefaces-extensions:6.1.1"
@@ -107,11 +109,15 @@ remotes {
     }
 }
 
-task deploy(dependsOn: ["war", "updateVersion"]) {
+task deleteCss {
     doLast {
         def cssFile = new File("$webAppDir/resources/css/style.css")
         cssFile.delete()
+    }
+}
 
+task deploy(dependsOn: ["war", "updateVersion", "deleteCss"]) {
+    doLast {
         ssh.run {
             session(remotes.remoteServer) {
                 println("Backing up previous release...")
@@ -135,6 +141,9 @@ compileJava {
 }
 
 jar.dependsOn "compileLess"
-jar.into('static') {
+
+jar.into('META_INF/resources') {
     from('src/main/webapp')
 }
+
+jar.finalizedBy deleteCss

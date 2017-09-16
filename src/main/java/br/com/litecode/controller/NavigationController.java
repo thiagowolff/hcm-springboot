@@ -1,11 +1,11 @@
 package br.com.litecode.controller;
 
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.faces.view.ViewScoped;
 import java.io.Serializable;
 
-@Scope("view")
+@ViewScoped
 @Component
 public class NavigationController implements Serializable {
 	private String activePage = "/session.xhtml";

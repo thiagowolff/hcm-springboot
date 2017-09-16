@@ -6,15 +6,15 @@ import br.com.litecode.domain.repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.faces.view.ViewScoped;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
-@Scope("view")
+@ViewScoped
 @Component
 @CacheConfig(cacheNames = "patient")
 public class PatientController implements Serializable {

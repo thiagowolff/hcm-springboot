@@ -8,14 +8,14 @@
 				xmlns:of="http://omnifaces.org/functions"
 				xmlns:lcf="http://litecode.com.br/functions">
 
-	<p:growl id="growl" widgetVar="growl" showDetail="true" life="10000"/>
+	<p:growl id="growl" widgetVar="growl" showDetail="true" life="15000" escape="false" />
 
 	<div class="content-wrapper">
 		<h:form id="form">
-			<h:panelGrid id="sessionGrid" columns="7" styleClass="input-grid">
+			<p:panelGrid columns="7" layout="grid" style="margin-bottom: 15px;">
 				<h:panelGroup>
 					<p:commandButton icon="fa fa-chevron-left" actionListener="#{sessionController.previousSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
-					<p:calendar id="sessionDate" value="#{sessionController.sessionInput.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="10" beforeShowDay="sessionDates" converter="localDateTimeConverter">
+					<p:calendar id="sessionDate" value="#{sessionController.sessionInput.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" beforeShowDay="sessionDates" converter="localDateTimeConverter">
 						<p:ajax event="dateSelect" process="@this" update="chambersGrid"/>
 					</p:calendar>
 					<p:commandButton icon="fa fa-chevron-right" actionListener="#{sessionController.nextSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
@@ -30,17 +30,17 @@
 					<f:attribute name="pattern" value="HH:mm" />
 				</pe:timePicker>
 
-				<p:selectCheckboxMenu id="sessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionInput.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true" style="width: 160px" panelStyle="width: 250px">
+				<p:selectCheckboxMenu id="sessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionInput.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true">
 					<f:selectItems value="#{patientController.patients}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
 				</p:selectCheckboxMenu>
 
-				<p:commandButton value="#{msg['button.add']}" actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true">
+				<p:commandButton value="#{msg['button.add']}" actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true" styleClass="btn-primary">
 					<p:resetInput target="@form" />
 				</p:commandButton>
 
-				<p:commandButton icon="fa fa-clone" value="#{msg['button.duplicateSessions']}" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()"/>
+				<p:commandButton icon="fa fa-clone" value="#{msg['button.duplicateSessions']}" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary" />
 				<p:messages id="messages"/>
-			</h:panelGrid>
+			</p:panelGrid>
 
 			<p:dataGrid id="chambersGrid" var="chamber" value="#{chamberController.chambers}" columns="1" layout="grid">
 				<p:dataTable id="periodsTable" value="#{sessionController.getSessions(chamber.chamberId)}" var="chamberSession" rows="9" emptyMessage="#{msg['message.noSessionsFound']}" sortBy="#{chamberSession.timePeriod}">
@@ -55,7 +55,7 @@
 						</p:column>
 					</p:headerRow>
 
-					<p:column headerText="#{msg['label.id']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg" style="width: 1.5em;">
+					<p:column headerText="#{msg['label.id']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg" style="width: 3.5em;">
 						<h:outputText value="#{chamberSession.sessionId}"/>
 					</p:column>
 
@@ -82,19 +82,19 @@
 
 					<p:column headerText="#{msg['label.numberOfSessions']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column" style="vertical-align: top; white-space: nowrap">
 						<ui:repeat value="#{patientController.getPatientStats(chamberSession.sessionId, sessionController.sessionInput.sessionDate).toArray()}" var="patientStats">
-							<div style="padding: 2px 0px 2px">
+							<div>
 								<h:outputText value="#{patientStats.completedSessions}" />
 							</div>
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.capacity']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg text-left" style="width: 6.5em;">
+					<p:column headerText="#{msg['label.capacity']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg text-left" style="width: 8.5em;">
 						<div class="ui-g">
 							<ui:repeat value="#{sessionController.getChamberPayload(chamberSession)}" var="payloadStatus">
 								<div class="ui-g-4" style="padding: 0px;">
 									<span class="fa-stack fa-2x" style="font-size: 12px;">
 										<i class="fa fa-circle fa-stack-2x" style="#{payloadStatus eq 'AVAILABLE' ? 'color: #d3d3d3' : payloadStatus eq 'OCCUPIED' ? 'color: #466b8e' : 'color: #b14538'}"></i>
-										<h:panelGroup styleClass="fa fa-circle-o-notch fa-spin fa-fw fa-stack-1x" style="color: #1ee84a;" rendered="#{chamberSession.running and payloadStatus eq 'OCCUPIED' }"/>
+										<h:panelGroup styleClass="fa fa-circle-o-notch fa-spin fa-fw fa-stack-1x" style="color: #1ee84a; top: 6px;" rendered="#{chamberSession.running and payloadStatus eq 'OCCUPIED' }"/>
 									</span>
 								</div>
 							</ui:repeat>
@@ -146,21 +146,23 @@
 						</div>
 					</p:column>
 
-					<p:column headerText="#{msg['label.action']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column">
-						<div class="ui-g">
-							<div class="ui-g-12 ui-md-6 ui-lg-2 action-icon">
+					<p:column headerText="#{msg['label.action']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg session-action">
+						<div class="row">
+							<div class="col-sm-4 col-md-2">
 								<p:commandButton title="#{msg['button.startSession']}" icon="fa fa-play" actionListener="#{sessionController.startSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{chamberSession.status ne 'CREATED'}"/>
 							</div>
-							<div class="ui-g-12 ui-md-6 ui-lg-2 action-icon">
-								<p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionInput.setSession(chamberSession)}" oncomplete="PF('sessionDialog').show()" process=":form:chambersGrid" update=":editSessionForm" global="false"/>
+							<div class="col-sm-4 col-md-2">
+								<p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionInput.reset()}" oncomplete="PF('sessionDialog').show()" process=":form:chambersGrid" update=":editSessionForm" global="false">
+									<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionInput.session}" />
+								</p:commandButton>
 							</div>
-							<div class="ui-g-12 ui-md-6 ui-lg-2 action-icon">
+							<div class="col-sm-4 col-md-2">
 								<p:commandButton title="#{msg['button.reset']}" icon="fa fa-stop" actionListener="#{sessionController.resetSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'CREATED'}"/>
 							</div>
-							<div class="ui-g-12 ui-md-6 ui-lg-2 action-icon">
+							<div class="col-sm-4 col-md-2">
 								<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'FINISHED'}"/>
 							</div>
-							<div class="ui-g-12 ui-md-6 ui-lg-2 action-icon">
+							<div class="col-sm-4 col-md-2">
 								<p:commandButton title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionInput.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.status ne 'CREATED' and chamberSession.status ne 'FINISHED'}" rendered="#{loginController.hasAdminRights()}"/>
 							</div>
 						</div>
@@ -173,27 +175,28 @@
 	<h:form id="editSessionForm">
 		<p:dialog header="#{msg['label.session']} #{sessionController.sessionInput.session.sessionId}" widgetVar="sessionDialog" width="50%" resizable="false" showEffect="fade" hideEffect="fade" modal="true" dynamic="true">
 			<p:messages id="sessionMessages" autoUpdate="true" />
-
-			<div style="padding: 8px 0px 8px 0px; text-align: right;">
-				<p:selectCheckboxMenu id="newSessionPatients" label="#{msg['label.addPatients']}" value="#{sessionController.sessionInput.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true" style="width: 160px" panelStyle="width: 250px">
-					<f:selectItems value="#{patientController.getAvailabePatientsForSession(sessionController.sessionInput.session.sessionId)}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
-				</p:selectCheckboxMenu>
-
-				<p:commandButton icon="fa fa-plus" actionListener="#{sessionController.addPatientsToSession()}" process="@this, newSessionPatients" update=":form:chambersGrid, sessionPatientsTable, sessionMessages, newSessionPatients" />
+			<div class="row ui-fluid" style="padding-bottom: 10px;">
+				<div class="col-md-3 col-sm-6">
+					<p:selectCheckboxMenu id="newSessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionInput.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true" style="width: 160px" panelStyle="width: 250px">
+						<f:selectItems value="#{patientController.getAvailabePatientsForSession(sessionController.sessionInput.session.sessionId)}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
+					</p:selectCheckboxMenu>
+				</div>
+				<div class="col-md-3 col-sm-6 pull-right">
+					<p:commandButton value="#{msg['label.addPatients']}" actionListener="#{sessionController.addPatientsToSession()}" process="@this, newSessionPatients" update=":form:chambersGrid, sessionPatientsTable, sessionMessages, newSessionPatients" styleClass="btn-primary" />
+				</div>
 			</div>
-
 			<p:dataTable id="sessionPatientsTable" styleClass="dialog-table" var="sessionPatient" value="#{sessionController.sessionInput.session.patientSessions}" emptyMessage="#{msg['message.noData']}">
-				<p:column headerText="#{msg['label.id']}" width="25">
+				<p:column headerText="#{msg['label.id']}" width="50">
 					<h:outputText value="#{sessionPatient.patient.patientId}" />
 				</p:column>
-				<p:column headerText="#{msg['label.name']}" style="text-align: left;">
+				<p:column headerText="#{msg['label.name']}" styleClass="text-left">
 					<h:outputText value="#{sessionPatient.patient.name}" />
 				</p:column>
-				<p:column headerText="#{msg['label.status']}" width="100">
+				<p:column headerText="#{msg['label.status']}" width="120">
 					<ui:param name="status" value="#{msg[sessionPatient.absent ? 'label.patientSessionAbsent' : 'label.patientSessionPresent']}" />
 					<h:outputText value="#{status}" styleClass="#{sessionPatient.absent ? 'patient-absent' : 'patient-present'}" />
 				</p:column>
-				<p:column headerText="#{msg['label.action']}" width="50">
+				<p:column headerText="#{msg['label.action']}" width="100">
 					<p:commandButton process="@this" update=":form:chambersGrid, :editSessionForm:sessionPatientsTable" actionListener="#{sessionController.setPatientSessionStatus(sessionPatient, false)}" icon="fa fa-calendar-check-o" title="#{msg['button.active']}" rendered="#{sessionPatient.absent}" />
 					<p:commandButton process="@this" update=":form:chambersGrid, :editSessionForm:sessionPatientsTable" actionListener="#{sessionController.setPatientSessionStatus(sessionPatient, true)}" icon="fa fa-calendar-times-o" title="#{msg['button.absent']}" rendered="#{not sessionPatient.absent}" />
 					<p:commandButton process="@this" update=":form:chambersGrid, :editSessionForm:sessionPatientsTable, :editSessionForm:newSessionPatients" actionListener="#{sessionController.removePatientFromSession(sessionPatient)}" icon="fa fa-trash" title="#{msg['button.delete']}" />
@@ -204,20 +207,20 @@
 
 	<h:form>
 		<p:confirmDialog message="#{msg['confirmation.deleteSession']}" header="#{msg['title.deleteSession']}" severity="alert" widgetVar="confirmDeleteSessionDialog">
-			<p:commandButton value="#{msg['button.delete']}" process="@this" update=":form:chambersGrid" oncomplete="PF('confirmDeleteSessionDialog').hide()" actionListener="#{sessionController.deleteSession()}"/>
-			<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDeleteSessionDialog').hide()"/>
+			<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDeleteSessionDialog').hide()" styleClass="btn-primary pull-right"/>
+			<p:commandButton value="#{msg['button.delete']}" process="@this" update=":form:chambersGrid" oncomplete="PF('confirmDeleteSessionDialog').hide()" actionListener="#{sessionController.deleteSession()}" styleClass="btn-danger pull-right"/>
 		</p:confirmDialog>
 	</h:form>
 
 	<h:form id="duplicateSessionsForm">
 		<p:dialog header="#{msg['title.duplicateSessions']}" widgetVar="duplicateSessionDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
-			<h:panelGrid columns="5">
+			<p:panelGrid columns="5" layout="grid">
 				<p:outputLabel value="#{msg['label.from']}"/>
-				<p:calendar id="previousSessionsDate" value="#{sessionController.fromSessionsDate}" required="true" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="10" converter="localDateTimeConverter" />
+				<p:calendar id="previousSessionsDate" value="#{sessionController.fromSessionsDate}" required="true" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" converter="localDateTimeConverter" beforeShowDay="sessionDates" />
 				<p:outputLabel value="#{msg['label.to']}"/>
-				<p:calendar id="newSessionsDate" value="#{sessionController.toSessionsDate}" required="true" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="10" converter="localDateTimeConverter" />
-				<p:commandButton value="#{msg['button.duplicate']}" process="@this, previousSessionsDate, newSessionsDate" update=":form:chambersGrid" actionListener="#{sessionController.duplicateSessions()}" oncomplete="PF('duplicateSessionDialog').hide()"/>
-			</h:panelGrid>
+				<p:calendar id="newSessionsDate" value="#{sessionController.toSessionsDate}" required="true" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" converter="localDateTimeConverter" beforeShowDay="sessionDates" />
+				<p:commandButton value="#{msg['button.duplicate']}" process="@this, previousSessionsDate, newSessionsDate" update=":form:chambersGrid" actionListener="#{sessionController.duplicateSessions()}" oncomplete="PF('duplicateSessionDialog').hide()" styleClass="btn-primary"/>
+			</p:panelGrid>
 		</p:dialog>
 	</h:form>
 
@@ -259,12 +262,7 @@
 				{
 					route: '/topic/notify', callback: function (data) {
 						handleMessage(JSON.parse(data.body));
-
-						if (data.headers['user-name'] != loggedUser) {
-							refreshSessions();
-						} else {
-							updateSessions();
-						}
+						refreshSessions();
 					}
 				},
 				{
@@ -281,16 +279,16 @@
 			var facesMessage = {
 				summary: notificationMessage.messageSummary,
 				detail: notificationMessage.messageDetail,
-				severity: notificationMessage.eventType.toLowerCase()
+				severity: notificationMessage.eventType
 			};
 
 			PF('growl').show([facesMessage]);
-			playSound(notificationMessage.notificationSound);
+			playSound(notificationMessage.eventType);
 		}
 
-		function playSound(audioFile) {
+		function playSound(eventType) {
 			var audio = document.getElementById('audio');
-			audio.src = '#{request.contextPath}/javax.faces.resource/sounds/' + audioFile;
+			audio.src = '#{request.contextPath}/javax.faces.resource/sounds/' + eventType + '.mp3';
 			audio.play();
 		}
 

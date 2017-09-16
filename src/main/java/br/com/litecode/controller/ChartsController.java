@@ -4,13 +4,13 @@ import br.com.litecode.domain.repository.ChartsRepository;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.faces.view.ViewScoped;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Scope("view")
+@ViewScoped
 @Component
 @Cacheable(cacheNames = "chart", key = "#root.methodName")
 public class ChartsController {

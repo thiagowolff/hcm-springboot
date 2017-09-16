@@ -21,11 +21,11 @@ import org.hibernate.Hibernate;
 import org.omnifaces.util.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,7 +33,7 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Scope("session")
+@SessionScoped
 @Component
 @Slf4j
 public class SessionController implements Serializable {
@@ -190,6 +190,7 @@ public class SessionController implements Serializable {
 	public void removePatientFromSession(PatientSession patientSession) {
 		sessionInput.getSession().getPatientSessions().remove(patientSession);
 		sessionInput.setSession(sessionRepository.save(patientSession.getSession()));
+		chamberSessions.remove(getSessionKey(patientSession.getSession().getChamber().getChamberId()));
 	}
 
 	@PushRefresh

@@ -12,36 +12,44 @@
 
 		<div class="content-wrapper">
 			<p:dataTable id="patientsTable" widgetVar="patientsTable" value="#{patientController.patients}" var="patient" paginator="true" rows="15" paginatorAlwaysVisible="false" filteredValue="#{patientController.filteredPatients}"
-				paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="15,30,100,500" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
+				 currentPageReportTemplate="({startRecord} de {totalRecords})"
+				 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="15,30,100,500" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
+
+				<f:facet name="header">
+					<p:outputPanel style="text-align: right;">
+						<p:inputText id="globalFilter" onkeyup="PF('patientsTable').filter()" />
+						<i class="global-filter fa fa-search" />
+					</p:outputPanel>
+				</f:facet>
 
 				<ui:param name="patientStats" value="#{patientController.getPatientStats(patient.patientId)}" />
 
-				<p:column headerText="#{msg['label.name']}" sortBy="#{patient.name}" filterBy="#{patient.name}" style="text-align: left;">
+				<p:column headerText="#{msg['label.name']}" sortBy="#{patient.name}" filterBy="#{patient.name}" filterStyle="display: none;" styleClass="text-left">
 	          		<h:outputText value="#{patient.name}" />
 				</p:column>
-				<p:column headerText="#{msg['label.patientRecord']}" filterBy="#{patient.patientRecord}" styleClass="medium-column">
+				<p:column headerText="#{msg['label.patientRecord']}" filterBy="#{patient.patientRecord}" filterStyle="display: none;" styleClass="medium-column">
 	          		<h:outputText value="#{patient.patientRecord}" />
 				</p:column>
-				<p:column headerText="#{msg['label.folderNumber']}" filterBy="#{patient.folderNumber}" styleClass="medium-column">
+				<p:column headerText="#{msg['label.folderNumber']}" filterBy="#{patient.folderNumber}" filterStyle="display: none;"  priority="2" styleClass="medium-column">
 	          		<h:outputText value="#{patient.folderNumber}" />
 				</p:column>
-				<p:column headerText="#{msg['label.healthInsurance']}" filterBy="#{patient.healthInsurance}" styleClass="medium-column">
+				<p:column headerText="#{msg['label.healthInsurance']}" styleClass="medium-column text-left">
 	          		<h:outputText value="#{patient.healthInsurance}" />
 				</p:column>
-				<p:column headerText="#{msg['label.numberOfSessions']}" width="70">
+				<p:column headerText="#{msg['label.numberOfSessions']}" width="100">
 					<h:outputText value="#{patientStats.completedSessions + patientStats.absentSessions}" />
 				</p:column>
-				<p:column headerText="#{msg['label.numberOfCompletedSessions']}" width="70">
-					<h:outputText value="#{patientStats.completedSessions}" />
+				<p:column headerText="#{msg['label.numberOfCompletedSessions']}" width="100">
+					<h:outputText value="#{patientStats.completedSessions eq null ? 0 :patientStats.completedSessions}" />
 				</p:column>
-				<p:column headerText="#{msg['label.numberOfAbsentSessions']}" width="70">
-					<h:outputText value="#{patientStats.absentSessions}" />
+				<p:column headerText="#{msg['label.numberOfAbsentSessions']}" width="100" priority="3">
+					<h:outputText value="#{patientStats.absentSessions eq null ? 0 : patientStats.absentSessions}" />
 				</p:column>
-				<p:column headerText="#{msg['label.contact']}" width="100" styleClass="xs-hidden">
+				<p:column headerText="#{msg['label.contact']}" priority="3" styleClass="text-left">
 					<h:outputText value="#{patient.email}" /><br/>
 					<h:outputText value="#{patient.phoneNumber}" />
 				</p:column>
-				<p:column headerText="#{msg['label.creationDate']}" sortBy="#{patient.creationDate}" styleClass="xs-hidden medium-column">
+				<p:column headerText="#{msg['label.creationDate']}" sortBy="#{patient.creationDate}" priority="4" styleClass="medium-column">
 					<h:outputText value="#{patient.creationDate}" converter="localDateTimeConverter" />
 				</p:column>
 				<p:column headerText="#{msg['label.action']}" styleClass="small-column" style="padding: 1px">
@@ -95,18 +103,17 @@
 				<p:calendar id="patientBirthDate" value="#{patient.birthDate}" pattern="dd/MM/yyyy" mask="true" yearRange="c-100:c+15" size="15" showOn="button" navigator="true" converter="localDateTimeConverter" />
 			</p:panelGrid>
 
-			<h:panelGrid columns="3">
-				<p:commandButton value="#{msg['button.save']}" action="#{patientController.savePatient}" process="@form" update=":patientsForm:patientsTable, :patientsForm:messages" oncomplete="if (!args.validationFailed) { PF('patientDialog').hide(); PF('patientsTable').clearFilters(); }" validateClient="true"/>
-				<p:commandButton value="#{msg['button.cancel']}" type="button" onclick="PF('patientDialog').hide()" />
-			</h:panelGrid>
+			<p:separator />
+			<p:commandButton value="#{msg['button.cancel']}" type="button" onclick="PF('patientDialog').hide()" styleClass="btn-danger pull-right" />
+			<p:commandButton value="#{msg['button.save']}" action="#{patientController.savePatient}" process="@form" update=":patientsForm:patientsTable, :patientsForm:messages" oncomplete="if (!args.validationFailed) { PF('patientDialog').hide(); PF('patientsTable').clearFilters(); }" validateClient="true" styleClass="btn-primary pull-right"/>
 		</p:dialog>
 	</h:form>
 
 	<h:form id="confirmDeletePatientForm">
 		<p:confirmDialog message="#{msg['confirmation.deletePatient']}" header="#{msg['title.deletePatient']}" severity="alert" widgetVar="confirmDeletePatientDialog">
 			<p:messages autoUpdate="true" />
-			<p:commandButton value="#{msg['button.delete']}" actionListener="#{patientController.deletePatient}" process="@form" update=":patientsForm:messages, :patientsForm:patientsTable" oncomplete="if (!args.validationFailed) { PF('confirmDeletePatientDialog').hide(); PF('patientsTable').clearFilters(); }" />
-			<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDeletePatientDialog').hide();" />
+			<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDeletePatientDialog').hide();" styleClass="btn-danger pull-right" />
+			<p:commandButton value="#{msg['button.delete']}" actionListener="#{patientController.deletePatient}" process="@form" update=":patientsForm:messages, :patientsForm:patientsTable" oncomplete="if (!args.validationFailed) { PF('confirmDeletePatientDialog').hide(); PF('patientsTable').clearFilters(); }" styleClass="btn-primary pull-right" />
 		</p:confirmDialog>
 	</h:form>
 

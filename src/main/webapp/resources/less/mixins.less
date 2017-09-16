@@ -80,6 +80,7 @@
 .for(@array) when (default()) {
 	.for-impl(length(@array))
 }
+
 .for-impl(@i) when (@i > 1) {
 	.for-impl((@i - 1))
 }

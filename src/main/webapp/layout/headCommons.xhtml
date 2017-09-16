@@ -6,6 +6,8 @@
 	
 	<ui:composition>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="viewport" content="width=device-width"/>
+
 		<title>#{msg['title.appTitle']}</title>
 		
 		<link rel="shortcut icon" href="#{request.contextPath}/resources/images/favicon.ico" type="image/x-icon" />
@@ -13,7 +15,7 @@
 		<ui:param name="development" value="#{facesContext.application.projectStage eq 'Development'}" />
 		<ui:param name="stylesheet" value="#{development ? 'less' : 'css'}" />
 		
-		<link type="text/css" rel="stylesheet#{development ? '/less' : ''}" href="#{request.contextPath}/javax.faces.resource/style.#{stylesheet}?ln=#{stylesheet}&amp;ts=#{of:formatDate(now, 'yyyyMMdd')}" />
+		<link type="text/css" rel="stylesheet#{development ? '/less' : ''}" href="#{request.contextPath}/javax.faces.resource/style.#{stylesheet}?ln=#{stylesheet}&amp;version=#{version['version']}" />
 		<h:outputScript library="js" name="less-2.7.2.min.js" rendered="#{development}" />
 		<h:outputScript library="js" name="locale-primefaces.js" target="body" />
 		<h:outputScript library="js" name="sockjs.min.js" target="body" />

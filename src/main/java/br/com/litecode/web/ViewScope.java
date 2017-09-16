@@ -1,12 +1,11 @@
 package br.com.litecode.web;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.faces.context.FacesContext;
-
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
+
+import javax.faces.context.FacesContext;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ViewScope implements Scope {
 

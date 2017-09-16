@@ -27,27 +27,39 @@
 					<div class="login-error-message">
 						<p:messages />
 					</div>
-					<div class="login-input">
-						<p:inputText id="username" value="#{loginController.username}" required="#{not isDev}" requiredMessage="#{msg['error.loginRequired']}" label="#{msg['label.username']}" size="50" />
-						<p:watermark for="login:username" value="#{msg['label.login']}" />
-						<div class="input-icon"><div>@</div></div>
+					<div class="row">
+						<div class="login-input col-md-12">
+							<p:inputText id="username" value="#{loginController.username}" required="#{not isDev}" requiredMessage="#{msg['error.loginRequired']}" label="#{msg['label.username']}" size="50" />
+							<p:watermark for="login:username" value="#{msg['label.login']}" />
+							<div class="input-icon"><span class="fa fa-at" /></div>
+						</div>
 					</div>
-					<div class="login-input">
-						<p:password id="password" value="#{loginController.password}" required="#{not isDev}" requiredMessage="#{msg['error.passwordRequired']}" label="#{msg['label.password']}" size="50" />
-						<p:watermark for="login:password" value="#{msg['label.password']}" />
-						<div class="input-icon"><span class="fa fa-lock" /></div>
+					<div class="row">
+						<div class="login-input col-md-12">
+							<p:password id="password" value="#{loginController.password}" required="#{not isDev}" requiredMessage="#{msg['error.passwordRequired']}" label="#{msg['label.password']}" size="50" />
+							<p:watermark for="login:password" value="#{msg['label.password']}" />
+							<div class="input-icon"><span class="fa fa-lock" /></div>
+						</div>
 					</div>
-					<h:panelGroup styleClass="login-input">
-						<p:commandButton value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" style="width: #{isDev ? '60%' : '100%' };" rendered="#{isDev}"/>
-						<p:commandButton icon="fa fa-user fa-lg" value="USER" process="@form" action="#{loginController.login}" ajax="false" style="width: 20%;" rendered="#{isDev}">
-							<f:setPropertyActionListener value="user" target="#{loginController.username}" />
-							<f:setPropertyActionListener value="123" target="#{loginController.password}" />
-						</p:commandButton>
-						<p:commandButton icon="fa fa-wrench fa-lg" value="DEV" process="@form" action="#{loginController.login}" ajax="false" style="width: 19%;" rendered="#{isDev}">
-							<f:setPropertyActionListener value="thiago" target="#{loginController.username}" />
-							<f:setPropertyActionListener value="admin" target="#{loginController.password}" />
-						</p:commandButton>
-					</h:panelGroup>
+					<div class="row">
+						<div class="login-input col-xs-#{isDev ? '6' : '12' }">
+							<p:commandButton value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" />
+						</div>
+						<div class="login-input col-xs-3">
+							<div class="btn-group">
+							<p:commandButton icon="fa fa-user fa-lg" value="USER" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}">
+								<f:setPropertyActionListener value="user" target="#{loginController.username}" />
+								<f:setPropertyActionListener value="123" target="#{loginController.password}" />
+							</p:commandButton>
+							</div>
+						</div>
+						<div class="login-input col-xs-3">
+							<p:commandButton icon="fa fa-wrench fa-lg" value="DEV" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}">
+								<f:setPropertyActionListener value="thiago" target="#{loginController.username}" />
+								<f:setPropertyActionListener value="admin" target="#{loginController.password}" />
+							</p:commandButton>
+						</div>
+					</div>
 				</div>
 			</div>
         </h:form>

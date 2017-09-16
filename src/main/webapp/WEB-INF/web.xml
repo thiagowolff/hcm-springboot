@@ -2,24 +2,45 @@
 <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" version="3.1">
   	<display-name>HCM</display-name>
 
-	<servlet>
-		<servlet-name>Faces Servlet</servlet-name>
-		<servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
-		<async-supported>true</async-supported>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>Faces Servlet</servlet-name>
-		<url-pattern>*.xhtml</url-pattern>
-		<url-pattern>/javax.faces.resource/*</url-pattern>
-	</servlet-mapping>
+	<!--<servlet>-->
+		<!--<servlet-name>Faces Servlet</servlet-name>-->
+		<!--<servlet-class>javax.faces.webapp.FacesServlet</servlet-class>-->
+		<!--<load-on-startup>1</load-on-startup>-->
+		<!--<async-supported>true</async-supported>-->
+	<!--</servlet>-->
+	<!--<servlet-mapping>-->
+		<!--<servlet-name>Faces Servlet</servlet-name>-->
+		<!--<url-pattern>*.xhtml</url-pattern>-->
+		<!--<url-pattern>/javax.faces.resource/*</url-pattern>-->
+	<!--</servlet-mapping>-->
 
-	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
-	<listener>
-		<listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
-	</listener>
+	<!--<listener>-->
+		<!--<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>-->
+	<!--</listener>-->
+	<!--<listener>-->
+		<!--<listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>-->
+	<!--</listener>-->
+
+	<!--<context-param>-->
+		<!--<param-name>primefaces.THEME</param-name>-->
+		<!--<param-value>admin</param-value>-->
+	<!--</context-param>-->
+	<!--<context-param>-->
+		<!--<param-name>primefaces.SUBMIT</param-name>-->
+		<!--<param-value>partial</param-value>-->
+	<!--</context-param>-->
+	<!--<context-param>-->
+		<!--<param-name>primefaces.FONT_AWESOME</param-name>-->
+		<!--<param-value>true</param-value>-->
+	<!--</context-param>-->
+	<!--<context-param>-->
+		<!--<param-name>litefaces.ENUM_MESSAGE_BUNDLE</param-name>-->
+		<!--<param-value>br.com.litecode.enums</param-value>-->
+	<!--</context-param>-->
+	<!--<context-param>-->
+		<!--<param-name>litefaces.ENUM_KEY_PREFIX</param-name>-->
+		<!--<param-value>enum</param-value>-->
+	<!--</context-param>-->
 
 	<error-page>
 		<exception-type>javax.faces.application.ViewExpiredException</exception-type>
