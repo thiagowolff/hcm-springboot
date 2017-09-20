@@ -11,7 +11,7 @@
 		<lc:headerPanel title="#{msg['title.patients']}" addButtonAction="#{patientController.newPatient()}" update=":patientInputForm" oncomplete="PF('patientDialog').show()" />
 
 		<div class="content-wrapper">
-			<p:dataTable id="patientsTable" widgetVar="patientsTable" value="#{patientController.patients}" var="patient" paginator="true" rows="15" paginatorAlwaysVisible="false" filteredValue="#{patientController.filteredPatients}"
+			<p:dataTable id="patientsTable" widgetVar="patientsTable" value="#{patientController.patients}" var="patient" paginator="true" rows="12" paginatorAlwaysVisible="false" filteredValue="#{patientController.filteredPatients}"
 				 currentPageReportTemplate="({startRecord} de {totalRecords})"
 				 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="15,30,100,500" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
 

@@ -13,7 +13,7 @@
 	<div class="content-wrapper">
 		<h:form id="form">
 			<p:panelGrid columns="7" layout="grid" style="margin-bottom: 15px;">
-				<h:panelGroup>
+				<h:panelGroup style="white-space: nowrap;">
 					<p:commandButton icon="fa fa-chevron-left" actionListener="#{sessionController.previousSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
 					<p:calendar id="sessionDate" value="#{sessionController.sessionInput.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" beforeShowDay="sessionDates" converter="localDateTimeConverter">
 						<p:ajax event="dateSelect" process="@this" update="chambersGrid"/>
@@ -38,7 +38,7 @@
 					<p:resetInput target="@form" />
 				</p:commandButton>
 
-				<p:commandButton icon="fa fa-clone" value="#{msg['button.duplicateSessions']}" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary" />
+				<p:commandButton icon="fa fa-clone" value="#{msg['button.duplicateSessions']}" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary hidden-xs hidden-sm" />
 				<p:messages id="messages"/>
 			</p:panelGrid>
 
@@ -55,11 +55,11 @@
 						</p:column>
 					</p:headerRow>
 
-					<p:column headerText="#{msg['label.id']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg" style="width: 3.5em;">
+					<p:column headerText="#{msg['label.id']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg" style="width: 3.0em;">
 						<h:outputText value="#{chamberSession.sessionId}"/>
 					</p:column>
 
-					<p:column headerText="#{msg['label.patient']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg large-column" style="vertical-align: top">
+					<p:column headerText="#{msg['label.patient']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg large-column" style="vertical-align: top;">
 						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
 							<div class="long-text text-left">
 								<h:outputText
@@ -72,7 +72,7 @@
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.healthInsurance']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column" style="vertical-align: top">
+					<p:column headerText="#{msg['label.healthInsurance']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column hidden-sm hidden-xs" style="vertical-align: top">
 						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
 							<div class="long-text text-left">
 								<h:outputText value="#{patientSession.patient.healthInsurance}" title="#{patientSession.patient.healthInsurance}" />
@@ -80,7 +80,7 @@
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.numberOfSessions']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column" style="vertical-align: top; white-space: nowrap">
+					<p:column headerText="#{msg['label.numberOfSessions']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-xs" style="vertical-align: top; white-space: nowrap">
 						<ui:repeat value="#{patientController.getPatientStats(chamberSession.sessionId, sessionController.sessionInput.sessionDate).toArray()}" var="patientStats">
 							<div>
 								<h:outputText value="#{patientStats.completedSessions}" />
@@ -88,20 +88,18 @@
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.capacity']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg text-left" style="width: 8.5em;">
-						<div class="ui-g">
-							<ui:repeat value="#{sessionController.getChamberPayload(chamberSession)}" var="payloadStatus">
-								<div class="ui-g-4" style="padding: 0px;">
-									<span class="fa-stack fa-2x" style="font-size: 12px;">
-										<i class="fa fa-circle fa-stack-2x" style="#{payloadStatus eq 'AVAILABLE' ? 'color: #d3d3d3' : payloadStatus eq 'OCCUPIED' ? 'color: #466b8e' : 'color: #b14538'}"></i>
-										<h:panelGroup styleClass="fa fa-circle-o-notch fa-spin fa-fw fa-stack-1x" style="color: #1ee84a; top: 6px;" rendered="#{chamberSession.running and payloadStatus eq 'OCCUPIED' }"/>
-									</span>
-								</div>
-							</ui:repeat>
-						</div>
+					<p:column headerText="#{msg['label.capacity']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg text-left hidden-sm hidden-xs" style="width: 8.5em;">
+						<ui:repeat value="#{sessionController.getChamberPayload(chamberSession)}" var="payloadStatus">
+							<div class="col-md-4" style="padding-left: 2px;">
+								<span class="fa-stack fa-2x" style="font-size: 12px;">
+									<i class="fa fa-circle fa-stack-2x" style="#{payloadStatus eq 'AVAILABLE' ? 'color: #d3d3d3' : payloadStatus eq 'OCCUPIED' ? 'color: #466b8e' : 'color: #b14538'}"></i>
+									<h:panelGroup styleClass="fa fa-circle-o-notch fa-spin fa-fw fa-stack-1x" style="color: #1ee84a; top: 6px;" rendered="#{chamberSession.running and payloadStatus eq 'OCCUPIED' }"/>
+								</span>
+							</div>
+						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.time']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column">
+					<p:column headerText="#{msg['label.time']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-xs">
 						<h:outputText value="#{chamberSession.scheduledTime}">
 							<f:converter converterId="localDateTimeConverter" />
 							<f:attribute name="pattern" value="HH:mm:ss" />
@@ -115,7 +113,7 @@
 						</h:outputText>
 					</p:column>
 
-					<p:column headerText="#{msg['label.decompressionTime']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column">
+					<p:column headerText="#{msg['label.decompressionTime']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-sm hidden-xs">
 						<h:outputText value="#{chamberSession.shutdownTime}" style="color: #6e6e6e;">
 							<f:converter converterId="localDateTimeConverter" />
 							<f:attribute name="pattern" value="HH:mm:ss" />
@@ -141,12 +139,12 @@
 							</div>
 							<div>
 								<p:progressBar widgetVar="progress-#{chamberSession.sessionId}" labelTemplate="{value}%" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status ne 'FINISHED'}"/>
-								<p:progressBar value="100" displayOnly="true" labelTemplate="100%" rendered="#{chamberSession.status eq 'FINISHED'}"/>
+								<p:progressBar value="100" displayOnly="true" labelTemplate="100%" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status eq 'FINISHED'}"/>
 							</div>
 						</div>
 					</p:column>
 
-					<p:column headerText="#{msg['label.action']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg session-action">
+					<p:column headerText="#{msg['label.action']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column session-action">
 						<div class="row">
 							<div class="col-sm-4 col-md-2">
 								<p:commandButton title="#{msg['button.startSession']}" icon="fa fa-play" actionListener="#{sessionController.startSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{chamberSession.status ne 'CREATED'}"/>
@@ -160,14 +158,15 @@
 								<p:commandButton title="#{msg['button.reset']}" icon="fa fa-stop" actionListener="#{sessionController.resetSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'CREATED'}"/>
 							</div>
 							<div class="col-sm-4 col-md-2">
-								<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'FINISHED'}"/>
+								<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'FINISHED'}" styleClass="hidden-xs" />
 							</div>
 							<div class="col-sm-4 col-md-2">
-								<p:commandButton title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionInput.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.status ne 'CREATED' and chamberSession.status ne 'FINISHED'}" rendered="#{loginController.hasAdminRights()}"/>
+								<p:commandButton title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionInput.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.status ne 'CREATED' and chamberSession.status ne 'FINISHED'}" rendered="#{loginController.hasAdminRights()}" styleClass="hidden-xs" />
 							</div>
 						</div>
 					</p:column>
 				</p:dataTable>
+				<h:outputScript>if (typeof resize === "function") resize();</h:outputScript>
 			</p:dataGrid>
 		</h:form>
 	</div>
@@ -273,6 +272,12 @@
 					}
 				}
 			]);
+
+			resize();
+		});
+
+		$(window).resize(function() {
+			resize();
 		});
 
 		function handleMessage(notificationMessage) {
@@ -321,6 +326,11 @@
 			var isoDate = date.getFullYear() + '-' + (date.getMonth() &lt; 9 ? '0' : '') + (date.getMonth() + 1) + '-' + (date.getDate() &lt; 10 ? '0' : '') + date.getDate();
 			var styleClass = dates.indexOf(isoDate) != -1 ? 'session-day' : '';
 			return [ true,  styleClass]
+		}
+
+		function resize() {
+			var colspan = 12 - ($('th:hidden').length / 2);
+			$('.ui-rowgroup-header td, .ui-datatable-empty-message td').attr('colspan', colspan);
 		}
 	</script>
 </ui:composition>

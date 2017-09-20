@@ -48,16 +48,18 @@ public class TestSessionController extends BaseControllerTest {
 	private Chamber chamber;
 	private Patient patient;
 
+	private SessionInput sessionInput;
+
 	@Before
 	public void setUp() {
 		chamber = chamberRepository.findOne(1);
 		patient = patientRepository.findOne(1);
+		sessionInput = sessionController.getSessionInput();
 	}
 
 	@Test
 	public void getChamberSessions() {
 		Session session = sessionRepository.findOne(1);
-		SessionInput sessionInput = sessionController.getSessionInput();
 		sessionInput.setSessionDate(session.getScheduledTime().toLocalDate());
 
 		List<Session> sessions = sessionController.getSessions(chamber.getChamberId());
@@ -69,6 +71,7 @@ public class TestSessionController extends BaseControllerTest {
 		SessionInput sessionInput = SessionInput.of(chamber, LocalDate.now(), LocalTime.now(), patient);
 		sessionController.setSessionInput(sessionInput);
 		sessionController.addSession();
+
 		Session session = sessionRepository.findSessionsByChamberAndDate(chamber.getChamberId(), LocalDate.now()).get(0);
 
 		assertThat(session.getStatus()).isEqualTo(SessionStatus.CREATED);
@@ -78,7 +81,6 @@ public class TestSessionController extends BaseControllerTest {
 	@Test
 	public void addSessionExceededCapacity() {
 		chamber.setCapacity(0);
-		SessionInput sessionInput = sessionController.getSessionInput();
 		sessionInput.setChamber(chamber);
 		sessionInput.getPatients().add(patient);
 		sessionInput.setSessionDate(LocalDate.now());
@@ -97,9 +99,66 @@ public class TestSessionController extends BaseControllerTest {
 	@Test
 	public void deleteSession() {
 		Session session = sessionRepository.findOne(1);
-		sessionController.getSessionInput().setSession(session);
+		sessionInput.setSession(session);
+
 		sessionController.deleteSession();
 
 		assertThat(sessionRepository.findOne(session.getSessionId())).isNull();
 	}
+
+	@Test
+	public void addPatientsToSession() {
+		Patient patientA = patientRepository.save(new Patient("Patient A"));
+		Patient patientB = patientRepository.save(new Patient("Patient B"));
+		Session session = sessionRepository.findOne(1);
+		sessionInput.setSession(session);
+		sessionInput.getPatients().add(patientA);
+		sessionInput.getPatients().add(patientB);
+
+		sessionController.addPatientsToSession();
+
+		assertThat(session.getPatientSessions()).hasSize(4);
+	}
+
+	@Test
+	public void removePatientFromSession() {
+		Session session = sessionRepository.findOne(1);
+		sessionInput.setSession(session);
+
+		sessionController.removePatientFromSession(sessionInput.getSession().getPatientSessions().first());
+
+		assertThat(session.getPatientSessions()).hasSize(1);
+	}
+
+	@Test
+	public void updatePatientSessionStatus() {
+		Session session = sessionRepository.findOne(1);
+		sessionInput.setSession(session);
+
+		sessionController.setPatientSessionStatus(sessionInput.getSession().getPatientSessions().first(), true);
+
+		assertThat(session.getPatientSessions()).hasSize(2);
+		assertThat(session.getPatientSessions().first().isAbsent()).isTrue();
+	}
+
+	@Test
+	public void duplicateSessions() {
+		Session session = sessionRepository.findOne(1);
+		sessionController.setFromSessionsDate(session.getScheduledTime().toLocalDate());
+		sessionController.setToSessionsDate(LocalDate.now());
+
+		sessionController.duplicateSessions();
+
+		List<Session> sessions = sessionRepository.findSessionsByDate(LocalDate.now());
+
+		assertThat(sessions).hasSize(1);
+		assertThat(sessions.get(0).getScheduledTime().toLocalTime()).isEqualTo(session.getScheduledTime().toLocalTime());
+		assertThat(sessions.get(0).getPatientSessions()).isEqualTo(session.getPatientSessions());
+		assertThat(sessions.get(0).getStatus()).isEqualTo(SessionStatus.CREATED);
+	}
+
+//	startSession
+//	resetSession
+//	finishSession
 }
+

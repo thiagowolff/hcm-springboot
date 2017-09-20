@@ -1,61 +1,50 @@
 body.login-page {
 	background: @whiteThemeColor;
 	overflow: hidden;
+
+	form {
+		margin: 0 auto;
+		max-width: 450px;
+		margin-top: 120px;
+	}
 }
 
 .login-logo { 
-	position: relative;
-	top: -142px;
-	left: -50%;
-	.rounded(5px, 5px, 0px, 0px);
 	z-index: 2;
 	padding: 10px 15px 10px 15px;
 	background: @primaryThemeColor;
-	
-	span {
-		font-size: 16px;
+	.rounded(5px, 5px, 0px, 0px);
+
+	div {
 		color: @whiteThemeColor;
-		position: relative;
 		font-weight: 400;
-		margin-left: 8px;
+	}
+
+	.login-title {
+		font-size: 14px;
+		top: 25px;
+		position: relative;
 	}
 
 	img {
-		width: 75px;
+		width: 70px;
+	}
+
+	.version {
+		font-size: 10px !important;
+		position: absolute;
+		top: 5px;
+		right: 5px;
 	}
 }
 
-.login-panel { 
-	position: absolute; 
-	top: 40%;
-	left: 50%;
-}
-
-.login-inner-panel { 
+.login-inner-panel {
 	position: relative; 
-	top: -170px; 
-	left: -50%; 
+	top: -25px;
 	background: @whiteThemeColor;
-	padding: 25px;
-	.rounded(5px);
+	padding: 20px;
 	border: 1px solid @borderColor;
-	
-	.separator {
-		color: @darkGreyThemeColor;
-		text-align: center;
-  		height: 1px; 
-  		border-top: 0px solid #cdcdcd; 
-  		position: relative;
-  		margin: 20px 0px 5px;
-
-		span { 
-  			position: relative; 
-  			top: -.7em; 
-  			background: #f6f6f6; 
-  			display: inline-block; 
-  			padding: 0px 5px 0px 5px;
-		}
-	}		
+	.rounded(0px, 0px, 5px, 5px);
 }
 
 .login-input {
@@ -100,9 +89,4 @@ body.login-page {
 
 .login-error-message {
 	margin-bottom: 10px;
-}
-
-.version {
-	font-size: 12px !important;
-	top: -35px !important;
 }

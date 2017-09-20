@@ -39,6 +39,11 @@ public class Patient {
 		active = true;
 	}
 
+	public Patient(String name) {
+		this();
+		this.name = name;
+	}
+
 	public String getRecordInfo() {
 		String folderNumber = Strings.isNullOrEmpty(this.folderNumber) ? "-" : this.folderNumber.trim();
 		String patientRecord = Strings.isNullOrEmpty(this.patientRecord) ? "-" : this.patientRecord.trim();

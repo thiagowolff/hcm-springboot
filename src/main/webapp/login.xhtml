@@ -12,58 +12,63 @@
 	</h:head>
 	
 	<h:body styleClass="login-page">
-		<h:form id="login">
-			<div class="login-panel">
-				<div class="login-logo">
-					<p:graphicImage id="logo" value="/resources/images/logo-white.png" styleClass="animate-0 zoomIn" />
-					<pe:tooltip for="logo" value="" />
-
-					<span>#{msg['title.appTitle']}</span><span class="version animate-2 fadeIn" style="#{loginController.newVersion ? 'color: #57f547' : ''}">#{version['version']}</span>
-				</div>
-
-				<ui:param name="isDev" value="#{facesContext.application.projectStage eq 'Development'}" />
-
-				<div class="login-inner-panel">
-					<div class="login-error-message">
-						<p:messages />
-					</div>
-					<div class="row">
-						<div class="login-input col-md-12">
-							<p:inputText id="username" value="#{loginController.username}" required="#{not isDev}" requiredMessage="#{msg['error.loginRequired']}" label="#{msg['label.username']}" size="50" />
-							<p:watermark for="login:username" value="#{msg['label.login']}" />
-							<div class="input-icon"><span class="fa fa-at" /></div>
+		<div class="container">
+			<h:form id="login">
+				<pe:tooltip for="logo" value="" />
+				<div class="container">
+					<div class="row login-logo">
+						<div class="col-xs-2">
+							<p:graphicImage id="logo" value="/resources/images/logo-white.png" styleClass="animate-0 zoomIn" />
+						</div>
+						<div class="col-xs-10">
+							<div class="login-title">#{msg['title.appTitle']}</div>
+							<div class="version animate-2 fadeIn" style="#{loginController.newVersion ? 'color: #57f547' : ''}">#{version['version']}</div>
 						</div>
 					</div>
-					<div class="row">
-						<div class="login-input col-md-12">
-							<p:password id="password" value="#{loginController.password}" required="#{not isDev}" requiredMessage="#{msg['error.passwordRequired']}" label="#{msg['label.password']}" size="50" />
-							<p:watermark for="login:password" value="#{msg['label.password']}" />
-							<div class="input-icon"><span class="fa fa-lock" /></div>
+
+					<ui:param name="isDev" value="#{facesContext.application.projectStage eq 'Development'}" />
+
+					<div class="row login-inner-panel">
+						<div class="login-error-message">
+							<p:messages />
 						</div>
-					</div>
-					<div class="row">
-						<div class="login-input col-xs-#{isDev ? '6' : '12' }">
-							<p:commandButton value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" />
-						</div>
-						<div class="login-input col-xs-3">
-							<div class="btn-group">
-							<p:commandButton icon="fa fa-user fa-lg" value="USER" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}">
-								<f:setPropertyActionListener value="user" target="#{loginController.username}" />
-								<f:setPropertyActionListener value="123" target="#{loginController.password}" />
-							</p:commandButton>
+						<div class="row">
+							<div class="login-input col-md-12">
+								<p:inputText id="username" value="#{loginController.username}" required="#{not isDev}" requiredMessage="#{msg['error.loginRequired']}" label="#{msg['label.username']}" size="50" />
+								<p:watermark for="login:username" value="#{msg['label.login']}" />
+								<div class="input-icon"><span class="fa fa-at" /></div>
 							</div>
 						</div>
-						<div class="login-input col-xs-3">
-							<p:commandButton icon="fa fa-wrench fa-lg" value="DEV" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}">
-								<f:setPropertyActionListener value="thiago" target="#{loginController.username}" />
-								<f:setPropertyActionListener value="admin" target="#{loginController.password}" />
-							</p:commandButton>
+						<div class="row">
+							<div class="login-input col-md-12">
+								<p:password id="password" value="#{loginController.password}" required="#{not isDev}" requiredMessage="#{msg['error.passwordRequired']}" label="#{msg['label.password']}" size="50" />
+								<p:watermark for="login:password" value="#{msg['label.password']}" />
+								<div class="input-icon"><span class="fa fa-lock" /></div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="login-input col-xs-#{isDev ? '6' : '12' }">
+								<p:commandButton value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" />
+							</div>
+							<div class="login-input col-xs-3">
+								<div class="btn-group">
+								<p:commandButton icon="fa fa-user fa-lg" value="USER" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}">
+									<f:setPropertyActionListener value="user" target="#{loginController.username}" />
+									<f:setPropertyActionListener value="123" target="#{loginController.password}" />
+								</p:commandButton>
+								</div>
+							</div>
+							<div class="login-input col-xs-3">
+								<p:commandButton icon="fa fa-wrench fa-lg" value="DEV" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}">
+									<f:setPropertyActionListener value="thiago" target="#{loginController.username}" />
+									<f:setPropertyActionListener value="admin" target="#{loginController.password}" />
+								</p:commandButton>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-        </h:form>
-
+        	</h:form>
+		</div>
 		<script type="text/javascript">
 			mixpanel.track("Login page");
 		</script>
