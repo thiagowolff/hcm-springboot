@@ -10,7 +10,7 @@
 		<lc:headerPanel title="#{msg['title.chambers']}" />
 
 		<div class="content-wrapper">
-			<p:dataTable id="chamberTable" var="chamber" value="#{chamberController.chambers}" emptyMessage="#{msg['message.noData']}" style="width: 50%">
+			<p:dataTable id="chamberTable" var="chamber" value="#{chamberController.chambers}" emptyMessage="#{msg['message.noData']}">
 				<p:column headerText="#{msg['label.id']}" sortBy="#{chamber.chamberId}" width="50">
 					<h:outputText value="#{chamber.chamberId}" />
 				</p:column>
@@ -24,13 +24,13 @@
 				</p:column>
 
 				<p:column headerText="#{msg['label.events']}" style="text-align: left">
-					<div class="ui-g">
+					<div class="row">
 						<ui:repeat value="#{chamber.chamberEvents}" var="event">
 							<h:panelGroup>
-							<div class="ui-g-4">
+							<div class="col-md-2">
 								<h:outputText value="#{lcf:enum(event.eventType)}" />
 							</div>
-							<div class="ui-g-8">
+							<div class="col-md-10">
 								<h:outputText value="#{event.duration}" />
 							</div>
 							</h:panelGroup>
@@ -40,4 +40,7 @@
 			</p:dataTable>
 		</div>
 	</h:form>
+	<script type="text/javascript">
+		mixpanel.track('Chambers page');
+	</script>
 </ui:composition>

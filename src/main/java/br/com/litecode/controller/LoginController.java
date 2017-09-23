@@ -72,7 +72,7 @@ public class LoginController {
 
 	private String getLastAccessLocation() {
 		try {
-			URL url = new URL("http://ipinfo.io/" + Faces.getRemoteAddr() + "/json");
+			URL url = new URL("https://ipinfo.io/" + Faces.getRemoteAddr() + "/json");
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
 			return new String(ByteStreams.toByteArray(connection.getInputStream()));

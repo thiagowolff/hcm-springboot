@@ -11,9 +11,9 @@
 		<lc:headerPanel title="#{msg['title.patients']}" addButtonAction="#{patientController.newPatient()}" update=":patientInputForm" oncomplete="PF('patientDialog').show()" />
 
 		<div class="content-wrapper">
-			<p:dataTable id="patientsTable" widgetVar="patientsTable" value="#{patientController.patients}" var="patient" paginator="true" rows="12" paginatorAlwaysVisible="false" filteredValue="#{patientController.filteredPatients}"
+			<p:dataTable id="patientsTable" widgetVar="patientsTable" value="#{patientController.patients}" var="patient" paginator="true" rows="10" paginatorAlwaysVisible="false" filteredValue="#{patientController.filteredPatients}"
 				 currentPageReportTemplate="({startRecord} de {totalRecords})"
-				 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="15,30,100,500" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
+				 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="10,25,100,500" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
 
 				<f:facet name="header">
 					<p:outputPanel style="text-align: right;">
@@ -24,22 +24,22 @@
 
 				<ui:param name="patientStats" value="#{patientController.getPatientStats(patient.patientId)}" />
 
-				<p:column headerText="#{msg['label.name']}" sortBy="#{patient.name}" filterBy="#{patient.name}" filterStyle="display: none;" styleClass="text-left">
+				<p:column headerText="#{msg['label.name']}" sortBy="#{patient.name}" filterBy="#{patient.name}" filterStyle="display: none;" styleClass="text-left" priority="1">
 	          		<h:outputText value="#{patient.name}" />
 				</p:column>
-				<p:column headerText="#{msg['label.patientRecord']}" filterBy="#{patient.patientRecord}" filterStyle="display: none;" styleClass="medium-column">
+				<p:column headerText="#{msg['label.patientRecord']}" filterBy="#{patient.patientRecord}" filterStyle="display: none;" priority="1">
 	          		<h:outputText value="#{patient.patientRecord}" />
 				</p:column>
-				<p:column headerText="#{msg['label.folderNumber']}" filterBy="#{patient.folderNumber}" filterStyle="display: none;"  priority="2" styleClass="medium-column">
+				<p:column headerText="#{msg['label.folderNumber']}" filterBy="#{patient.folderNumber}" filterStyle="display: none;" priority="2">
 	          		<h:outputText value="#{patient.folderNumber}" />
 				</p:column>
-				<p:column headerText="#{msg['label.healthInsurance']}" styleClass="medium-column text-left">
+				<p:column headerText="#{msg['label.healthInsurance']}" styleClass="text-left" priority="3">
 	          		<h:outputText value="#{patient.healthInsurance}" />
 				</p:column>
-				<p:column headerText="#{msg['label.numberOfSessions']}" width="100">
+				<p:column headerText="#{msg['label.numberOfSessions']}" width="100" priority="2">
 					<h:outputText value="#{patientStats.completedSessions + patientStats.absentSessions}" />
 				</p:column>
-				<p:column headerText="#{msg['label.numberOfCompletedSessions']}" width="100">
+				<p:column headerText="#{msg['label.numberOfCompletedSessions']}" width="100" priority="1">
 					<h:outputText value="#{patientStats.completedSessions eq null ? 0 :patientStats.completedSessions}" />
 				</p:column>
 				<p:column headerText="#{msg['label.numberOfAbsentSessions']}" width="100" priority="3">
@@ -49,10 +49,10 @@
 					<h:outputText value="#{patient.email}" /><br/>
 					<h:outputText value="#{patient.phoneNumber}" />
 				</p:column>
-				<p:column headerText="#{msg['label.creationDate']}" sortBy="#{patient.creationDate}" priority="4" styleClass="medium-column">
+				<p:column headerText="#{msg['label.creationDate']}" width="120" sortBy="#{patient.creationDate}" priority="4">
 					<h:outputText value="#{patient.creationDate}" converter="localDateTimeConverter" />
 				</p:column>
-				<p:column headerText="#{msg['label.action']}" styleClass="small-column" style="padding: 1px">
+				<p:column headerText="#{msg['label.action']}" width="100" style="padding: 1px" priority="3">
 					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" update=":patientInputForm" oncomplete="PF('patientDialog').show();" icon="fa fa-pencil" title="#{msg['button.edit']}" global="false">
 						<p:resetInput target=":patientInputForm:patientGrid" />
 					</p:commandButton>

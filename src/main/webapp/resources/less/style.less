@@ -8,7 +8,6 @@
 
 .wrapper {
 	width: 100%;
-	//min-width: 1000px;
 	min-height: 100%;
 	height: auto !important;
 	height: 100%;
@@ -23,7 +22,7 @@
 	border: none;
 	position: fixed;
 	width: 100%;
-	z-index: 2;
+	z-index: 1000;
 
 	.header-left {
 		height: @headerHeight;
@@ -181,12 +180,12 @@ div.timer-progress-cell {
 	padding: 4px;
 }
 
-@colorCreatedStatus: #5e5e5e;
-@colorCompressingStatus: #008ed0;
-@colorO2OnStatus: #007d18;
-@colorO2OffStatus: #eb8723;
-@colorShuttingDownStatus: #b14538;
-@colorFinishedStatus: #004d9e;
+@colorCreatedStatus: @grey-600;
+@colorCompressingStatus: @lightBlue-600;
+@colorO2OnStatus: @green-600;
+@colorO2OffStatus: @orange-600;
+@colorShuttingDownStatus: @red-600;
+@colorFinishedStatus: @blue-600;
 
 @bgColorCreatedStatus: #f7f7f7;
 @bgColorCompressingStatus: rgba(0, 142, 208, 0.05);;
@@ -291,7 +290,7 @@ div.timer-progress-cell {
 
 @media screen and (max-width: 640px) {
 	.small-column {
-		width: 3.5em;
+		width: 3.6em;
 	}
 
 	.medium-column {
@@ -309,7 +308,7 @@ div.timer-progress-cell {
 
 @media screen and (min-width: 641px) and (max-width: 1024px) {
 	.small-column {
-		width: 4em;
+		width: 4.6em;
 	}
 
 	.medium-column {

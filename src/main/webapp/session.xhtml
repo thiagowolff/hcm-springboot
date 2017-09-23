@@ -21,24 +21,27 @@
 					<p:commandButton icon="fa fa-chevron-right" actionListener="#{sessionController.nextSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
 				</h:panelGroup>
 
-				<p:selectOneMenu id="sessionChamber" value="#{sessionController.sessionInput.chamber}" converter="omnifaces.SelectItemsConverter">
+				<p:selectOneMenu id="sessionChamber" value="#{sessionController.sessionInput.chamber}" converter="omnifaces.SelectItemsConverter" styleClass="hidden-xs">
 					<f:selectItems value="#{chamberController.chambers}" var="chamber" itemValue="#{chamber}" itemLabel="#{chamber.name}"/>
 				</p:selectOneMenu>
 
-				<pe:timePicker id="sessionTime" label="#{msg['label.time']}" widgetVar="sessionTime" value="#{sessionController.sessionInput.sessionTime}" mode="spinner" startHours="6" endHours="22" showOn="focus" intervalMinutes="15" required="true">
-					<f:converter converterId="localDateTimeConverter" />
-					<f:attribute name="pattern" value="HH:mm" />
-				</pe:timePicker>
+				<h:panelGroup styleClass="hidden-xs">
+					<pe:timePicker id="sessionTime" label="#{msg['label.time']}" widgetVar="sessionTime" value="#{sessionController.sessionInput.sessionTime}" mode="spinner" startHours="6" endHours="22" showOn="focus" intervalMinutes="15" required="true">
+						<f:converter converterId="localDateTimeConverter" />
+						<f:attribute name="pattern" value="HH:mm" />
+					</pe:timePicker>
+				</h:panelGroup>
 
-				<p:selectCheckboxMenu id="sessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionInput.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true">
+				<p:selectCheckboxMenu id="sessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionInput.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true"  styleClass="hidden-xs">
 					<f:selectItems value="#{patientController.patients}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
 				</p:selectCheckboxMenu>
 
-				<p:commandButton value="#{msg['button.add']}" actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true" styleClass="btn-primary">
+				<p:commandButton value="#{msg['button.add']}" actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true" styleClass="btn-primary hidden-xs">
 					<p:resetInput target="@form" />
 				</p:commandButton>
 
 				<p:commandButton icon="fa fa-clone" value="#{msg['button.duplicateSessions']}" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary hidden-xs hidden-sm" />
+
 				<p:messages id="messages"/>
 			</p:panelGrid>
 
@@ -59,7 +62,7 @@
 						<h:outputText value="#{chamberSession.sessionId}"/>
 					</p:column>
 
-					<p:column headerText="#{msg['label.patient']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg large-column" style="vertical-align: top;">
+					<p:column headerText="#{msg['label.patients']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg large-column hidden-xs" style="vertical-align: top;">
 						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
 							<div class="long-text text-left">
 								<h:outputText
@@ -144,7 +147,7 @@
 						</div>
 					</p:column>
 
-					<p:column headerText="#{msg['label.action']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column session-action">
+					<p:column headerText="#{msg['label.action']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column session-action hidden-xs">
 						<div class="row">
 							<div class="col-sm-4 col-md-2">
 								<p:commandButton title="#{msg['button.startSession']}" icon="fa fa-play" actionListener="#{sessionController.startSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{chamberSession.status ne 'CREATED'}"/>
@@ -158,10 +161,10 @@
 								<p:commandButton title="#{msg['button.reset']}" icon="fa fa-stop" actionListener="#{sessionController.resetSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'CREATED'}"/>
 							</div>
 							<div class="col-sm-4 col-md-2">
-								<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'FINISHED'}" styleClass="hidden-xs" />
+								<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'FINISHED'}" styleClass="hidden-sm" />
 							</div>
 							<div class="col-sm-4 col-md-2">
-								<p:commandButton title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionInput.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.status ne 'CREATED' and chamberSession.status ne 'FINISHED'}" rendered="#{loginController.hasAdminRights()}" styleClass="hidden-xs" />
+								<p:commandButton title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionInput.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.status ne 'CREATED' and chamberSession.status ne 'FINISHED'}" rendered="#{loginController.hasAdminRights()}" styleClass="hidden-sm" />
 							</div>
 						</div>
 					</p:column>
@@ -274,6 +277,8 @@
 			]);
 
 			resize();
+
+			mixpanel.track('Sessions page');
 		});
 
 		$(window).resize(function() {
@@ -294,7 +299,9 @@
 		function playSound(eventType) {
 			var audio = document.getElementById('audio');
 			audio.src = '#{request.contextPath}/javax.faces.resource/sounds/' + eventType + '.mp3';
-			audio.play();
+			setTimeout(function () {
+				audio.play();
+			}, 150);
 		}
 
 		function updateTimer(session) {
@@ -304,21 +311,21 @@
 
 		function progressStep(session) {
 			var widget = PF('progress-' + session.sessionId);
-			if (widget) {
+			if (widget &amp;&amp; widget.getValue() > 0) {
 				widget.setValue(session.currentProgress);
 			}
 		}
 
-		function handleAlarm(alarm) {
-			var facesMessage = {
-				summary: alarm.name,
-				detail: alarm.message,
-				severity: "info"
-			};
-
-			PF('growl').show([facesMessage]);
-			playSound(alarm.notificationSound);
-		}
+//		function handleAlarm(alarm) {
+//			var facesMessage = {
+//				summary: alarm.name,
+//				detail: alarm.message,
+//				severity: "info"
+//			};
+//
+//			PF('growl').show([facesMessage]);
+//			playSound(alarm.notificationSound);
+//		}
 
 		var dates = new Array(#{sessionController.scheduledSessionDates});
 
@@ -329,7 +336,7 @@
 		}
 
 		function resize() {
-			var colspan = 12 - ($('th:hidden').length / 2);
+			var colspan = 12 - ($('.ui-datatable-tablewrapper th[scope="col"]:hidden').length / 2);
 			$('.ui-rowgroup-header td, .ui-datatable-empty-message td').attr('colspan', colspan);
 		}
 	</script>

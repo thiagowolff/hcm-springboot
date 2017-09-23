@@ -2,7 +2,7 @@ import org.lesscss.LessCompiler
 
 buildscript {
     ext {
-        springBootVersion = "1.5.6.RELEASE"
+        springBootVersion = "1.5.7.RELEASE"
     }
 
     repositories {
@@ -25,6 +25,10 @@ apply plugin: "org.hidetake.ssh"
 
 sourceCompatibility = 1.8
 def webAppDir = "src/main/webapp"
+
+springBoot {
+    executable = true
+}
 
 repositories {
     mavenCentral()
@@ -80,17 +84,21 @@ task compileLess {
     }
 }
 
+ext.loadVersionProperties = {
+    def versionFile = "$projectDir/src/main/resources/version.properties"
+    def versionProperties = new Properties()
+    file(versionFile).withInputStream { versionProperties.load(it) }
+    return versionProperties
+}
+
 task updateVersion {
     doLast {
-        def versionFile = "$projectDir/src/main/resources/version.properties"
-        def versionProperties = new Properties()
-        file(versionFile).withInputStream { versionProperties.load(it) }
-
+        def versionProperties = loadVersionProperties()
         def version = versionProperties.version.split("\\.")
-        def minorVersion = version[2]
-        minorVersion++
-        def newVersion = version[0] + "." + version[1] + "." + minorVersion
+        def nextMinorVersion = Integer.parseInt(version[2]) + 1
+        def newVersion = version[0] + "." + version[1] + "." + nextMinorVersion
 
+        def versionFile = "$projectDir/src/main/resources/version.properties"
         ant.propertyfile(file: versionFile) {
             entry(key: "version", value: newVersion)
             entry(key: "versionDate", value: new Date().format('dd/MM/yyyy'))
@@ -116,19 +124,28 @@ task deleteCss {
     }
 }
 
-task deploy(dependsOn: ["war", "updateVersion", "deleteCss"]) {
+task deploy(dependsOn: "bootRepackage") {
     doLast {
         ssh.run {
             session(remotes.remoteServer) {
                 println("Backing up previous release...")
-                def today = new Date().format('yyyyMMddHHmmss')
-                execute "cp /opt/wildfly/standalone/deployments/HCM.war /opt/wildfly/standalone/releases/HCM-" + today + ".war"
+                def today = new Date().format('yyyy.MM.dd.HH.mm')
 
-                println("Uploading WAR...")
-                put from: "build/libs/HCM.war", into: "/opt/wildfly/standalone/deployments"
+                try {
+                    execute "cp /opt/hcm/hcm.jar /opt/hcm/releases/hcm-" + today + ".jar"
+                } catch (Exception e) {
+                    println "Unable to backup previous release"
+                }
 
-                println("Initiating server...")
-                execute "service wildfly restart"
+                println("Stopping application...")
+                execute "service hcm stop"
+
+                println("Uploading JAR...")
+                put from: "build/libs/hcm.jar", into: "/opt/hcm/hcm.jar"
+
+                println("Initiating application...")
+                execute "chmod +x /opt/hcm/hcm.jar"
+                execute "service hcm start"
             }
         }
     }
@@ -140,9 +157,10 @@ compileJava {
     ]
 }
 
+processResources.dependsOn "updateVersion"
 jar.dependsOn "compileLess"
 
-jar.into('META_INF/resources') {
+jar.into('META-INF/resources') {
     from('src/main/webapp')
 }
 

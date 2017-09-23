@@ -103,4 +103,7 @@
 			<p:commandButton value="#{msg['button.save']}" action="#{userController.saveUserPassword}" process="changePasswordForm" oncomplete="if (!args.validationFailed) { PF('changePasswordDialog').hide(); }" styleClass="btn-primary pull-right" />
    		</p:dialog>
   	</h:form>
+	<script type="text/javascript">
+		mixpanel.track('Users page');
+	</script>
 </ui:composition>
