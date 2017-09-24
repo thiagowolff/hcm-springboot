@@ -1,5 +1,6 @@
 package br.com.litecode.controller;
 
+import br.com.litecode.Application;
 import br.com.litecode.controller.SessionController.SessionInput;
 import br.com.litecode.domain.model.Chamber;
 import br.com.litecode.domain.model.Patient;
@@ -8,6 +9,9 @@ import br.com.litecode.domain.model.Session.SessionStatus;
 import br.com.litecode.domain.repository.ChamberRepository;
 import br.com.litecode.domain.repository.PatientRepository;
 import br.com.litecode.domain.repository.SessionRepository;
+import br.com.litecode.service.timer.ChamberSessionTimer;
+import br.com.litecode.service.timer.Clock;
+import br.com.litecode.service.timer.FakeSessionClock;
 import br.com.litecode.util.MessageUtil;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +24,10 @@ import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.faces.application.FacesMessage;
@@ -33,6 +40,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 public class TestSessionController extends BaseControllerTest {
+	@Configuration
+	@Import(Application.class)
+	public static class TestConfig {
+		@Bean
+		public Clock sessionClock() {
+			return new FakeSessionClock();
+		}
+	}
+
 	@Autowired
 	private ChamberRepository chamberRepository;
 
@@ -44,6 +60,10 @@ public class TestSessionController extends BaseControllerTest {
 
 	@Autowired
 	private SessionController sessionController;
+
+	@Autowired
+	private ChamberSessionTimer chamberSessionTimer;
+
 
 	private Chamber chamber;
 	private Patient patient;
@@ -60,9 +80,7 @@ public class TestSessionController extends BaseControllerTest {
 	@Test
 	public void getChamberSessions() {
 		Session session = sessionRepository.findOne(1);
-		sessionInput.setSessionDate(session.getScheduledTime().toLocalDate());
-
-		List<Session> sessions = sessionController.getSessions(chamber.getChamberId());
+		List<Session> sessions = sessionController.getSessions(chamber.getChamberId(), session.getScheduledTime().toLocalDate());
 		assertThat(sessions).hasSize(1);
 	}
 
@@ -99,9 +117,7 @@ public class TestSessionController extends BaseControllerTest {
 	@Test
 	public void deleteSession() {
 		Session session = sessionRepository.findOne(1);
-		sessionInput.setSession(session);
-
-		sessionController.deleteSession();
+		sessionController.deleteSession(session);
 
 		assertThat(sessionRepository.findOne(session.getSessionId())).isNull();
 	}
@@ -115,7 +131,7 @@ public class TestSessionController extends BaseControllerTest {
 		sessionInput.getPatients().add(patientA);
 		sessionInput.getPatients().add(patientB);
 
-		sessionController.addPatientsToSession();
+		sessionController.addPatientsToSession(session);
 
 		assertThat(session.getPatientSessions()).hasSize(4);
 	}
@@ -157,8 +173,37 @@ public class TestSessionController extends BaseControllerTest {
 		assertThat(sessions.get(0).getStatus()).isEqualTo(SessionStatus.CREATED);
 	}
 
-//	startSession
-//	resetSession
-//	finishSession
+	@Test
+	public void startSession() {
+		Session session = sessionRepository.findOne(1);
+		sessionController.startSession(session);
+		chamberSessionTimer.getSessionClock().elapseTime(session);
+
+		Session startedSession = sessionRepository.findOne(session.getSessionId());
+		assertThat(startedSession.isRunning()).isTrue();
+	}
+
+	@Test
+	public void finishSession() {
+		Session session = sessionRepository.findOne(1);
+
+		sessionController.finishSession(session);
+
+		assertThat(session.isRunning()).isFalse();
+		assertThat(session.getCurrentProgress()).isEqualTo(100);
+		assertThat(session.getStatus()).isEqualTo(SessionStatus.FINISHED);
+	}
+
+	@Test
+	public void resetSession() {
+		Session session = sessionRepository.findOne(1);
+		sessionController.finishSession(session);
+		assertThat(session.getStatus()).isEqualTo(SessionStatus.FINISHED);
+
+		sessionController.resetSession(session);
+		assertThat(session.isRunning()).isFalse();
+		assertThat(session.getCurrentProgress()).isEqualTo(0);
+		assertThat(session.getStatus()).isEqualTo(SessionStatus.CREATED);
+	}
 }
 

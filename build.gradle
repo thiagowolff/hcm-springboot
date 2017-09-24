@@ -157,7 +157,7 @@ compileJava {
     ]
 }
 
-processResources.dependsOn "updateVersion"
+//processResources.dependsOn "updateVersion"
 jar.dependsOn "compileLess"
 
 jar.into('META-INF/resources') {

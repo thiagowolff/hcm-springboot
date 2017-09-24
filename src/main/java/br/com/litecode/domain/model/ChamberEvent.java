@@ -26,6 +26,12 @@ public class ChamberEvent implements Comparable<ChamberEvent> {
 		COMPLETION(SessionStatus.FINISHED);
 
 		private SessionStatus sessionStatus;
+
+		private static EventType[] values = values();
+
+		public EventType next() {
+			return values[(this.ordinal() + 1) % values.length];
+		}
 	}
 
 	@Id

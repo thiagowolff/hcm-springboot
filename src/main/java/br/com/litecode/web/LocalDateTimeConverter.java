@@ -3,9 +3,11 @@ package br.com.litecode.web;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
+import javax.faces.convert.FacesConverter;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 
+@FacesConverter("localDateTimeConverter")
 public class LocalDateTimeConverter implements Converter {
 	private static final String LOCAL_DATE_PATTERN = "dd/MM/yyyy";
 	private static final String LOCAL_TIME_PATTERN = "HH:mm";

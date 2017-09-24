@@ -26,12 +26,7 @@
 		<el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>
 	</application>
 
-	<converter>
-		<converter-id>localDateTimeConverter</converter-id>
-		<converter-class>br.com.litecode.web.LocalDateTimeConverter</converter-class>
-	</converter>
-
 	<factory>
-    	<exception-handler-factory>org.omnifaces.exceptionhandler.FullAjaxExceptionHandlerFactory</exception-handler-factory>
+    	<exception-handler-factory>br.com.litecode.web.AjaxExceptionHandlerFactory</exception-handler-factory>
 	</factory>
 </faces-config>

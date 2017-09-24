@@ -46,7 +46,7 @@
 			</p:panelGrid>
 
 			<p:dataGrid id="chambersGrid" var="chamber" value="#{chamberController.chambers}" columns="1" layout="grid">
-				<p:dataTable id="periodsTable" value="#{sessionController.getSessions(chamber.chamberId)}" var="chamberSession" rows="9" emptyMessage="#{msg['message.noSessionsFound']}" sortBy="#{chamberSession.timePeriod}">
+				<p:dataTable id="periodsTable" value="#{sessionController.getSessions(chamber.chamberId, sessionController.sessionInput.sessionDate)}" var="chamberSession" rows="9" emptyMessage="#{msg['message.noSessionsFound']}" sortBy="#{chamberSession.timePeriod}">
 					<f:facet name="header">
 						#{chamber.name}
 						<div style="float: right;"><i class="fa fa-exclamation-circle"></i> #{msg['message.absentPatient']}</div>
@@ -69,7 +69,7 @@
 										styleClass="patient-#{patientSession.patientSessionId}"
 										value="#{patientSession.patient.name}"
 										style="#{patientSession.absent ? 'color: #b14538' : chamberSession.running ? 'color: #007d18' : ''}" />
-								<p:tooltip id="toolTipFade" for="@(.patient-#{patientSession.patientSessionId})" value="#{patientSession.patient.recordInfo}" position="right"/>
+								<p:tooltip for="@(.patient-#{patientSession.patientSessionId})" value="#{patientSession.patient.recordInfo}" position="right"/>
 								<h:panelGroup rendered="#{patientSession.absent}"> <i class="fa fa-exclamation-circle" style="font-size: 9px"></i> </h:panelGroup>
 							</div>
 						</ui:repeat>
@@ -116,11 +116,16 @@
 						</h:outputText>
 					</p:column>
 
-					<p:column headerText="#{msg['label.decompressionTime']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-sm hidden-xs">
-						<h:outputText value="#{chamberSession.shutdownTime}" style="color: #6e6e6e;">
+					<p:column headerText="#{msg['label.nextEvent']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column hidden-sm hidden-xs">
+						<div>
+							<h:outputText value="#{lcf:enum(chamberSession.nextChamberEvent.eventType)}" rendered="#{chamberSession.nextChamberEvent ne null}" />
+						</div>
+						<div>
+						<h:outputText value="#{chamberSession.nextChamberEventTime}" rendered="#{chamberSession.nextChamberEvent ne null}">
 							<f:converter converterId="localDateTimeConverter" />
 							<f:attribute name="pattern" value="HH:mm:ss" />
 						</h:outputText>
+						</div>
 					</p:column>
 
 					<p:column headerText="#{msg['label.endTime']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column">
@@ -184,7 +189,7 @@
 					</p:selectCheckboxMenu>
 				</div>
 				<div class="col-md-3 col-sm-6 pull-right">
-					<p:commandButton value="#{msg['label.addPatients']}" actionListener="#{sessionController.addPatientsToSession()}" process="@this, newSessionPatients" update=":form:chambersGrid, sessionPatientsTable, sessionMessages, newSessionPatients" styleClass="btn-primary" />
+					<p:commandButton value="#{msg['label.addPatients']}" actionListener="#{sessionController.addPatientsToSession(sessionController.sessionInput.session)}" process="@this, newSessionPatients" update=":form:chambersGrid, sessionPatientsTable, sessionMessages, newSessionPatients" styleClass="btn-primary" />
 				</div>
 			</div>
 			<p:dataTable id="sessionPatientsTable" styleClass="dialog-table" var="sessionPatient" value="#{sessionController.sessionInput.session.patientSessions}" emptyMessage="#{msg['message.noData']}">
@@ -210,7 +215,7 @@
 	<h:form>
 		<p:confirmDialog message="#{msg['confirmation.deleteSession']}" header="#{msg['title.deleteSession']}" severity="alert" widgetVar="confirmDeleteSessionDialog">
 			<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDeleteSessionDialog').hide()" styleClass="btn-primary pull-right"/>
-			<p:commandButton value="#{msg['button.delete']}" process="@this" update=":form:chambersGrid" oncomplete="PF('confirmDeleteSessionDialog').hide()" actionListener="#{sessionController.deleteSession()}" styleClass="btn-danger pull-right"/>
+			<p:commandButton value="#{msg['button.delete']}" process="@this" update=":form:chambersGrid" oncomplete="PF('confirmDeleteSessionDialog').hide()" actionListener="#{sessionController.deleteSession(sessionController.sessionInput.session)}" styleClass="btn-danger pull-right"/>
 		</p:confirmDialog>
 	</h:form>
 
@@ -311,7 +316,7 @@
 
 		function progressStep(session) {
 			var widget = PF('progress-' + session.sessionId);
-			if (widget &amp;&amp; widget.getValue() > 0) {
+			if (widget &amp;&amp; session.currentProgress > 0) {
 				widget.setValue(session.currentProgress);
 			}
 		}

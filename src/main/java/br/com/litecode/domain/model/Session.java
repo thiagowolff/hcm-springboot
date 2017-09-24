@@ -8,10 +8,12 @@ import org.hibernate.annotations.SortNatural;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -57,6 +59,10 @@ public class Session implements Comparable<Session>, Serializable {
 		currentProgress = 0;
 	}
 
+	public LocalDate getSessionDate() {
+		return scheduledTime.toLocalDate();
+	}
+
 	public void reset() {
 		LocalDateTime now = LocalDateTime.now();
 		startTime = now.toLocalTime();
@@ -91,9 +97,26 @@ public class Session implements Comparable<Session>, Serializable {
 		return TimePeriod.AFTERNOON;
 	}
 
-	public LocalTime getShutdownTime() {
-		return startTime.plusSeconds(chamber.getChamberEvent(EventType.SHUTDOWN).getTimeout());
+	public ChamberEvent getNextChamberEvent() {
+		for (Iterator<ChamberEvent> it = chamber.getChamberEvents().iterator(); it.hasNext();) {
+			ChamberEvent chamberEvent = it.next();
+			if (chamberEvent.getEventType().getSessionStatus() == status) {
+				return it.hasNext() ? it.next() : null;
+			}
+		}
+
+		return chamber.getChamberEvent(EventType.START.next());
 	}
+
+	public LocalTime getNextChamberEventTime() {
+		ChamberEvent nextChamberEvent = getNextChamberEvent();
+		if (nextChamberEvent == null) {
+			return null;
+		}
+
+		return startTime.plusSeconds(nextChamberEvent.getTimeout());
+	}
+
 
 	public boolean isRunning() {
 		return status != SessionStatus.CREATED && status != SessionStatus.FINISHED;

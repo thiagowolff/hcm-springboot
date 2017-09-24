@@ -51,7 +51,7 @@ public class LoginController {
 
 			String lastAccessLocation = getLastAccessLocation();
 			if (lastAccessLocation != null) {
-				user.setLastAccessLocation("[" + Faces.getRemoteAddr() + "] " + lastAccessLocation);
+				user.setLastAccessLocation(lastAccessLocation);
 				log.info("Last access location: {}", user.getLastAccessLocation());
 			}
 

@@ -6,6 +6,7 @@ import br.com.litecode.domain.model.Patient;
 import br.com.litecode.domain.model.PatientSession;
 import br.com.litecode.domain.model.Session;
 import br.com.litecode.domain.model.Session.SessionStatus;
+import br.com.litecode.domain.repository.ChamberRepository;
 import br.com.litecode.domain.repository.SessionRepository;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushRefresh;
@@ -13,6 +14,7 @@ import br.com.litecode.service.push.PushService;
 import br.com.litecode.service.push.message.NotificationMessage;
 import br.com.litecode.service.timer.SessionTimer;
 import br.com.litecode.util.MessageUtil;
+import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +22,12 @@ import org.apache.shiro.SecurityUtils;
 import org.hibernate.Hibernate;
 import org.omnifaces.util.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,15 +37,20 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @SessionScoped
 @Component
+@CacheConfig(cacheNames = "session")
 @Slf4j
 public class SessionController implements Serializable {
 	@Autowired
 	private SessionRepository sessionRepository;
+
+	@Autowired
+	private ChamberRepository chamberRepository;
 
 	@Autowired
 	private SessionTimer sessionTimer;
@@ -46,7 +58,10 @@ public class SessionController implements Serializable {
 	@Autowired
 	private PushService pushService;
 
-	private Map<String, List<Session>> chamberSessions;
+	@Autowired
+	private CacheManager cacheManager;
+
+	private Cache sessionCache;
 
 	@Getter @Setter
 	private SessionInput sessionInput;
@@ -66,35 +81,22 @@ public class SessionController implements Serializable {
 	private void init() {
 		sessionInput = new SessionInput();
 		scheduledSessionDates = sessionRepository.findScheduledSessionDates();
-		chamberSessions = new HashMap<>();
+		sessionCache = cacheManager.getCache("session");
 	}
 
 	@Transactional(readOnly = true)
-	public List<Session> getSessions(Integer chamberId) {
-		String key = getSessionKey(chamberId);
-		List<Session> cachedSessions = chamberSessions.get(key);
-		if (cachedSessions == null || cachedSessions.isEmpty()) {
-			log.debug("Cache miss for key {}, cache size: {}", key, chamberSessions.size());
-
-			List<Session> sessions = sessionRepository.findSessionsByChamberAndDate(chamberId, sessionInput.getSessionDate());
-			chamberSessions.put(key, sessions);
-			sessions.forEach(s -> Hibernate.initialize(s.getPatientSessions()));
-		}
-
-		return chamberSessions.get(key);
-	}
-
-	private String getSessionKey(Integer chamberId) {
-		return chamberId + "." + sessionInput.getSessionDate().toEpochDay();
+	@Cacheable(key = "{ #chamberId, #sessionDate }")
+	public List<Session> getSessions(Integer chamberId, LocalDate sessionDate) {
+		return sessionRepository.findSessionsByChamberAndDate(chamberId, sessionDate);
 	}
 
 	@Transactional
 	public void addSession() {
 		int sessionDuration = sessionInput.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout();
-		LocalDateTime sessionTime = sessionInput.getSessionDate().atTime(sessionInput.getSessionTime());
-		LocalTime endTime = sessionTime.plusSeconds(sessionDuration).toLocalTime();
+		LocalDateTime scheduledTime = sessionInput.getSessionDate().atTime(sessionInput.getSessionTime());
+		LocalTime endTime = scheduledTime.plusSeconds(sessionDuration).toLocalTime();
 
-		boolean isScheduled = sessionRepository.isSessionScheduled(sessionInput.getChamber().getChamberId(), sessionTime);
+		boolean isScheduled = sessionRepository.isSessionScheduled(sessionInput.getChamber().getChamberId(), scheduledTime);
 		if (isScheduled) {
 			Messages.addGlobalError(MessageUtil.getMessage("error.sessionAlreadyCreatedForPeriod"));
 			return;
@@ -107,7 +109,7 @@ public class SessionController implements Serializable {
 
 		Session session = new Session();
 		session.setChamber(sessionInput.getChamber());
-		session.setScheduledTime(sessionTime);
+		session.setScheduledTime(scheduledTime);
 		session.setStartTime(session.getScheduledTime().toLocalTime());
 		session.setEndTime(endTime);
 		session.setManagedBy((String) SecurityUtils.getSubject().getPrincipal());
@@ -118,47 +120,45 @@ public class SessionController implements Serializable {
 	}
 
 	@Transactional
+	@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }")
 	public void startSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 		session.reset();
 		session.setManagedBy((String) SecurityUtils.getSubject().getPrincipal());
 
-		//sessionRepository.save(session);
 		sessionTimer.startSession(session);
-		chamberSessions.remove(getSessionKey(session.getChamber().getChamberId()));
-		//pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, EventType.START), session.getManagedBy());
 	}
 
 	@PushRefresh
 	@Transactional
-	@CacheEvict(cacheNames = "patient", allEntries = true)
+	@Caching(evict = { @CacheEvict(cacheNames = "patient", allEntries = true), @CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }") })
 	public void resetSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionTimer.stopSession(session);
 		session.reset();
 		sessionRepository.save(session);
-		chamberSessions.remove(getSessionKey(session.getChamber().getChamberId()));
 	}
 
 	@PushRefresh
 	@Transactional
-	@CacheEvict(cacheNames = "patient", allEntries = true)
+	@Caching(evict = { @CacheEvict(cacheNames = "patient", allEntries = true), @CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }") })
 	public void finishSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionTimer.stopSession(session);
-		session.reset();
+
+		session.setStartTime(session.getScheduledTime().toLocalTime());
+		session.setEndTime(session.getScheduledTime().plus(session.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout(), ChronoUnit.SECONDS).toLocalTime());
+		session.setCurrentProgress(100);
 		session.setStatus(SessionStatus.FINISHED);
 		sessionRepository.save(session);
-		chamberSessions.remove(getSessionKey(session.getChamber().getChamberId()));
 	}
 
 	@PushRefresh
 	@Transactional
-	@CacheEvict(cacheNames = "patient", allEntries = true)
-	public void deleteSession() {
-		sessionTimer.stopSession(sessionInput.getSession());
-		sessionRepository.delete(sessionInput.getSession());
-		chamberSessions.remove(getSessionKey(sessionInput.getSession().getChamber().getChamberId()));
+	@Caching(evict = { @CacheEvict(cacheNames = "patient", allEntries = true), @CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }") })
+	public void deleteSession(Session session) {
+		sessionTimer.stopSession(session);
+		sessionRepository.delete(session);
 		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(sessionInput.getSession(), SessionOperationType.DELETE_SESSION.name()), sessionInput.getSession().getManagedBy());
 	}
 
@@ -171,26 +171,27 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@CacheEvict(cacheNames = "patient", allEntries = true)
-	public void addPatientsToSession() {
-		if (sessionInput.getPatients().size() + sessionInput.getSession().getPatientSessions().size() > sessionInput.getSession().getChamber().getCapacity()) {
-			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", sessionInput.getSession().getChamber().getCapacity()));
+	@Caching(evict = { @CacheEvict(cacheNames = "patient", allEntries = true), @CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }") })
+	public void addPatientsToSession(Session session) {
+		if (sessionInput.getPatients().size() + session.getPatientSessions().size() > session.getChamber().getCapacity()) {
+			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", session.getChamber().getCapacity()));
 			return;
 		}
 
-		Session session = sessionRepository.findOne(sessionInput.getSession().getSessionId());
+		session = sessionRepository.findOne(session.getSessionId());
 		sessionInput.getPatients().forEach(session::addPatient);
 		sessionInput.setSession(sessionRepository.save(session));
-		chamberSessions.remove(getSessionKey(session.getChamber().getChamberId()));
 	}
 
 	@PushRefresh
 	@Transactional
-	@CacheEvict(cacheNames = "patient", allEntries = true)
+	@Caching(evict = {
+			@CacheEvict(cacheNames = "patient", allEntries = true),
+			@CacheEvict(cacheNames = "session", key = "{ #patientSession.session.chamber.chamberId, #patientSession.session.sessionDate }")
+	})
 	public void removePatientFromSession(PatientSession patientSession) {
 		sessionInput.getSession().getPatientSessions().remove(patientSession);
 		sessionInput.setSession(sessionRepository.save(patientSession.getSession()));
-		chamberSessions.remove(getSessionKey(patientSession.getSession().getChamber().getChamberId()));
 	}
 
 	@PushRefresh
@@ -244,8 +245,11 @@ public class SessionController implements Serializable {
 	}
 
 	public void invalidateSessionCache() {
-		List<String> keys = chamberSessions.keySet().stream().filter(k -> k.endsWith(String.valueOf(sessionInput.sessionDate.toEpochDay()))).collect(Collectors.toList());
-		keys.forEach(chamberSessions::remove);
+		List<List<Object>> keys = new ArrayList<>();
+		for (Chamber chamber : chamberRepository.findAll()) {
+			keys.add(Lists.newArrayList(chamber.getChamberId(), sessionInput.getSessionDate()));
+		}
+		keys.forEach(sessionCache::evict);
 		sessionInput.reset();
 	}
 

@@ -15,7 +15,7 @@
 					<h:outputText value="#{chamber.chamberId}" />
 				</p:column>
 				
-				<p:column headerText="#{msg['label.name']}" sortBy="#{chamber.name}" width="200">
+				<p:column headerText="#{msg['label.name']}" sortBy="#{chamber.name}">
 					<h:outputText value="#{chamber.name}" />
 				</p:column>
 
@@ -23,17 +23,15 @@
 					<h:outputText value="#{chamber.capacity}" />
 				</p:column>
 
-				<p:column headerText="#{msg['label.events']}" style="text-align: left">
+				<p:column headerText="#{msg['label.events']}" styleClass="text-left">
 					<div class="row">
 						<ui:repeat value="#{chamber.chamberEvents}" var="event">
-							<h:panelGroup>
-							<div class="col-md-2">
+							<div class="col-md-3">
 								<h:outputText value="#{lcf:enum(event.eventType)}" />
 							</div>
-							<div class="col-md-10">
+							<div class="col-md-9">
 								<h:outputText value="#{event.duration}" />
 							</div>
-							</h:panelGroup>
 						</ui:repeat>
 					</div>
 				</p:column>

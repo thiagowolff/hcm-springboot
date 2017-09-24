@@ -1,5 +1,9 @@
 package br.com.litecode.domain.model;
 
+import com.google.common.base.Joiner;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,6 +34,23 @@ public class User {
     public User() {
     	creationDate = Instant.now();
     }
+
+    public String getLastAccessLocationFormatted() {
+		if (lastAccessLocation == null) {
+			return "";
+		}
+
+		JsonParser jsonParser = new JsonParser();
+		JsonObject locationJson = jsonParser.parse(lastAccessLocation).getAsJsonObject();
+
+		String ip = locationJson.get("ip") == null ? null : "IP: " + locationJson.get("ip").getAsString();
+		String city = locationJson.get("city") == null ? null : "City: " + locationJson.get("city").getAsString();
+		String region = locationJson.get("region") == null ? null : "Region: " + locationJson.get("region").getAsString();
+		String country = locationJson.get("country") == null ? null : "Country: " + locationJson.get("country").getAsString();
+		String location = locationJson.get("loc") == null ? null : "Location: " + locationJson.get("loc").getAsString();
+
+		return Joiner.on("<br/>").skipNulls().join(ip, city, region, country, location);
+	}
 
 	@Override
 	public int hashCode() {

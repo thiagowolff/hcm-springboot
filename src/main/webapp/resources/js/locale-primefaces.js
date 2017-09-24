@@ -1,4 +1,5 @@
-﻿PrimeFaces.locales['pt'] = {
+﻿
+PrimeFaces.locales['pt'] = {
         closeText: 'Fechar',
         prevText: 'Anterior',
         nextText: 'Próximo',

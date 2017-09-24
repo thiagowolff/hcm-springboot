@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html"
+	  xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<f:view contentType="text/html" encoding="UTF-8">
+	<head>
+		<ui:include src="/layout/headCommons.xhtml" />
+	</head>
+
+	<h:body>
+		<h:form>
+			<div class="error-panel animate-1 bounceIn">
+				#{msg['error.pageNotFound']}
+
+				<div style="font-size: 80px;">
+					<span class="animate-2 fadeIn">4</span>
+					<span class="animate-3 fadeIn">0</span>
+					<span class="animate-4 fadeIn">4</span>
+				</div>
+			</div>
+		</h:form>
+	</h:body>
+</f:view>
+</html>

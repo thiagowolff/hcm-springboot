@@ -28,10 +28,11 @@
 				</p:column>
 				
 				<p:column headerText="#{msg['label.lastAccess']}" sortBy="#{user.lastAccess}" width="200">
-					<h:outputText value="#{user.lastAccess}">
+					<h:outputText id="userLastAccess" value="#{user.lastAccess}">
 						<f:converter converterId="localDateTimeConverter" />
 						<f:attribute name="pattern" value="dd/MM/yyyy HH:mm:ss" />
 					</h:outputText>
+					<p:tooltip for="#{p:component('userLastAccess')}" value="#{user.lastAccessLocationFormatted}" position="bottom" escape="false" rendered="#{loginController.hasDevRights()}" />
 				</p:column>
 				
 				<p:column headerText="#{msg['label.action']}" width="150">
@@ -50,28 +51,28 @@
 
 	<o:importConstants type="br.com.litecode.domain.model.User.Role" />
 
-	<p:dialog header="#{msg['label.user']}" widgetVar="userDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
+	<p:dialog header="#{msg['label.user']}" widgetVar="userDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true" fitViewport="true">
 		<h:form id="userForm">
 			<ui:param name="newUser" value="#{userController.user.userId eq null}" />
 			<p:messages id="userMessages" autoUpdate="true" />
 			<p:panelGrid id="userGrid" columns="2" styleClass="dialog-content">
-				<h:outputLabel value="#{msg['label.name']}" for="fullName" />
+				<p:outputLabel value="#{msg['label.name']}" for="fullName" />
 				<p:inputText id="fullName" value="#{userController.user.name}" maxlength="80" required="true" size="50" />
 
-				<h:outputLabel value="#{msg['label.login']}" for="userLogin" />
+				<p:outputLabel value="#{msg['label.login']}" for="userLogin" />
 				<p:inputText id="userLogin" value="#{userController.user.username}" size="50" maxlength="50" required="true" />
 
-				<h:outputLabel value="#{msg['label.role']}" for="role" />
+				<p:outputLabel value="#{msg['label.role']}" for="role" />
 				<p:selectOneMenu id="role" value="#{userController.user.role}" required="true" converter="omnifaces.SelectItemsConverter">
 					<f:selectItem itemLabel="#{lcf:enum(Role.DEV)}" itemValue="#{Role.DEV}" itemDisabled="#{not loginController.hasDevRights()}" />
 					<f:selectItem itemLabel="#{lcf:enum(Role.ADMIN)}" itemValue="#{Role.ADMIN}" />
 					<f:selectItem itemLabel="#{lcf:enum(Role.USER)}" itemValue="#{Role.USER}" />
 				</p:selectOneMenu>
 
-				<h:outputLabel value="#{msg['label.password']}" for="password" rendered="#{newUser}"/>
+				<p:outputLabel value="#{msg['label.password']}" for="password" rendered="#{newUser}"/>
 				<p:password id="password" value="#{userController.user.password}" required="true" requiredMessage="#{msg['error.passwordRequired']}" match="matchPassword" validatorMessage="#{msg['error.passwordMismatch']}" rendered="#{newUser}" />
 
-				<h:outputLabel value="#{msg['label.passwordConfirmation']}" for="matchPassword" rendered="#{newUser}"/>
+				<p:outputLabel value="#{msg['label.passwordConfirmation']}" for="matchPassword" rendered="#{newUser}"/>
 				<p:password id="matchPassword" value="#{userController.user.password}" maxlength="50" required="true" requiredMessage="#{msg['error.passwordConfirmationRequired']}" validatorMessage="#{msg['error.maxLength']}" rendered="#{newUser}" />
 			</p:panelGrid>
 
@@ -104,6 +105,8 @@
    		</p:dialog>
   	</h:form>
 	<script type="text/javascript">
-		mixpanel.track('Users page');
+		$().ready(function() {
+			mixpanel.track('Users page');
+		})
 	</script>
 </ui:composition>
