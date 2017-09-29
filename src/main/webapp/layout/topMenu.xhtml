@@ -6,9 +6,37 @@
 	
 	<ui:composition>
 		<h:form prependId="false">
-			<div class="top-button-menu">
+			<div class="navbar hidden-xs hidden-sm">
+				<ul class="nav navbar-nav">
+					<li>
+						<p:commandButton id="sessionsMenuButton" actionListener="#{navigationController.setActivePage('/session.xhtml')}" process="@this" update=":content" icon="fa fa-clock-o" styleClass="btn-flat" />
+						<p:tooltip for="sessionsMenuButton" value="#{msg['menu.sessions']}" position="bottom"/>
+					</li>
+					<li>
+						<p:commandButton id="patientsMenuButton" actionListener="#{navigationController.setActivePage('/patient.xhtml')}" update=":content" icon="fa fa-id-badge" rendered="#{loginController.hasAdminRights()}" styleClass="btn-flat" />
+						<p:tooltip for="patientsMenuButton" value="#{msg['menu.patients']}" position="bottom"/>
+					</li>
+					<li>
+						<p:commandButton id="chambersMenuButton" actionListener="#{navigationController.setActivePage('/chamber.xhtml')}" update=":content" icon="fa fa-server" rendered="#{loginController.hasAdminRights()}" />
+						<p:tooltip for="chambersMenuButton" value="#{msg['menu.chambers']}" position="bottom"/>
+					</li>
+					<li>
+						<p:commandButton id="statisticsMenuButton" actionListener="#{navigationController.setActivePage('/charts.xhtml')}" update=":content" icon="fa fa-bar-chart" styleClass="btn-flat" />
+						<p:tooltip for="statisticsMenuButton" value="#{msg['menu.statistics']}" position="bottom"/>
+					</li>
+					<li>
+						<p:menuButton value="#{''}" styleClass="header-menu" icon="fa fa-user">
+							<p:menuitem value="#{loggedUser.name}" icon="fa fa-user-md" disabled="true" />
+							<p:separator/>
+							<p:menuitem value="#{msg['menu.users']}" actionListener="#{navigationController.setActivePage('/user.xhtml')}" action="#{userController.setUsers(null)}" update=":content" icon="fa fa-user" rendered="#{loginController.hasAdminRights()}" />
+							<p:menuitem value="#{msg['menu.logout']}" process="@this" action="#{loginController.logout}" icon="fa fa-sign-out" />
+						</p:menuButton>
+					</li>
+				</ul>
+			</div>
+			<div class="top-button-menu hidden-md hidden-lg">
 				<div class="header-menu-panel">
-					<p:menuButton id="userMenu" value="#{''}" styleClass="header-menu" icon="fa fa-ellipsis-v">
+					<p:menuButton value="#{''}" styleClass="header-menu" icon="fa fa-ellipsis-v">
 						<p:menuitem value="#{loggedUser.name}" icon="fa fa-user-md" disabled="true" />
 						<p:separator/>
 						<p:menuitem value="#{msg['menu.sessions']}" actionListener="#{navigationController.setActivePage('/session.xhtml')}" update=":content" icon="fa fa-clock-o" />

@@ -12,7 +12,7 @@
 
 	<div class="content-wrapper">
 		<h:form id="form">
-			<p:panelGrid columns="7" layout="grid" style="margin-bottom: 15px;">
+			<p:panelGrid columns="7" layout="grid" styleClass="session-toolbar">
 				<h:panelGroup style="white-space: nowrap;">
 					<p:commandButton icon="fa fa-chevron-left" actionListener="#{sessionController.previousSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
 					<p:calendar id="sessionDate" value="#{sessionController.sessionInput.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" beforeShowDay="sessionDates" converter="localDateTimeConverter">
@@ -83,7 +83,7 @@
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.numberOfSessions']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-xs" style="vertical-align: top; white-space: nowrap">
+					<p:column headerText="#{msg['label.attendance']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-xs" style="vertical-align: top; white-space: nowrap">
 						<ui:repeat value="#{patientController.getPatientStats(chamberSession.sessionId, sessionController.sessionInput.sessionDate).toArray()}" var="patientStats">
 							<div>
 								<h:outputText value="#{patientStats.completedSessions}" />

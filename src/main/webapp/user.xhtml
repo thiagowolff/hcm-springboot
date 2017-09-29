@@ -12,22 +12,22 @@
 
 		<div class="content-wrapper">
 			<p:dataTable id="userTable" var="user" value="#{userController.users}" paginator="true" rows="20" paginatorPosition="bottom" paginatorAlwaysVisible="false" emptyMessage="#{msg['message.noData']}">
-				<p:column headerText="#{msg['label.login']}" sortBy="#{user.username}" styleClass="text-left" width="250">
+				<p:column headerText="#{msg['label.login']}" sortBy="#{user.username}" styleClass="text-left medium-column" priority="1">
 					<h:outputText id="username" value="#{user.username}" style="color: #{user.sessionId ne null ? '#00d02a' : '#000000'}" />
 				</p:column>
 				
-				<p:column headerText="#{msg['label.name']}" sortBy="#{user.name}" styleClass="text-left">
+				<p:column headerText="#{msg['label.name']}" sortBy="#{user.name}" styleClass="text-left" priority="1">
 					<h:outputText value="#{user.name}" />
 				</p:column>
-				<p:column headerText="#{msg['label.role']}" width="200" styleClass="text-left">
+				<p:column headerText="#{msg['label.role']}" styleClass="text-left" priority="2">
 					<h:outputText value="#{lcf:enum(user.role)}" />
 				</p:column>
 
-				<p:column headerText="#{msg['label.creationDate']}" sortBy="#{user.creationDate}" width="150">
+				<p:column headerText="#{msg['label.creationDate']}" sortBy="#{user.creationDate}" width="150" priority="3">
 					<h:outputText value="#{user.creationDate}" converter="localDateTimeConverter" />
 				</p:column>
 				
-				<p:column headerText="#{msg['label.lastAccess']}" sortBy="#{user.lastAccess}" width="200">
+				<p:column headerText="#{msg['label.lastAccess']}" sortBy="#{user.lastAccess}" width="150" priority="1">
 					<h:outputText id="userLastAccess" value="#{user.lastAccess}">
 						<f:converter converterId="localDateTimeConverter" />
 						<f:attribute name="pattern" value="dd/MM/yyyy HH:mm:ss" />
@@ -35,7 +35,7 @@
 					<p:tooltip for="#{p:component('userLastAccess')}" value="#{user.lastAccessLocationFormatted}" position="bottom" escape="false" rendered="#{loginController.hasDevRights()}" />
 				</p:column>
 				
-				<p:column headerText="#{msg['label.action']}" width="150">
+				<p:column headerText="#{msg['label.action']}" width="150" priority="4">
 					<p:commandButton process="@this" update=":userForm" actionListener="#{userController.setUser(user)}" oncomplete="PF('userDialog').show()" icon="fa fa-pencil" title="#{msg['button.edit']}" />
 					<p:commandButton process="@this" update=":content" actionListener="#{userController.killUserSession(user)}" icon="fa fa-sign-out" title="#{msg['button.killSession']}" rendered="#{loginController.hasDevRights() and user.sessionId ne null and loggedUser.username ne user.username}">
 						<f:setPropertyActionListener value="/user.xhtml" target="#{navigationController.activePage}" />

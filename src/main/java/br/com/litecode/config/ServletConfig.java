@@ -69,7 +69,7 @@ public class ServletConfig extends WebMvcConfigurerAdapter implements ServletCon
 
 	@Override
 	public void customize(ConfigurableEmbeddedServletContainer container) {
-		container.addErrorPages(new ErrorPage(ViewExpiredException.class, "/errorPage.xhtml"));
+		container.addErrorPages(new ErrorPage(ViewExpiredException.class, "/login.xhtml"));
 		container.addErrorPages(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/errorPage.xhtml"));
 		container.addErrorPages(new ErrorPage(HttpStatus.NOT_FOUND, "/pageNotFound.xhtml"));
 	}
