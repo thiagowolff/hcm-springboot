@@ -19,7 +19,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
-import org.hibernate.Hibernate;
 import org.omnifaces.util.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -39,6 +38,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @SessionScoped
@@ -82,12 +82,13 @@ public class SessionController implements Serializable {
 		sessionInput = new SessionInput();
 		scheduledSessionDates = sessionRepository.findScheduledSessionDates();
 		sessionCache = cacheManager.getCache("session");
+		sessionCache.clear();
 	}
 
 	@Transactional(readOnly = true)
-	@Cacheable(key = "{ #chamberId, #sessionDate }")
+	@Cacheable(key = "{ #chamberId, #sessionDate }", sync = true)
 	public List<Session> getSessions(Integer chamberId, LocalDate sessionDate) {
-		return sessionRepository.findSessionsByChamberAndDate(chamberId, sessionDate);
+		return new CopyOnWriteArrayList(sessionRepository.findSessionsByChamberAndDate(chamberId, sessionDate));
 	}
 
 	@Transactional

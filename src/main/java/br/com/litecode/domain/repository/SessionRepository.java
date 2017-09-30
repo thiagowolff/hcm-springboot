@@ -10,11 +10,11 @@ import java.util.List;
 
 public interface SessionRepository extends CrudRepository<Session, Integer> {
 	default List<Session> findSessionsByDate(LocalDate sessionDate) {
-		return findSessionsByDate(sessionDate.atStartOfDay(), sessionDate.plusDays(1).atStartOfDay());
+		return findSessionsByDate(sessionDate.atStartOfDay(), sessionDate.atTime(23, 59, 59));
 	}
 
 	default List<Session> findSessionsByChamberAndDate(Integer chamberId, LocalDate sessionDate) {
-		return findSessionsByChamberAndDate(chamberId, sessionDate.atStartOfDay(), sessionDate.plusDays(1).atStartOfDay());
+		return findSessionsByChamberAndDate(chamberId, sessionDate.atStartOfDay(), sessionDate.atTime(23, 59, 59));
 	}
 
 	@Query("select s from Session s where s.scheduledTime between :startOfDay and :endOfDay order by s.scheduledTime, s.sessionId")

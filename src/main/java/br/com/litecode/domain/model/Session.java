@@ -34,7 +34,7 @@ public class Session implements Comparable<Session>, Serializable {
 	private Chamber chamber;
 
 	@SortNatural
-	@OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "session", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private SortedSet<PatientSession> patientSessions;
 
 	private LocalDateTime scheduledTime;

@@ -37,6 +37,7 @@ public class Patient {
 		creationDate = LocalDateTime.now();
 		patientSessions = new TreeSet<>();
 		active = true;
+		name = "";
 	}
 
 	public Patient(String name) {
