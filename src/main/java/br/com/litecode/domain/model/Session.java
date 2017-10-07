@@ -1,20 +1,21 @@
 package br.com.litecode.domain.model;
 
 import br.com.litecode.domain.model.ChamberEvent.EventType;
+import br.com.litecode.domain.repository.ContextDataConverter;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.shiro.SecurityUtils;
 import org.hibernate.annotations.SortNatural;
+import org.omnifaces.util.Faces;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 import java.util.SortedSet;
+import java.util.TimeZone;
 import java.util.TreeSet;
 
 @Entity
@@ -50,25 +51,44 @@ public class Session implements Comparable<Session>, Serializable {
 	@Transient
 	private long currentProgress;
 
-	@Transient
-	private String managedBy;
+	@Convert(converter = ContextDataConverter.class)
+	private ContextData contextData;
 
 	public Session() {
 		patientSessions = new TreeSet<>();
 		status = SessionStatus.CREATED;
 		currentProgress = 0;
+		contextData = new ContextData();
 	}
 
 	public LocalDate getSessionDate() {
 		return scheduledTime.toLocalDate();
 	}
 
-	public void reset() {
-		LocalDateTime now = LocalDateTime.now();
+	public String getPatients() {
+		String patients = "";
+		for (PatientSession patientSession : patientSessions) {
+			patients += patientSession.getPatient().getName() + "<br />";
+		}
+		return patients;
+	}
+
+	public void init() {
+		ZoneId timeZone = Faces.getSessionAttribute("timeZone");
+		contextData.setTimeZone(timeZone == null ? ZoneId.systemDefault().getId() : timeZone.getId());
+
+		LocalDateTime now = LocalDateTime.now(ZoneId.of(contextData.getTimeZone()));
 		startTime = now.toLocalTime();
 		endTime = now.plus(chamber.getChamberEvent(EventType.COMPLETION).getTimeout(), ChronoUnit.SECONDS).toLocalTime();
 		currentProgress = 0;
 		status = SessionStatus.CREATED;
+	}
+
+	public void reset() {
+		startTime = scheduledTime.toLocalTime();
+		endTime = scheduledTime.plus(chamber.getChamberEvent(EventType.COMPLETION).getTimeout(), ChronoUnit.SECONDS).toLocalTime();
+		status = SessionStatus.CREATED;
+		currentProgress = 0;
 	}
 
 	public void addPatient(Patient patient) {
@@ -76,7 +96,7 @@ public class Session implements Comparable<Session>, Serializable {
 	}
 
 	public void updateProgress() {
-		long remainingMillis = Duration.between(LocalTime.now(), endTime).toMillis();
+		long remainingMillis = Duration.between(LocalTime.now(ZoneId.of(contextData.getTimeZone())), endTime).toMillis();
 		long duration = Duration.between(startTime, endTime).toMillis();
 		long elapsedTime =  duration - remainingMillis;
 
@@ -144,5 +164,13 @@ public class Session implements Comparable<Session>, Serializable {
 	@Override
 	public String toString() {
 		return "Session " + sessionId + " [" + status + "]";
+	}
+
+	@Getter
+	@Setter
+	public static class ContextData implements Serializable {
+		private String createdBy;
+		private String startedBy;
+		private String timeZone;
 	}
 }

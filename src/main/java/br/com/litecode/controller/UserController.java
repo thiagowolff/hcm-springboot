@@ -3,8 +3,10 @@ package br.com.litecode.controller;
 import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.UserRepository;
 import br.com.litecode.security.UserSessionTracker;
+import br.com.litecode.service.MailService;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.omnifaces.util.Messages;
 import org.primefaces.context.RequestContext;
@@ -24,12 +26,19 @@ public class UserController implements Serializable {
 	@Autowired
 	private UserSessionTracker userSessionTracker;
 
+	@Autowired
+	private MailService mailService;
+
 	@Getter
 	@Setter
 	private User user;
 
 	@Setter
 	private Iterable<User> users;
+
+	@Getter
+	@Setter
+	private String helpMessage;
 
 	@PostConstruct
 	public void init() {
@@ -84,6 +93,10 @@ public class UserController implements Serializable {
 	public void killUserSession(User user) {
 		userSessionTracker.killUserSession(user);
 		users = null;
+	}
+
+	public void sendHelpMessageEmail() {
+		mailService.sendEmail("thiago.wolff@gmail.com", "HCM - Report Issue [" + SecurityUtils.getSubject().getPrincipal() + "]", helpMessage);
 	}
 
 	public void newUser() {

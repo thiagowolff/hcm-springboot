@@ -1,10 +1,12 @@
 package br.com.litecode.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.omnifaces.filter.FacesExceptionFilter;
 import org.omnifaces.util.Messages;
 import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.web.servlet.ErrorPage;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import javax.el.ELException;
 import javax.faces.application.ViewExpiredException;
 import javax.faces.webapp.FacesServlet;
 import javax.servlet.ServletContext;
@@ -70,6 +73,7 @@ public class ServletConfig extends WebMvcConfigurerAdapter implements ServletCon
 	@Override
 	public void customize(ConfigurableEmbeddedServletContainer container) {
 		container.addErrorPages(new ErrorPage(ViewExpiredException.class, "/login.xhtml"));
+		container.addErrorPages(new ErrorPage(ELException.class, "/errorPage.xhtml"));
 		container.addErrorPages(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/errorPage.xhtml"));
 		container.addErrorPages(new ErrorPage(HttpStatus.NOT_FOUND, "/pageNotFound.xhtml"));
 	}

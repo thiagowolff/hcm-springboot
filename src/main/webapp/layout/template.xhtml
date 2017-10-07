@@ -46,10 +46,24 @@
 				</div>
 			</div>
 		</div>
-		<footer class="footer animate-1 bounceInLeft hidden-xs">
-			<span >#{msg['title.poweredBy']} &#8211;</span>
-			<span class="animate-3 fadeIn" style="#{loginController.newVersion ? 'color: green' : ''}">v. #{version['version']} (#{version['versionUpdatedOn']} #{version['versionDate']})</span>
+		<footer class="footer hidden-xs">
+			<p:link styleClass="animate-1 fadeIn text-primary" style="position: absolute; left: 15px; z-index: 2;" onclick="PF('helpDialog').show(); return false;"><i class="fa fa-question-circle" /> #{msg['title.help']}</p:link>
+			<div class="animate-1 fadeIn">
+				<span>#{msg['title.poweredBy']} &#8211;</span>
+				<span class="animate-3 fadeIn" style="#{loginController.newVersion ? 'color: green' : ''}">v. #{version['version']} (#{version['versionUpdatedOn']} #{version['versionDate']})</span>
+			</div>
 		</footer>
+
+		<p:dialog header="#{msg['title.help']}" widgetVar="helpDialog" width="50%" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
+			<h:form id="helpForm">
+				<div class="form-group">
+					<label for="helpMessage">#{msg['message.help']}</label>
+					<p:inputTextarea id="helpMessage" value="#{userController.helpMessage}" class="form-control" rows="10" style="width: 100%;" />
+				</div>
+				<p:commandButton value="#{msg['button.send']}" process="@this, helpMessage" oncomplete="PF('helpDialog').hide();" actionListener="#{userController.sendHelpMessageEmail()}" styleClass="btn-success pull-right"/>
+			</h:form>
+		</p:dialog>
+
 		<script>
 			function calculateHeight() {
 				var height = $(window).height();

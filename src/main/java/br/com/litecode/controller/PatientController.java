@@ -38,7 +38,7 @@ public class PatientController implements Serializable {
 	}
 
 	@Cacheable(key = "{ #sessionId, #sessionDate }", sync = true)
-	public List<PatientStats>  getPatientStats(Integer sessionId, LocalDate sessionDate) {
+	public List<PatientStats> getPatientStats(Integer sessionId, LocalDate sessionDate) {
 		return patientRepository.findPatienStats(sessionId, sessionDate.plusDays(1).atStartOfDay());
 	}
 

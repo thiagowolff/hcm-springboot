@@ -22,6 +22,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.TimeZone;
 
 @RequestScoped
 @Component
@@ -58,7 +60,7 @@ public class LoginController {
 			userRepository.save(user);
 			userSessionTracker.addUserSession(user, Faces.getSession());
 
-			Faces.getSessionMap().put("loggedUser", user);
+			Faces.setSessionAttribute("loggedUser", user);
 			Faces.redirect("");
 
 			log.info("User {} logged in successfully", user.getUsername());
@@ -77,10 +79,9 @@ public class LoginController {
 			connection.setRequestMethod("GET");
 			return new String(ByteStreams.toByteArray(connection.getInputStream()));
 		} catch (Exception e) {
-			log.warn("Unable to retrieve IP geo location for{}", Faces.getRemoteAddr());
+			log.warn("Unable to retrieve IP geo location for {}", Faces.getRemoteAddr());
 			return null;
 		}
-
 	}
 	
 	public void logout() {
@@ -92,6 +93,23 @@ public class LoginController {
         } catch (IOException e) {
         	Messages.addGlobalError(e.getMessage());
         }
+	}
+
+	public void setClientTimeZone() {
+		String clientTimeZone = Faces.getRequestParameter("clientTimeZone");
+
+		if (clientTimeZone == null) {
+			return;
+		}
+
+		int timeZoneOffset = Integer.parseInt(clientTimeZone);
+		if (timeZoneOffset >= 0) {
+			clientTimeZone = "+" + timeZoneOffset;
+		}
+
+		ZoneId timeZone = ZoneId.of("GMT" + clientTimeZone);
+		Faces.getSessionMap().put("timeZone", timeZone);
+		log.info("Client time zone: {}", timeZone);
 	}
 
 	public boolean hasDevRights() {

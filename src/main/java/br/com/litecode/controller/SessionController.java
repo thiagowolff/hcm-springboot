@@ -8,6 +8,7 @@ import br.com.litecode.domain.model.Session;
 import br.com.litecode.domain.model.Session.SessionStatus;
 import br.com.litecode.domain.repository.ChamberRepository;
 import br.com.litecode.domain.repository.SessionRepository;
+import br.com.litecode.service.PdfService;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushRefresh;
 import br.com.litecode.service.push.PushService;
@@ -19,6 +20,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
+import org.omnifaces.util.Faces;
 import org.omnifaces.util.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -36,6 +38,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -60,6 +63,9 @@ public class SessionController implements Serializable {
 
 	@Autowired
 	private CacheManager cacheManager;
+
+	@Autowired
+	private PdfService pdfService;
 
 	private Cache sessionCache;
 
@@ -113,20 +119,19 @@ public class SessionController implements Serializable {
 		session.setScheduledTime(scheduledTime);
 		session.setStartTime(session.getScheduledTime().toLocalTime());
 		session.setEndTime(endTime);
-		session.setManagedBy((String) SecurityUtils.getSubject().getPrincipal());
+		session.getContextData().setCreatedBy((String) SecurityUtils.getSubject().getPrincipal());
 		sessionInput.getPatients().forEach(session::addPatient);
 		sessionRepository.save(session);
 		invalidateSessionCache();
-		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name()), session.getManagedBy());
+		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name()), session.getContextData().getCreatedBy());
 	}
 
-	@Transactional
 	@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }")
 	public void startSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
-		session.reset();
-		session.setManagedBy((String) SecurityUtils.getSubject().getPrincipal());
-
+		session.init();
+		session.getContextData().setStartedBy((String) SecurityUtils.getSubject().getPrincipal());
+		sessionRepository.save(session);
 		sessionTimer.startSession(session);
 	}
 
@@ -160,7 +165,7 @@ public class SessionController implements Serializable {
 	public void deleteSession(Session session) {
 		sessionTimer.stopSession(session);
 		sessionRepository.delete(session);
-		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(sessionInput.getSession(), SessionOperationType.DELETE_SESSION.name()), sessionInput.getSession().getManagedBy());
+		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(sessionInput.getSession(), SessionOperationType.DELETE_SESSION.name()), sessionInput.getSession().getContextData().getCreatedBy());
 	}
 
 	@PushRefresh
@@ -209,6 +214,7 @@ public class SessionController implements Serializable {
 			session.setScheduledTime(sessionTime);
 			session.setStartTime(sessionTime.toLocalTime());
 			session.setEndTime(sessionTime.plusSeconds(sessionDuration).toLocalTime());
+			session.getContextData().setCreatedBy((String) SecurityUtils.getSubject().getPrincipal());
 			fromSession.getPatientSessions().forEach(ps -> session.addPatient(ps.getPatient()));
 			sessionRepository.save(session);
 		}
@@ -252,6 +258,16 @@ public class SessionController implements Serializable {
 		}
 		keys.forEach(sessionCache::evict);
 		sessionInput.reset();
+	}
+
+	public void generateDailySessionsReport() {
+		byte[] sessionsReportContent;
+		try {
+			sessionsReportContent = pdfService.generateSessionReport(sessionInput.getSessionDate());
+			Faces.sendFile(sessionsReportContent, sessionInput.getSessionDate().format(DateTimeFormatter.BASIC_ISO_DATE) + ".pdf", false);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public String getScheduledSessionDates() {

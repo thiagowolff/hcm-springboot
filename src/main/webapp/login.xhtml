@@ -9,8 +9,6 @@
 <f:view contentType="text/html" encoding="UTF-8">
 	<h:head>
 		<ui:include src="/layout/headCommons.xhtml" />
-		<meta http-equiv="Pragma" content="no-cache" />
-		<meta http-equiv="Expires" content="0" />
 	</h:head>
 	
 	<h:body styleClass="login-page">
@@ -69,9 +67,18 @@
 					</div>
 				</div>
         	</h:form>
+
+        	<h:form>
+				<p:remoteCommand name="setClientTimeZone" actionListener="#{loginController.setClientTimeZone()}" />
+			</h:form>
 		</div>
 		<script type="text/javascript">
-			mixpanel.track('Login page');
+			$().ready(function() {
+				mixpanel.track('Login page');
+
+				var timeZone = new Date().getTimezoneOffset() / 60 * -1;
+				setClientTimeZone([{ name: 'clientTimeZone', value: timeZone }]);
+			});
 		</script>
 	</h:body>
 </f:view>

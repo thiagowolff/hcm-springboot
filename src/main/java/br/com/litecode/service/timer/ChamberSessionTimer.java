@@ -54,7 +54,7 @@ public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBe
 			sessionClock.stop(session);
 		}
 
-		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, chamberEvent.toString()), session.getManagedBy());
+		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, chamberEvent.toString()), session.getContextData().getStartedBy());
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBe
 	private void clockTimeout() {
 		for (Session session : sessionClock.getActiveListeners()) {
 			session.updateProgress();
-			pushService.publish(PushChannel.PROGRESS, ProgressMessage.create(session), session.getManagedBy());
+			pushService.publish(PushChannel.PROGRESS, ProgressMessage.create(session), session.getContextData().getStartedBy());
 		}
 	}
 
