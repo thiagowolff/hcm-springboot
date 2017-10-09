@@ -13,6 +13,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class PdfService {
+public class SessionReportService {
 	@Autowired
 	private ChamberRepository chamberRepository;
 
@@ -81,12 +82,12 @@ public class PdfService {
 
 	private TableCell[] getPatientHeaders() {
 		TableCell[] headers = {
-				new TableCell("label.name", 8, Element.ALIGN_LEFT),
-				new TableCell("label.patientSessionPresent", 8, Element.ALIGN_CENTER),
-				new TableCell("label.healthInsurance", 8, Element.ALIGN_LEFT),
-				new TableCell("label.patientRecord", 8, Element.ALIGN_CENTER),
-				new TableCell("label.folderNumber", 8, Element.ALIGN_CENTER),
-				new TableCell("label.attendance", 8, Element.ALIGN_CENTER)
+				new TableCell("label.patient", Element.ALIGN_LEFT),
+				new TableCell("label.patientSessionPresent", Element.ALIGN_CENTER),
+				new TableCell("label.healthInsurance", Element.ALIGN_LEFT),
+				new TableCell("label.patientRecord", Element.ALIGN_CENTER),
+				new TableCell("label.folderNumber", Element.ALIGN_CENTER),
+				new TableCell("label.attendance", Element.ALIGN_CENTER)
 		};
 
 		return headers;
@@ -102,7 +103,7 @@ public class PdfService {
 
 		PdfPTable table = new PdfPTable(sessionHeaders.length);
 		table.setWidthPercentage(100);
-		table.setWidths(new int[] { 1, 4, 1, 1, 1 });
+		table.setWidths(new int[] { 1, 6, 1, 1, 1 });
 
 		for (TableCell header : sessionHeaders) {
 			if (header.getLabel().equals(patientHeader)) {
@@ -112,12 +113,16 @@ public class PdfService {
 			}
 		}
 
+		DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+		int rowIndex = 0;
 		for (Session session : sessions) {
-			table.addCell(createCell(new TableCell(session.getSessionId()::toString)));
-			table.addCell(createPatientsTable(session, sessionDate));
-			table.addCell(createCell(new TableCell(() -> session.getScheduledTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))));
-			table.addCell(createCell(new TableCell(() -> session.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))));
-			table.addCell(createCell(new TableCell(() -> session.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))));
+			table.addCell(createCell(new TableCell(rowIndex, session.getSessionId()::toString)));
+			table.addCell(createPatientsTable(rowIndex, session, sessionDate));
+			table.addCell(createCell(new TableCell(rowIndex, () -> session.getScheduledTime().format(timeFormatter))));
+			table.addCell(createCell(new TableCell(rowIndex, () -> session.getStartTime().format(timeFormatter))));
+			table.addCell(createCell(new TableCell(rowIndex, () -> session.getEndTime().format(timeFormatter))));
+			rowIndex++;
 		}
 
 		return table;
@@ -127,9 +132,6 @@ public class PdfService {
 		TableCell[] patientHeaders = getPatientHeaders();
 
 		PdfPTable table = new PdfPTable(patientHeaders.length);
-		PdfPCell headerCell = createCell(new TableCell("label.patients", 10, Element.ALIGN_CENTER));
-		headerCell.setColspan(patientHeaders.length);
-		table.addCell(headerCell);
 		table.setWidths(new int[] { 3, 1, 1, 1, 1, 1 });
 
 		for (TableCell patientHeader : patientHeaders) {
@@ -139,7 +141,7 @@ public class PdfService {
 		return new PdfPCell(table);
 	}
 
-	private PdfPCell createPatientsTable(Session session, LocalDate sessionDate) throws DocumentException {
+	private PdfPCell createPatientsTable(int rowIndex, Session session, LocalDate sessionDate) throws DocumentException {
 		TableCell[] patientHeaders = getPatientHeaders();
 		PdfPTable table = new PdfPTable(patientHeaders.length);
 		table.setWidths(new int[] { 3, 1, 1, 1, 1, 1 });
@@ -147,12 +149,19 @@ public class PdfService {
 		Map<Integer, PatientStats> patientStats = patientRepository.findPatienStats(session.getSessionId(), sessionDate.plusDays(1).atStartOfDay()).stream().collect(Collectors.toMap(PatientStats::getPatientId, Function.identity()));
 
 		for (PatientSession patientSession : session.getPatientSessions()) {
-			table.addCell(createCell(new TableCell(patientSession.getPatient()::getName, 8, Element.ALIGN_LEFT)));
-			table.addCell(createCell(new TableCell(() -> patientSession.isAbsent() ? "" : "x", 8, Element.ALIGN_CENTER)));
-			table.addCell(createCell(new TableCell(patientSession.getPatient()::getHealthInsurance, 8, Element.ALIGN_LEFT)));
-			table.addCell(createCell(new TableCell(patientSession.getPatient()::getPatientRecord, 8, Element.ALIGN_CENTER)));
-			table.addCell(createCell(new TableCell(patientSession.getPatient()::getFolderNumber, 8, Element.ALIGN_CENTER)));
-			table.addCell(createCell(new TableCell(() -> String.valueOf(patientStats.get(patientSession.getPatient().getPatientId()).getCompletedSessions()), 8, Element.ALIGN_CENTER)));
+			TableCell patientName = new TableCell(rowIndex, patientSession.getPatient()::getName, Element.ALIGN_LEFT);
+			if (patientSession.isAbsent()) {
+				patientName.setColor(BaseColor.DARK_GRAY);
+			}
+
+			table.addCell(createCell(patientName));
+			table.addCell(createCell(new TableCell(rowIndex, () -> patientSession.isAbsent() ? "" : "x", Element.ALIGN_CENTER)));
+			table.addCell(createCell(new TableCell(rowIndex, patientSession.getPatient()::getHealthInsurance, Element.ALIGN_LEFT)));
+			table.addCell(createCell(new TableCell(rowIndex, patientSession.getPatient()::getPatientRecord, Element.ALIGN_CENTER)));
+			table.addCell(createCell(new TableCell(rowIndex, patientSession.getPatient()::getFolderNumber, Element.ALIGN_CENTER)));
+
+			int completedSessions = patientStats.get(patientSession.getPatient().getPatientId()).getCompletedSessions();
+			table.addCell(createCell(new TableCell(rowIndex, () -> String.valueOf(completedSessions), Element.ALIGN_CENTER)));
 		}
 
 		PdfPCell cell = new PdfPCell(table);
@@ -163,7 +172,7 @@ public class PdfService {
 
 	private PdfPCell createCell(TableCell tableCell) {
 		String text = tableCell.getValueSupplier() != null ? tableCell.getValue() : tableCell.getLabel();
-		PdfPCell cell = new PdfPCell(new Phrase(text, new Font(Font.FontFamily.HELVETICA, tableCell.getFontSize(), Font.NORMAL, tableCell.getColor())));
+		PdfPCell cell = new PdfPCell(new Phrase(text, new Font(Font.FontFamily.HELVETICA, tableCell.getFontSize(), tableCell.getFontStyle(), tableCell.getColor())));
 		cell.setBackgroundColor(tableCell.getBackgroundColor());
 		cell.setHorizontalAlignment(tableCell.getTextAlign());
 		cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
@@ -172,32 +181,37 @@ public class PdfService {
 	}
 
 	@Getter
+	@Setter
 	private static class TableCell {
 		private String header;
 		private Supplier<String> valueSupplier;
-		private int fontSize = 10;
+		private int fontSize = 8;
+		private int fontStyle = Font.NORMAL;
 		private int textAlign = Element.ALIGN_CENTER;
 		private BaseColor color = BaseColor.BLACK;
 		private BaseColor backgroundColor = BaseColor.WHITE;
 
 		public TableCell(String header) {
 			this.header = header;
-			this.backgroundColor = new BaseColor(230, 230, 230);
+			fontStyle = Font.BOLD;
+			backgroundColor = new BaseColor(220, 220, 220);
 		}
 
-		public TableCell(String header, int fontSize, int textAlign) {
+		public TableCell(String header, int textAlign) {
 			this(header);
-			this.fontSize = fontSize;
 			this.textAlign = textAlign;
 		}
 
-		public TableCell(Supplier<String> valueSupplier) {
+		public TableCell(int rowIndex, Supplier<String> valueSupplier) {
 			this.valueSupplier = valueSupplier;
+
+			if (rowIndex % 2 > 0) {
+				backgroundColor = new BaseColor(245, 245, 245);
+			}
 		}
 
-		public TableCell(Supplier<String> valueSupplier, int fontSize, int textAlign) {
-			this.valueSupplier = valueSupplier;
-			this.fontSize = fontSize;
+		public TableCell(int rowIndex, Supplier<String> valueSupplier, int textAlign) {
+			this(rowIndex, valueSupplier);
 			this.textAlign = textAlign;
 		}
 

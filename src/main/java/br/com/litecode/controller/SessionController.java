@@ -8,7 +8,7 @@ import br.com.litecode.domain.model.Session;
 import br.com.litecode.domain.model.Session.SessionStatus;
 import br.com.litecode.domain.repository.ChamberRepository;
 import br.com.litecode.domain.repository.SessionRepository;
-import br.com.litecode.service.PdfService;
+import br.com.litecode.service.SessionReportService;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushRefresh;
 import br.com.litecode.service.push.PushService;
@@ -16,6 +16,7 @@ import br.com.litecode.service.push.message.NotificationMessage;
 import br.com.litecode.service.timer.SessionTimer;
 import br.com.litecode.util.MessageUtil;
 import com.google.common.collect.Lists;
+import com.itextpdf.text.DocumentException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
+import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -65,12 +67,12 @@ public class SessionController implements Serializable {
 	private CacheManager cacheManager;
 
 	@Autowired
-	private PdfService pdfService;
+	private SessionReportService sessionReportService;
 
 	private Cache sessionCache;
 
 	@Getter @Setter
-	private SessionInput sessionInput;
+	private SessionData sessionData;
 
 	@Getter @Setter
 	private LocalDate fromSessionsDate;
@@ -85,7 +87,7 @@ public class SessionController implements Serializable {
 
 	@PostConstruct
 	private void init() {
-		sessionInput = new SessionInput();
+		sessionData = new SessionData();
 		scheduledSessionDates = sessionRepository.findScheduledSessionDates();
 		sessionCache = cacheManager.getCache("session");
 		sessionCache.clear();
@@ -99,28 +101,28 @@ public class SessionController implements Serializable {
 
 	@Transactional
 	public void addSession() {
-		int sessionDuration = sessionInput.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout();
-		LocalDateTime scheduledTime = sessionInput.getSessionDate().atTime(sessionInput.getSessionTime());
+		int sessionDuration = sessionData.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout();
+		LocalDateTime scheduledTime = sessionData.getSessionDate().atTime(sessionData.getSessionTime());
 		LocalTime endTime = scheduledTime.plusSeconds(sessionDuration).toLocalTime();
 
-		boolean isScheduled = sessionRepository.isSessionScheduled(sessionInput.getChamber().getChamberId(), scheduledTime);
+		boolean isScheduled = sessionRepository.isSessionScheduled(sessionData.getChamber().getChamberId(), scheduledTime);
 		if (isScheduled) {
 			Messages.addGlobalError(MessageUtil.getMessage("error.sessionAlreadyCreatedForPeriod"));
 			return;
 		}
 
-		if (sessionInput.getPatients().size() > sessionInput.getChamber().getCapacity()) {
-			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", sessionInput.getChamber().getCapacity()));
+		if (sessionData.getPatients().size() > sessionData.getChamber().getCapacity()) {
+			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", sessionData.getChamber().getCapacity()));
 			return;
 		}
 
 		Session session = new Session();
-		session.setChamber(sessionInput.getChamber());
+		session.setChamber(sessionData.getChamber());
 		session.setScheduledTime(scheduledTime);
 		session.setStartTime(session.getScheduledTime().toLocalTime());
 		session.setEndTime(endTime);
 		session.getContextData().setCreatedBy((String) SecurityUtils.getSubject().getPrincipal());
-		sessionInput.getPatients().forEach(session::addPatient);
+		sessionData.getPatients().forEach(session::addPatient);
 		sessionRepository.save(session);
 		invalidateSessionCache();
 		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name()), session.getContextData().getCreatedBy());
@@ -165,7 +167,7 @@ public class SessionController implements Serializable {
 	public void deleteSession(Session session) {
 		sessionTimer.stopSession(session);
 		sessionRepository.delete(session);
-		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(sessionInput.getSession(), SessionOperationType.DELETE_SESSION.name()), sessionInput.getSession().getContextData().getCreatedBy());
+		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(sessionData.getSession(), SessionOperationType.DELETE_SESSION.name()), sessionData.getSession().getContextData().getCreatedBy());
 	}
 
 	@PushRefresh
@@ -179,14 +181,14 @@ public class SessionController implements Serializable {
 	@Transactional
 	@Caching(evict = { @CacheEvict(cacheNames = "patient", allEntries = true), @CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }") })
 	public void addPatientsToSession(Session session) {
-		if (sessionInput.getPatients().size() + session.getPatientSessions().size() > session.getChamber().getCapacity()) {
+		if (sessionData.getPatients().size() + session.getPatientSessions().size() > session.getChamber().getCapacity()) {
 			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", session.getChamber().getCapacity()));
 			return;
 		}
 
 		session = sessionRepository.findOne(session.getSessionId());
-		sessionInput.getPatients().forEach(session::addPatient);
-		sessionInput.setSession(sessionRepository.save(session));
+		sessionData.getPatients().forEach(session::addPatient);
+		sessionData.setSession(sessionRepository.save(session));
 	}
 
 	@PushRefresh
@@ -196,8 +198,8 @@ public class SessionController implements Serializable {
 			@CacheEvict(cacheNames = "session", key = "{ #patientSession.session.chamber.chamberId, #patientSession.session.sessionDate }")
 	})
 	public void removePatientFromSession(PatientSession patientSession) {
-		sessionInput.getSession().getPatientSessions().remove(patientSession);
-		sessionInput.setSession(sessionRepository.save(patientSession.getSession()));
+		sessionData.getSession().getPatientSessions().remove(patientSession);
+		sessionData.setSession(sessionRepository.save(patientSession.getSession()));
 	}
 
 	@PushRefresh
@@ -222,11 +224,11 @@ public class SessionController implements Serializable {
 	}
 
 	public void previousSessionDate() {
-		sessionInput.setSessionDate(sessionInput.getSessionDate().minusDays(1));
+		sessionData.setSessionDate(sessionData.getSessionDate().minusDays(1));
 	}
 
 	public void nextSessionDate() {
-		sessionInput.setSessionDate(sessionInput.getSessionDate().plusDays(1));
+		sessionData.setSessionDate(sessionData.getSessionDate().plusDays(1));
 	}
 
 	public ChamberPayloadStatus[] getChamberPayload(Session session) {
@@ -254,19 +256,19 @@ public class SessionController implements Serializable {
 	public void invalidateSessionCache() {
 		List<List<Object>> keys = new ArrayList<>();
 		for (Chamber chamber : chamberRepository.findAll()) {
-			keys.add(Lists.newArrayList(chamber.getChamberId(), sessionInput.getSessionDate()));
+			keys.add(Lists.newArrayList(chamber.getChamberId(), sessionData.getSessionDate()));
 		}
 		keys.forEach(sessionCache::evict);
-		sessionInput.reset();
+		sessionData.reset();
 	}
 
 	public void generateDailySessionsReport() {
-		byte[] sessionsReportContent;
 		try {
-			sessionsReportContent = pdfService.generateSessionReport(sessionInput.getSessionDate());
-			Faces.sendFile(sessionsReportContent, sessionInput.getSessionDate().format(DateTimeFormatter.BASIC_ISO_DATE) + ".pdf", false);
-		} catch (Exception e) {
-			e.printStackTrace();
+			byte[] pdfData = sessionReportService.generateSessionReport(sessionData.getSessionDate());
+			String fileName = sessionData.getSessionDate().format(DateTimeFormatter.BASIC_ISO_DATE) + ".pdf";
+			Faces.sendFile(pdfData, fileName, false);
+		} catch (DocumentException | IOException e) {
+			log.error("Unable to generate PDF: {}", e);
 		}
 	}
 
@@ -277,27 +279,27 @@ public class SessionController implements Serializable {
 
 	@Getter
 	@Setter
-	public static class SessionInput {
+	public static class SessionData {
 		private Chamber chamber;
 		private Session session;
 		private List<Patient> patients;
 		private LocalDate sessionDate;
 		private LocalTime sessionTime;
 
-		public SessionInput() {
+		public SessionData() {
 			chamber = new Chamber();
 			session = new Session();
 			patients = new ArrayList<>();
 			sessionDate = LocalDate.now();
 		}
 
-		public static SessionInput of(Chamber chamber, LocalDate sessionDate, LocalTime sessionTime, Patient... patients) {
-			SessionInput sessionInput = new SessionInput();
-			sessionInput.chamber = chamber;
-			sessionInput.sessionDate = sessionDate;
-			sessionInput.sessionTime = sessionTime;
-			Collections.addAll(sessionInput.patients, patients);
-			return sessionInput;
+		public static SessionData of(Chamber chamber, LocalDate sessionDate, LocalTime sessionTime, Patient... patients) {
+			SessionData sessionData = new SessionData();
+			sessionData.chamber = chamber;
+			sessionData.sessionDate = sessionDate;
+			sessionData.sessionTime = sessionTime;
+			Collections.addAll(sessionData.patients, patients);
+			return sessionData;
 		}
 
 		public void reset() {

@@ -4,6 +4,7 @@ import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.UserRepository;
 import br.com.litecode.security.UserSessionTracker;
 import br.com.litecode.service.MailService;
+import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.shiro.SecurityUtils;
@@ -96,6 +97,10 @@ public class UserController implements Serializable {
 	}
 
 	public void sendHelpMessageEmail() {
+		if (Strings.isNullOrEmpty(helpMessage)) {
+			return;
+		}
+
 		mailService.sendEmail("thiago.wolff@gmail.com", "HCM - Report Issue [" + SecurityUtils.getSubject().getPrincipal() + "]", helpMessage);
 	}
 

@@ -1,7 +1,7 @@
 package br.com.litecode.controller;
 
 import br.com.litecode.Application;
-import br.com.litecode.controller.SessionController.SessionInput;
+import br.com.litecode.controller.SessionController.SessionData;
 import br.com.litecode.domain.model.Chamber;
 import br.com.litecode.domain.model.Patient;
 import br.com.litecode.domain.model.Session;
@@ -68,13 +68,13 @@ public class TestSessionController extends BaseControllerTest {
 	private Chamber chamber;
 	private Patient patient;
 
-	private SessionInput sessionInput;
+	private SessionData sessionData;
 
 	@Before
 	public void setUp() {
 		chamber = chamberRepository.findOne(1);
 		patient = patientRepository.findOne(1);
-		sessionInput = sessionController.getSessionInput();
+		sessionData = sessionController.getSessionData();
 	}
 
 	@Test
@@ -86,8 +86,8 @@ public class TestSessionController extends BaseControllerTest {
 
 	@Test
 	public void addSession() {
-		SessionInput sessionInput = SessionInput.of(chamber, LocalDate.now(), LocalTime.now(), patient);
-		sessionController.setSessionInput(sessionInput);
+		SessionData sessionData = SessionData.of(chamber, LocalDate.now(), LocalTime.now(), patient);
+		sessionController.setSessionData(sessionData);
 		sessionController.addSession();
 
 		Session session = sessionRepository.findSessionsByChamberAndDate(chamber.getChamberId(), LocalDate.now()).get(0);
@@ -99,10 +99,10 @@ public class TestSessionController extends BaseControllerTest {
 	@Test
 	public void addSessionExceededCapacity() {
 		chamber.setCapacity(0);
-		sessionInput.setChamber(chamber);
-		sessionInput.getPatients().add(patient);
-		sessionInput.setSessionDate(LocalDate.now());
-		sessionInput.setSessionTime(LocalTime.now());
+		sessionData.setChamber(chamber);
+		sessionData.getPatients().add(patient);
+		sessionData.setSessionDate(LocalDate.now());
+		sessionData.setSessionTime(LocalTime.now());
 
 		sessionController.addSession();
 
@@ -111,7 +111,7 @@ public class TestSessionController extends BaseControllerTest {
 
 		FacesMessage message = facesMessageCaptor.getValue();
 		assertThat(message.getSeverity()).isEqualTo(FacesMessage.SEVERITY_ERROR);
-		assertThat(message.getDetail()).isEqualTo(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", sessionInput.getChamber().getCapacity()));
+		assertThat(message.getDetail()).isEqualTo(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", sessionData.getChamber().getCapacity()));
 	}
 
 	@Test
@@ -127,9 +127,9 @@ public class TestSessionController extends BaseControllerTest {
 		Patient patientA = patientRepository.save(new Patient("Patient A"));
 		Patient patientB = patientRepository.save(new Patient("Patient B"));
 		Session session = sessionRepository.findOne(1);
-		sessionInput.setSession(session);
-		sessionInput.getPatients().add(patientA);
-		sessionInput.getPatients().add(patientB);
+		sessionData.setSession(session);
+		sessionData.getPatients().add(patientA);
+		sessionData.getPatients().add(patientB);
 
 		sessionController.addPatientsToSession(session);
 
@@ -139,9 +139,9 @@ public class TestSessionController extends BaseControllerTest {
 	@Test
 	public void removePatientFromSession() {
 		Session session = sessionRepository.findOne(1);
-		sessionInput.setSession(session);
+		sessionData.setSession(session);
 
-		sessionController.removePatientFromSession(sessionInput.getSession().getPatientSessions().first());
+		sessionController.removePatientFromSession(sessionData.getSession().getPatientSessions().first());
 
 		assertThat(session.getPatientSessions()).hasSize(1);
 	}
@@ -149,9 +149,9 @@ public class TestSessionController extends BaseControllerTest {
 	@Test
 	public void updatePatientSessionStatus() {
 		Session session = sessionRepository.findOne(1);
-		sessionInput.setSession(session);
+		sessionData.setSession(session);
 
-		sessionController.setPatientSessionStatus(sessionInput.getSession().getPatientSessions().first(), true);
+		sessionController.setPatientSessionStatus(sessionData.getSession().getPatientSessions().first(), true);
 
 		assertThat(session.getPatientSessions()).hasSize(2);
 		assertThat(session.getPatientSessions().first().isAbsent()).isTrue();

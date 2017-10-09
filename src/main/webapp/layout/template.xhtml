@@ -60,7 +60,8 @@
 					<label for="helpMessage">#{msg['message.help']}</label>
 					<p:inputTextarea id="helpMessage" value="#{userController.helpMessage}" class="form-control" rows="10" style="width: 100%;" />
 				</div>
-				<p:commandButton value="#{msg['button.send']}" process="@this, helpMessage" oncomplete="PF('helpDialog').hide();" actionListener="#{userController.sendHelpMessageEmail()}" styleClass="btn-success pull-right"/>
+				<p:commandButton value="#{msg['button.cancel']}" type="button" onclick="PF('helpDialog').hide()" styleClass="btn-danger pull-right" />
+				<p:commandButton value="#{msg['button.send']}" process="@this, helpMessage" oncomplete="PF('helpDialog').hide();" actionListener="#{userController.sendHelpMessageEmail()}" styleClass="btn-primary pull-right"/>
 			</h:form>
 		</p:dialog>
 

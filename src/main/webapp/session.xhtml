@@ -15,24 +15,24 @@
 			<p:panelGrid columns="8" layout="grid" styleClass="session-toolbar">
 				<h:panelGroup style="white-space: nowrap;">
 					<p:commandButton icon="fa fa-chevron-left" actionListener="#{sessionController.previousSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
-					<p:calendar id="sessionDate" value="#{sessionController.sessionInput.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" beforeShowDay="sessionDates" converter="localDateTimeConverter">
+					<p:calendar id="sessionDate" value="#{sessionController.sessionData.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" beforeShowDay="sessionDates" converter="localDateTimeConverter">
 						<p:ajax event="dateSelect" process="@this" update="chambersGrid"/>
 					</p:calendar>
 					<p:commandButton icon="fa fa-chevron-right" actionListener="#{sessionController.nextSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
 				</h:panelGroup>
 
-				<p:selectOneMenu id="sessionChamber" value="#{sessionController.sessionInput.chamber}" converter="omnifaces.SelectItemsConverter" styleClass="hidden-xs">
+				<p:selectOneMenu id="sessionChamber" value="#{sessionController.sessionData.chamber}" converter="omnifaces.SelectItemsConverter" styleClass="hidden-xs">
 					<f:selectItems value="#{chamberController.chambers}" var="chamber" itemValue="#{chamber}" itemLabel="#{chamber.name}"/>
 				</p:selectOneMenu>
 
 				<h:panelGroup styleClass="hidden-xs">
-					<pe:timePicker id="sessionTime" label="#{msg['label.time']}" widgetVar="sessionTime" value="#{sessionController.sessionInput.sessionTime}" mode="spinner" startHours="6" endHours="22" showOn="focus" intervalMinutes="15" required="true">
+					<pe:timePicker id="sessionTime" label="#{msg['label.time']}" widgetVar="sessionTime" value="#{sessionController.sessionData.sessionTime}" mode="spinner" startHours="6" endHours="22" showOn="focus" intervalMinutes="15" required="true">
 						<f:converter converterId="localDateTimeConverter" />
 						<f:attribute name="pattern" value="HH:mm" />
 					</pe:timePicker>
 				</h:panelGroup>
 
-				<p:selectCheckboxMenu id="sessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionInput.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true"  styleClass="hidden-xs">
+				<p:selectCheckboxMenu id="sessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionData.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true"  styleClass="hidden-xs">
 					<f:selectItems value="#{patientController.patients}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
 				</p:selectCheckboxMenu>
 
@@ -41,13 +41,14 @@
 				</p:commandButton>
 
 				<p:commandButton icon="fa fa-clone" value="#{msg['button.duplicateSessions']}" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary hidden-xs hidden-sm" />
-				<p:commandButton icon="fa fa-print" value="#{msg['button.print']}" process="@this" ajax="false" immediate="true" actionListener="#{sessionController.generateDailySessionsReport}" onclick="this.form.target = '_blank';" styleClass="btn-primary hidden-xs hidden-sm" />
+				<p:commandButton id="printSession" icon="fa fa-print" value="#{msg['button.print']}" process="@this" ajax="false" immediate="true" actionListener="#{sessionController.generateDailySessionsReport}" onclick="this.form.target = '_blank'; mixpanel.track('Print');" styleClass="btn-primary hidden-xs hidden-sm" />
+				<p:tooltip for="printSession" value="#{msg['message.dailySessionsReport']}" position="right" escape="false" />
 
 				<p:messages id="messages"/>
 			</p:panelGrid>
 
 			<p:dataGrid id="chambersGrid" var="chamber" value="#{chamberController.chambers}" columns="1" layout="grid">
-				<p:dataTable id="periodsTable" value="#{sessionController.getSessions(chamber.chamberId, sessionController.sessionInput.sessionDate)}" var="chamberSession" rows="9" emptyMessage="#{msg['message.noSessionsFound']}" sortBy="#{chamberSession.timePeriod}">
+				<p:dataTable id="periodsTable" value="#{sessionController.getSessions(chamber.chamberId, sessionController.sessionData.sessionDate)}" var="chamberSession" rows="9" emptyMessage="#{msg['message.noSessionsFound']}" sortBy="#{chamberSession.timePeriod}">
 					<f:facet name="header">
 						#{chamber.name}
 						<div style="float: right;"><i class="fa fa-exclamation-circle"></i> #{msg['message.absentPatient']}</div>
@@ -86,7 +87,7 @@
 					</p:column>
 
 					<p:column headerText="#{msg['label.attendance']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-xs" style="vertical-align: top; white-space: nowrap">
-						<ui:repeat value="#{patientController.getPatientStats(chamberSession.sessionId, sessionController.sessionInput.sessionDate).toArray()}" var="patientStats">
+						<ui:repeat value="#{patientController.getPatientStats(chamberSession.sessionId, sessionController.sessionData.sessionDate).toArray()}" var="patientStats">
 							<div>
 								<h:outputText value="#{patientStats.completedSessions}" />
 							</div>
@@ -160,8 +161,8 @@
 								<p:commandButton title="#{msg['button.startSession']}" icon="fa fa-play" actionListener="#{sessionController.startSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{chamberSession.status ne 'CREATED'}" oncomplete="mixpanel.track('Start session');"/>
 							</div>
 							<div class="col-sm-4 col-md-2">
-								<p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionInput.reset()}" oncomplete="PF('sessionDialog').show(); mixpanel.track('Edit session');" process=":form:chambersGrid" update=":editSessionForm" global="false">
-									<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionInput.session}" />
+								<p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); mixpanel.track('Edit session');" process=":form:chambersGrid" update=":editSessionForm" global="false">
+									<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
 								</p:commandButton>
 							</div>
 							<div class="col-sm-4 col-md-2">
@@ -171,7 +172,7 @@
 								<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'FINISHED'}" styleClass="hidden-sm" oncomplete="mixpanel.track('Finalize session');" />
 							</div>
 							<div class="col-sm-4 col-md-2">
-								<p:commandButton title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionInput.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.status ne 'CREATED' and chamberSession.status ne 'FINISHED'}" rendered="#{loginController.hasAdminRights()}" styleClass="hidden-sm" />
+								<p:commandButton title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionData.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.status ne 'CREATED' and chamberSession.status ne 'FINISHED'}" rendered="#{loginController.hasAdminRights()}" styleClass="hidden-sm" />
 							</div>
 						</div>
 					</p:column>
@@ -182,19 +183,19 @@
 	</div>
 
 	<h:form id="editSessionForm">
-		<p:dialog header="#{msg['label.session']} #{sessionController.sessionInput.session.sessionId}" widgetVar="sessionDialog" width="50%" resizable="false" showEffect="fade" hideEffect="fade" modal="true" dynamic="true">
+		<p:dialog header="#{msg['label.session']} #{sessionController.sessionData.session.sessionId}" widgetVar="sessionDialog" width="50%" resizable="false" showEffect="fade" hideEffect="fade" modal="true" dynamic="true">
 			<p:messages id="sessionMessages" autoUpdate="true" />
 			<div class="row ui-fluid" style="padding-bottom: 10px;">
 				<div class="col-md-3 col-sm-6">
-					<p:selectCheckboxMenu id="newSessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionInput.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true" style="width: 160px" panelStyle="width: 250px">
-						<f:selectItems value="#{patientController.getAvailabePatientsForSession(sessionController.sessionInput.session.sessionId)}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
+					<p:selectCheckboxMenu id="newSessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionData.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true" style="width: 160px" panelStyle="width: 250px">
+						<f:selectItems value="#{patientController.getAvailabePatientsForSession(sessionController.sessionData.session.sessionId)}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
 					</p:selectCheckboxMenu>
 				</div>
 				<div class="col-md-3 col-sm-6 pull-right">
-					<p:commandButton value="#{msg['label.addPatients']}" actionListener="#{sessionController.addPatientsToSession(sessionController.sessionInput.session)}" process="@this, newSessionPatients" update=":form:chambersGrid, sessionPatientsTable, sessionMessages, newSessionPatients" styleClass="btn-primary" />
+					<p:commandButton value="#{msg['label.addPatients']}" actionListener="#{sessionController.addPatientsToSession(sessionController.sessionData.session)}" process="@this, newSessionPatients" update=":form:chambersGrid, sessionPatientsTable, sessionMessages, newSessionPatients" styleClass="btn-primary" />
 				</div>
 			</div>
-			<p:dataTable id="sessionPatientsTable" styleClass="dialog-table" var="sessionPatient" value="#{sessionController.sessionInput.session.patientSessions}" emptyMessage="#{msg['message.noData']}">
+			<p:dataTable id="sessionPatientsTable" styleClass="dialog-table" var="sessionPatient" value="#{sessionController.sessionData.session.patientSessions}" emptyMessage="#{msg['message.noData']}">
 				<p:column headerText="#{msg['label.id']}" width="50">
 					<h:outputText value="#{sessionPatient.patient.patientId}" />
 				</p:column>
@@ -217,7 +218,7 @@
 	<h:form>
 		<p:confirmDialog message="#{msg['confirmation.deleteSession']}" header="#{msg['title.deleteSession']}" severity="alert" widgetVar="confirmDeleteSessionDialog">
 			<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDeleteSessionDialog').hide()" styleClass="btn-primary pull-right"/>
-			<p:commandButton value="#{msg['button.delete']}" process="@this" update=":form:chambersGrid" oncomplete="PF('confirmDeleteSessionDialog').hide(); mixpanel.track('Delete session');" actionListener="#{sessionController.deleteSession(sessionController.sessionInput.session)}" styleClass="btn-danger pull-right"/>
+			<p:commandButton value="#{msg['button.delete']}" process="@this" update=":form:chambersGrid" oncomplete="PF('confirmDeleteSessionDialog').hide(); mixpanel.track('Delete session');" actionListener="#{sessionController.deleteSession(sessionController.sessionData.session)}" styleClass="btn-danger pull-right"/>
 		</p:confirmDialog>
 	</h:form>
 
