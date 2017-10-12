@@ -172,6 +172,7 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
+	@CacheEvict(cacheNames = "patient", allEntries = true)
 	public void setPatientSessionStatus(PatientSession patientSession, boolean absent) {
 		patientSession.setAbsent(absent);
 		sessionRepository.save(patientSession.getSession());

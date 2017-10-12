@@ -77,4 +77,23 @@ public class Patient {
 		int getCompletedSessions();
 		int getAbsentSessions();
 	}
+
+	public static PatientStats getEmptyPatientStats(Integer patientId) {
+		return new PatientStats() {
+			@Override
+			public Integer getPatientId() {
+				return patientId;
+			}
+
+			@Override
+			public int getCompletedSessions() {
+				return 0;
+			}
+
+			@Override
+			public int getAbsentSessions() {
+				return 0;
+			}
+		};
+	}
 }

@@ -13,7 +13,7 @@
 	
 	<h:body styleClass="login-page">
 		<div class="container">
-			<h:form id="login">
+			<h:form id="login" prependId="false">
 				<pe:tooltip for="logo" value="" />
 				<div class="container">
 					<div class="row login-logo">
@@ -47,7 +47,7 @@
 						</div>
 						<div class="row">
 							<div class="login-input col-xs-#{isDev ? '6' : '12' }">
-								<p:commandButton value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" onclick="mixpanel.track('Sign-in', { username: $('#login\\:username').val()})" />
+								<p:commandButton id="loginButton" value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" onclick="mixpanel.track('Sign-in', { username: $('#login\\:username').val()})" />
 							</div>
 							<div class="login-input col-xs-3">
 								<div class="btn-group">

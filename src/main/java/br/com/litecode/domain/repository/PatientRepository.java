@@ -16,7 +16,7 @@ public interface PatientRepository extends PagingAndSortingRepository<Patient, I
 			"sum(case when ps.session.status = 'FINISHED' and ps.absent = false then 1 else 0 end) as completedSessions, " +
 			"sum(case when ps.session.status = 'FINISHED' and ps.absent = true then 1 else 0 end) as absentSessions " +
 			"from PatientSession ps where ps.session.scheduledTime < :sessionDate and ps.patient.patientId in (select patient.patientId from PatientSession where session.sessionId = :sessionId) " +
-			"group by ps.patient.patientId order by patient.name")
+			"group by ps.patient.patientId")
 	List<PatientStats> findPatienStats(Integer sessionId, LocalDateTime sessionDate);
 
 	@Query(value = "select ps.patient.patientId as patientId, " +

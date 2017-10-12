@@ -15,13 +15,13 @@
 			<p:panelGrid columns="8" layout="grid" styleClass="session-toolbar">
 				<h:panelGroup style="white-space: nowrap;">
 					<p:commandButton icon="fa fa-chevron-left" actionListener="#{sessionController.previousSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
-					<p:calendar id="sessionDate" value="#{sessionController.sessionData.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" beforeShowDay="sessionDates" converter="localDateTimeConverter">
+					<p:calendar id="sessionDate" widgetVar="sessionDate" value="#{sessionController.sessionData.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" beforeShowDay="sessionDates" converter="localDateTimeConverter">
 						<p:ajax event="dateSelect" process="@this" update="chambersGrid"/>
 					</p:calendar>
 					<p:commandButton icon="fa fa-chevron-right" actionListener="#{sessionController.nextSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
 				</h:panelGroup>
 
-				<p:selectOneMenu id="sessionChamber" value="#{sessionController.sessionData.chamber}" converter="omnifaces.SelectItemsConverter" styleClass="hidden-xs">
+				<p:selectOneMenu id="sessionChamber" widgetVar="sessionChamber" value="#{sessionController.sessionData.chamber}" converter="omnifaces.SelectItemsConverter" styleClass="hidden-xs">
 					<f:selectItems value="#{chamberController.chambers}" var="chamber" itemValue="#{chamber}" itemLabel="#{chamber.name}"/>
 				</p:selectOneMenu>
 
@@ -32,11 +32,11 @@
 					</pe:timePicker>
 				</h:panelGroup>
 
-				<p:selectCheckboxMenu id="sessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionData.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true"  styleClass="hidden-xs">
+				<p:selectCheckboxMenu id="sessionPatients" widgetVar="sessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionData.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true"  styleClass="hidden-xs">
 					<f:selectItems value="#{patientController.patients}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
 				</p:selectCheckboxMenu>
 
-				<p:commandButton value="#{msg['button.add']}" actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true" styleClass="btn-primary hidden-xs" oncomplete="mixpanel.track('Add session');">
+				<p:commandButton value="#{msg['button.add']}" id="addButton" actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true" styleClass="btn-primary hidden-xs" oncomplete="mixpanel.track('Add session');">
 					<p:resetInput target="@form" />
 				</p:commandButton>
 
@@ -48,6 +48,7 @@
 			</p:panelGrid>
 
 			<p:dataGrid id="chambersGrid" var="chamber" value="#{chamberController.chambers}" columns="1" layout="grid">
+				<ui:param name="patientStats" value="#{patientController.getPatientStats(chamberSession, sessionController.sessionData.sessionDate)}" />
 				<p:dataTable id="periodsTable" value="#{sessionController.getSessions(chamber.chamberId, sessionController.sessionData.sessionDate)}" var="chamberSession" rows="9" emptyMessage="#{msg['message.noSessionsFound']}" sortBy="#{chamberSession.timePeriod}">
 					<f:facet name="header">
 						#{chamber.name}
@@ -87,9 +88,9 @@
 					</p:column>
 
 					<p:column headerText="#{msg['label.attendance']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-xs" style="vertical-align: top; white-space: nowrap">
-						<ui:repeat value="#{patientController.getPatientStats(chamberSession.sessionId, sessionController.sessionData.sessionDate).toArray()}" var="patientStats">
+						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
 							<div>
-								<h:outputText value="#{patientStats.completedSessions}" />
+								<h:outputText value="#{patientStats[patientSession.patient.patientId].completedSessions}" />
 							</div>
 						</ui:repeat>
 					</p:column>

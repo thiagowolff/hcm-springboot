@@ -2,6 +2,8 @@ package br.com.litecode.controller;
 
 import br.com.litecode.domain.model.Patient;
 import br.com.litecode.domain.model.Patient.PatientStats;
+import br.com.litecode.domain.model.PatientSession;
+import br.com.litecode.domain.model.Session;
 import br.com.litecode.domain.repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -13,6 +15,9 @@ import javax.faces.view.ViewScoped;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @ViewScoped
 @Component
@@ -37,9 +42,17 @@ public class PatientController implements Serializable {
 		return patients;
 	}
 
-	@Cacheable(key = "{ #sessionId, #sessionDate }", sync = true)
-	public List<PatientStats> getPatientStats(Integer sessionId, LocalDate sessionDate) {
-		return patientRepository.findPatienStats(sessionId, sessionDate.plusDays(1).atStartOfDay());
+	@Cacheable(key = "{ #session.sessionId, #date }", sync = true)
+	public Map<Integer, PatientStats> getPatientStats(Session session, LocalDate date) {
+		List<PatientStats> stats = patientRepository.findPatienStats(session.getSessionId(), date.plusDays(1).atStartOfDay());
+
+		Map<Integer, PatientStats> patientStats = stats.stream().collect(Collectors.toMap(PatientStats::getPatientId, Function.identity()));
+		for (PatientSession patientSession : session.getPatientSessions()) {
+			Integer patientId = patientSession.getPatient().getPatientId();
+			patientStats.putIfAbsent(patientId, Patient.getEmptyPatientStats(patientId));
+		}
+
+		return patientStats;
 	}
 
 	@Cacheable(key = "#patientId", sync = true)
