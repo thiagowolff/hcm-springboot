@@ -46,18 +46,22 @@
 							</div>
 						</div>
 						<div class="row">
-							<div class="login-input col-xs-#{isDev ? '6' : '12' }">
-								<p:commandButton id="loginButton" value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" onclick="mixpanel.track('Sign-in', { username: $('#login\\:username').val()})" />
+							<div class="login-input col-xs-#{isDev ? '4' : '12' }">
+								<p:commandButton id="loginButton" value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" onclick="mixpanel.track('Sign-in', { username: $('#login\\:username').val()})" style="width: 100%;" />
 							</div>
-							<div class="login-input col-xs-3">
-								<div class="btn-group">
+							<div class="login-input login-button col-xs-2">
 								<p:commandButton icon="fa fa-user fa-lg" value="USER" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}">
 									<f:setPropertyActionListener value="user" target="#{loginController.username}" />
 									<f:setPropertyActionListener value="123" target="#{loginController.password}" />
 								</p:commandButton>
-								</div>
 							</div>
-							<div class="login-input col-xs-3">
+								<div class="login-input login-button col-xs-2">
+								<p:commandButton icon="fa fa-cog fa-lg" value="ADMIN" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}">
+									<f:setPropertyActionListener value="admin" target="#{loginController.username}" />
+									<f:setPropertyActionListener value="123" target="#{loginController.password}" />
+								</p:commandButton>
+								</div>
+									<div class="login-input login-button col-xs-2">
 								<p:commandButton icon="fa fa-wrench fa-lg" value="DEV" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}">
 									<f:setPropertyActionListener value="thiago" target="#{loginController.username}" />
 									<f:setPropertyActionListener value="admin" target="#{loginController.password}" />

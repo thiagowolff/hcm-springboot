@@ -94,6 +94,10 @@ ext.loadVersionProperties = {
 
 task updateVersion {
     doLast {
+        if (gradle.startParameter.taskNames[0] != "deploy") {
+            return;
+        }
+
         def versionProperties = loadVersionProperties()
         def version = versionProperties.version.split("\\.")
         def nextMinorVersion = Integer.parseInt(version[2]) + 1

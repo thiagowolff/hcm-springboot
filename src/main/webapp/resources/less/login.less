@@ -48,6 +48,9 @@ body.login-page {
 }
 
 .login-input {
+	&.login-button {
+		padding-right: 0px;
+	}
 	.ui-inputfield {
 		padding: 2px 2px 2px 10px;
 		height: 42px;
@@ -60,14 +63,14 @@ body.login-page {
 	
 	button {
 		border: 1px solid @primaryThemeColor;
-		padding: 6px !important;;
+		padding: 6px 2px !important;;
 		background: @primaryThemeColor;
 		color: @whiteThemeColor;
-		width: 100%;
+		width: 70px;
 
 		span.ui-icon.fa {
 			margin-top: -10px;
-			padding-right: 5px;
+			margin-left: -4px;
 		}
 	}
 	

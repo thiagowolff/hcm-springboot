@@ -21,7 +21,7 @@
 					<p:commandButton icon="fa fa-chevron-right" actionListener="#{sessionController.nextSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
 				</h:panelGroup>
 
-				<p:selectOneMenu id="sessionChamber" widgetVar="sessionChamber" value="#{sessionController.sessionData.chamber}" converter="omnifaces.SelectItemsConverter" styleClass="hidden-xs">
+				<p:selectOneMenu id="sessionChamber" widgetVar="sessionChamber" value="#{sessionController.sessionData.chamber}" converter="omnifaces.SelectItemsConverter" styleClass="hidden-xs" style="min-width: 85px;">
 					<f:selectItems value="#{chamberController.chambers}" var="chamber" itemValue="#{chamber}" itemLabel="#{chamber.name}"/>
 				</p:selectOneMenu>
 
@@ -52,7 +52,6 @@
 				<p:dataTable id="periodsTable" value="#{sessionController.getSessions(chamber.chamberId, sessionController.sessionData.sessionDate)}" var="chamberSession" rows="9" emptyMessage="#{msg['message.noSessionsFound']}" sortBy="#{chamberSession.timePeriod}">
 					<f:facet name="header">
 						#{chamber.name}
-						<div style="float: right;"><i class="fa fa-exclamation-circle"></i> #{msg['message.absentPatient']}</div>
 					</f:facet>
 
 					<p:headerRow>
@@ -74,7 +73,6 @@
 										value="#{patientSession.patient.name}"
 										style="#{patientSession.absent ? 'color: #b14538' : chamberSession.running ? 'color: #007d18' : ''}" />
 								<p:tooltip for="@(.patient-#{patientSession.patientSessionId})" value="#{patientSession.patient.recordInfo}" position="right"/>
-								<h:panelGroup rendered="#{patientSession.absent}"> <i class="fa fa-exclamation-circle" style="font-size: 9px"></i> </h:panelGroup>
 							</div>
 						</ui:repeat>
 					</p:column>
@@ -82,7 +80,7 @@
 					<p:column headerText="#{msg['label.healthInsurance']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column hidden-sm hidden-xs" style="vertical-align: top">
 						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
 							<div class="long-text text-left">
-								<h:outputText value="#{patientSession.patient.healthInsurance}" />
+								<h:outputText value="#{empty patientSession.patient.healthInsurance ? '-' : patientSession.patient.healthInsurance}" />
 							</div>
 						</ui:repeat>
 					</p:column>

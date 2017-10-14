@@ -44,7 +44,7 @@ public class LoginController {
 			User user = userRepository.findUserByUsername(username);
 
 			HttpSession userSession = userSessionTracker.getUserSession(user);
-			if (userSession != null && !userSession.getId().equals(Faces.getSessionId())) {
+			if (user.getRole() != Role.DEV && userSession != null && !userSession.getId().equals(Faces.getSessionId())) {
 				userSessionTracker.killUserSession(user);
 			}
 
