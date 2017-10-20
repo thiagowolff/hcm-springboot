@@ -56,6 +56,10 @@ public class ExceptionReportFilter implements Filter {
 				}
 
 				lastEmailsSent = Instant.now();
+
+				if (numberOfEmailsSent == MAX_EMAILS_PER_MINUTE) {
+					mailService.sendEmail("thiago.wolff@gmail.com", "HCM - Exception email limit reached", "");
+				}
 			}
 		}
 	}

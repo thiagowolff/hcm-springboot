@@ -37,9 +37,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import java.io.IOException;
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -125,7 +123,7 @@ public class SessionController implements Serializable {
 		sessionData.getPatients().forEach(session::addPatient);
 		sessionRepository.save(session);
 		invalidateSessionCache();
-		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name()), session.getContextData().getCreatedBy());
+		pushService.publish(PushChannel.NOTIFY, NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name()), session.getContextData().getCreatedBy());
 	}
 
 	@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }")
@@ -140,7 +138,7 @@ public class SessionController implements Serializable {
 	@PushRefresh
 	@Transactional
 	@Caching(evict = { @CacheEvict(cacheNames = "patient", allEntries = true), @CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }") })
-	public void resetSession(Session session) {
+	public void stopSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionTimer.stopSession(session);
 		session.reset();
@@ -158,6 +156,16 @@ public class SessionController implements Serializable {
 		session.setEndTime(session.getScheduledTime().plus(session.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout(), ChronoUnit.SECONDS).toLocalTime());
 		session.setCurrentProgress(100);
 		session.setStatus(SessionStatus.FINISHED);
+		sessionRepository.save(session);
+	}
+
+	@PushRefresh
+	@Transactional
+	@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }")
+	public void pauseSession(Session session) {
+		session = sessionRepository.findOne(session.getSessionId());
+		sessionTimer.stopSession(session);
+		session.pause();
 		sessionRepository.save(session);
 	}
 

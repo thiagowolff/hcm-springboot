@@ -34,11 +34,12 @@ public class TestChamberSessionTimer {
 	private PatientRepository patientRepository;
 
 	@Autowired
-	private ChamberSessionTimer chamberSessionTimer;
+	private SessionTimer chamberSessionTimer;
 
 	@Test
 	public void playSession() {
 		Session session = sessionRepository.findOne(1);
+		session.init();
 		chamberSessionTimer.startSession(session);
 
 		long numberOfAbsentPatients = session.getPatientSessions().stream().filter(PatientSession::isAbsent).count();

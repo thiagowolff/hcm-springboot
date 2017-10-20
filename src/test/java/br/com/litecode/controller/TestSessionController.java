@@ -186,12 +186,12 @@ public class TestSessionController extends BaseControllerTest {
 	}
 
 	@Test
-	public void resetSession() {
+	public void stopSession() {
 		Session session = sessionRepository.findOne(1);
 		sessionController.finishSession(session);
 		assertThat(session.getStatus()).isEqualTo(SessionStatus.FINISHED);
 
-		sessionController.resetSession(session);
+		sessionController.stopSession(session);
 		assertThat(session.isRunning()).isFalse();
 		assertThat(session.getCurrentProgress()).isEqualTo(0);
 		assertThat(session.getStatus()).isEqualTo(SessionStatus.CREATED);

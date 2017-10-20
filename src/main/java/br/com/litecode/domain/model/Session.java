@@ -45,19 +45,18 @@ public class Session implements Comparable<Session>, Serializable {
 	@Enumerated(EnumType.STRING)
 	private SessionStatus status;
 
-	@Transient
-	private String timeRemaining;
-
-	@Transient
-	private long currentProgress;
-
 	@Convert(converter = ContextDataConverter.class)
 	private ContextData contextData;
+
+	private long currentProgress;
+	private long elapsedSeconds;
+	private String timeRemaining;
+	private boolean paused;
 
 	public Session() {
 		patientSessions = new TreeSet<>();
 		status = SessionStatus.CREATED;
-		currentProgress = 0;
+		paused = false;
 		contextData = new ContextData();
 	}
 
@@ -73,34 +72,53 @@ public class Session implements Comparable<Session>, Serializable {
 		return patients;
 	}
 
-	public void init() {
-		ZoneId timeZone = Faces.getSessionAttribute("timeZone");
-		contextData.setTimeZone(timeZone == null ? ZoneId.systemDefault().getId() : timeZone.getId());
-
-		LocalDateTime now = LocalDateTime.now(ZoneId.of(contextData.getTimeZone()));
-		startTime = now.toLocalTime();
-		endTime = now.plus(chamber.getChamberEvent(EventType.COMPLETION).getTimeout(), ChronoUnit.SECONDS).toLocalTime();
-		currentProgress = 0;
-		status = SessionStatus.CREATED;
-	}
-
-	public void reset() {
-		startTime = scheduledTime.toLocalTime();
-		endTime = scheduledTime.plus(chamber.getChamberEvent(EventType.COMPLETION).getTimeout(), ChronoUnit.SECONDS).toLocalTime();
-		status = SessionStatus.CREATED;
-		currentProgress = 0;
-	}
-
 	public void addPatient(Patient patient) {
 		patientSessions.add(new PatientSession(patient, this));
 	}
 
-	public void updateProgress() {
-		long remainingMillis = Duration.between(LocalTime.now(ZoneId.of(contextData.getTimeZone())), endTime).toMillis();
-		long duration = Duration.between(startTime, endTime).toMillis();
-		long elapsedTime =  duration - remainingMillis;
+	public void init() {
+		ZoneId timeZone = Faces.getSessionAttribute("timeZone");
+		contextData.setTimeZone(timeZone == null ? ZoneId.systemDefault().getId() : timeZone.getId());
+		LocalDateTime now = LocalDateTime.now(ZoneId.of(contextData.getTimeZone()));
 
-		timeRemaining = LocalTime.MIDNIGHT.plus(remainingMillis, ChronoUnit.MILLIS).format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+		if (!paused) {
+			startTime = now.toLocalTime();
+			endTime = now.plus(chamber.getChamberEvent(EventType.COMPLETION).getTimeout(), ChronoUnit.SECONDS).toLocalTime();
+			currentProgress = 0;
+			elapsedSeconds = 0;
+			timeRemaining = LocalTime.MIDNIGHT.plus(Duration.between(startTime, endTime).toMillis(), ChronoUnit.MILLIS).format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+			status = SessionStatus.CREATED;
+		} else {
+			endTime = now.plusSeconds(getRemainingSeconds()).toLocalTime();
+		}
+
+		paused = false;
+	}
+
+	public void reset() {
+		startTime = scheduledTime.toLocalTime();
+		endTime = scheduledTime.plusSeconds(chamber.getChamberEvent(EventType.COMPLETION).getTimeout()).toLocalTime();
+		status = SessionStatus.CREATED;
+		currentProgress = 0;
+		elapsedSeconds = 0;
+		paused = false;
+		timeRemaining = LocalTime.MIDNIGHT.plus(Duration.between(startTime, endTime).toMillis(), ChronoUnit.MILLIS).format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+	}
+
+	public void pause() {
+		updateProgress();
+		long duration = chamber.getChamberEvent(EventType.COMPLETION).getTimeout();
+		long remainingSeconds = Duration.between(LocalTime.now(ZoneId.of(contextData.getTimeZone())), endTime).getSeconds();
+		elapsedSeconds = duration - remainingSeconds;
+		paused = true;
+	}
+
+	public void updateProgress() {
+		long remainingSeconds = Duration.between(LocalTime.now(ZoneId.of(contextData.getTimeZone())), endTime).getSeconds();
+		long duration = chamber.getChamberEvent(EventType.COMPLETION).getTimeout();
+		long elapsedTime = duration - remainingSeconds;
+
+		timeRemaining = LocalTime.MIDNIGHT.plusSeconds(remainingSeconds).format(DateTimeFormatter.ofPattern("HH:mm:ss"));
 		currentProgress = elapsedTime * 100 / duration;
 	}
 
@@ -134,12 +152,15 @@ public class Session implements Comparable<Session>, Serializable {
 			return null;
 		}
 
-		return startTime.plusSeconds(nextChamberEvent.getTimeout());
+		return endTime.minusSeconds(nextChamberEvent.getTimeout());
 	}
 
+	public int getRemainingSeconds() {
+		return LocalTime.parse(timeRemaining).toSecondOfDay();
+	}
 
 	public boolean isRunning() {
-		return status != SessionStatus.CREATED && status != SessionStatus.FINISHED;
+		return status != SessionStatus.CREATED && status != SessionStatus.FINISHED && !paused;
 	}
 
 	@Override

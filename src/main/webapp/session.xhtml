@@ -49,13 +49,13 @@
 
 			<p:dataGrid id="chambersGrid" var="chamber" value="#{chamberController.chambers}" columns="1" layout="grid">
 				<ui:param name="patientStats" value="#{patientController.getPatientStats(chamberSession, sessionController.sessionData.sessionDate)}" />
-				<p:dataTable id="periodsTable" value="#{sessionController.getSessions(chamber.chamberId, sessionController.sessionData.sessionDate)}" var="chamberSession" rows="9" emptyMessage="#{msg['message.noSessionsFound']}" sortBy="#{chamberSession.timePeriod}">
+				<p:dataTable id="sessionsTable" value="#{sessionController.getSessions(chamber.chamberId, sessionController.sessionData.sessionDate)}" var="chamberSession" rows="9" emptyMessage="#{msg['message.noSessionsFound']}" sortBy="#{chamberSession.timePeriod}">
 					<f:facet name="header">
 						#{chamber.name}
 					</f:facet>
 
 					<p:headerRow>
-						<p:column colspan="12">
+						<p:column colspan="13">
 							<h:outputText value="#{lcf:enum(chamberSession.timePeriod)}" />
 						</p:column>
 					</p:headerRow>
@@ -145,33 +145,43 @@
 						<div class="timer-progress-cell">
 							<div id="currentTime-#{chamberSession.sessionId}">
 								<h:outputText value="#{sessionTracker.getSession(chamberSession.sessionId).timeRemaining}" rendered="#{chamberSession.running}"/>
-								<h:outputText value="00:00:00" rendered="#{not chamberSession.running}"/>
+								<h:outputText value="#{chamberSession.timeRemaining}" rendered="#{chamberSession.paused}"/>
+								<h:outputText value="00:00:00" rendered="#{not chamberSession.running and not chamberSession.paused}"/>
 							</div>
 							<div>
-								<p:progressBar widgetVar="progress-#{chamberSession.sessionId}" labelTemplate="{value}%" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status ne 'FINISHED'}" />
-								<p:progressBar value="100" displayOnly="true" labelTemplate="100%" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status eq 'FINISHED'}" />
+								<p:progressBar widgetVar="progress-#{chamberSession.sessionId}" labelTemplate="{value}%" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status ne 'FINISHED' and not chamberSession.paused}" />
+								<p:progressBar labelTemplate="{value}%" value="#{chamberSession.currentProgress}" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.paused}" />
+								<p:progressBar value="100" displayOnly="true" labelTemplate="100%" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status eq 'FINISHED' and not chamberSession.paused}" />
 							</div>
 						</div>
 					</p:column>
 
-					<p:column headerText="#{msg['label.action']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column session-action hidden-xs">
-						<div class="row">
-							<div class="col-sm-4 col-md-2">
-								<p:commandButton title="#{msg['button.startSession']}" icon="fa fa-play" actionListener="#{sessionController.startSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{chamberSession.status ne 'CREATED'}" oncomplete="mixpanel.track('Start session');"/>
+					<p:column headerText="#{msg['label.controls']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column session-action hidden-xs">
+						<div class="row" style="margin-right: 0px;">
+							<div class="col-sm-6 col-md-3">
+								<p:commandButton title="#{msg['button.start']}" icon="fa fa-play" actionListener="#{sessionController.startSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{chamberSession.running or chamberSession.status eq 'FINISHED'}" oncomplete="mixpanel.track('Start session');"/>
 							</div>
-							<div class="col-sm-4 col-md-2">
+							<div class="col-sm-6 col-md-3">
+								<p:commandButton title="#{msg['button.pause']}" icon="fa fa-pause" actionListener="#{sessionController.pauseSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{not chamberSession.running}" oncomplete="mixpanel.track('Pause session');"/>
+							</div>
+							<div class="col-sm-6 col-md-3">
+								<p:commandButton title="#{msg['button.stop']}" icon="fa fa-stop" actionListener="#{sessionController.stopSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'CREATED'}" oncomplete="mixpanel.track('Reset session');"/>
+							</div>
+							<div class="col-sm-6 col-md-3">
+								<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'FINISHED'}" oncomplete="mixpanel.track('Finalize session');" />
+							</div>
+						</div>
+					</p:column>
+
+					<p:column headerText="#{msg['label.action']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg xsmall-column session-action hidden-xs">
+						<div class="row">
+							<div class="col-md-5">
 								<p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); mixpanel.track('Edit session');" process=":form:chambersGrid" update=":editSessionForm" global="false">
 									<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
 								</p:commandButton>
 							</div>
-							<div class="col-sm-4 col-md-2">
-								<p:commandButton title="#{msg['button.reset']}" icon="fa fa-stop" actionListener="#{sessionController.resetSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'CREATED'}" oncomplete="mixpanel.track('Reset session');"/>
-							</div>
-							<div class="col-sm-4 col-md-2">
-								<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'FINISHED'}" styleClass="hidden-sm" oncomplete="mixpanel.track('Finalize session');" />
-							</div>
-							<div class="col-sm-4 col-md-2">
-								<p:commandButton title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionData.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.status ne 'CREATED' and chamberSession.status ne 'FINISHED'}" rendered="#{loginController.hasAdminRights()}" styleClass="hidden-sm" />
+							<div class="col-md-5">
+								<p:commandButton id="deleteSessionButton" title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionData.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.status ne 'CREATED' and chamberSession.status ne 'FINISHED'}" rendered="#{loginController.hasAdminRights()}" styleClass="hidden-sm" />
 							</div>
 						</div>
 					</p:column>
@@ -310,7 +320,7 @@
 			audio.src = '#{request.contextPath}/javax.faces.resource/sounds/' + eventType + '.mp3';
 			setTimeout(function () {
 				audio.play();
-			}, 150);
+			}, 100);
 		}
 
 		function updateTimer(session) {
@@ -345,7 +355,7 @@
 		}
 
 		function resize() {
-			var colspan = 12 - ($('#form\\:chambersGrid .ui-datatable-tablewrapper th[scope="col"]:hidden').length / 2);
+			var colspan = 13 - ($('#form\\:chambersGrid .ui-datatable-tablewrapper th[scope="col"]:hidden').length / 2);
 			$('.ui-rowgroup-header td, .ui-datatable-empty-message td').attr('colspan', colspan);
 		}
 	</script>

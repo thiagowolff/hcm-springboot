@@ -5,4 +5,5 @@ import br.com.litecode.domain.model.Session;
 public interface SessionTimer {
 	void startSession(Session session);
 	void stopSession(Session session);
+	Clock<Session> getSessionClock();
 }

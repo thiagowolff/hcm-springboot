@@ -27,7 +27,7 @@ public class SessionClock implements Clock<Session> {
 	}
 
 	@Override
-	public void start(Session session) {
+	public synchronized void start(Session session) {
 		if (activeSessions.containsKey(session)) {
 			log.warn("Session {} already started", session.getSessionId());
 			return;
@@ -42,7 +42,7 @@ public class SessionClock implements Clock<Session> {
 	}
 
 	@Override
-	public void stop(Session session) {
+	public synchronized void stop(Session session) {
 		if (!activeSessions.containsKey(session)) {
 			log.warn("Session {} is not running", session.getSessionId());
 			return;

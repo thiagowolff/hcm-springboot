@@ -219,6 +219,15 @@ div.timer-progress-cell {
 	}
 }
 
+.ui-button-icon-only span.ui-icon {
+	&.fa-play { color: @green-500 !important; }
+	&.fa-pause { color: @indigo-500 !important; }
+	&.fa-stop { color: @red-700 !important; }
+	&.fa-fast-forward { color: @indigo-500 !important; }
+	&.fa-pencil { color: @grey-700 !important; }
+	&.fa-trash { color: @grey-700 !important; }
+}
+
 .patient {
 	&-present { color: @colorCompressingStatus;	}
 	&-absent { color:@colorShuttingDownStatus; }
@@ -328,8 +337,12 @@ div.timer-progress-cell {
 }
 
 @media screen and (min-width: 641px) and (max-width: 1024px) {
+	.xsmall-column {
+		width: 3em;
+	}
+
 	.small-column {
-		width: 4.6em;
+		width: 4em;
 	}
 
 	.medium-column {
@@ -342,8 +355,12 @@ div.timer-progress-cell {
 }
 
 @media screen and (min-width: 1025px) and (max-width: 1280px) {
+	.xsmall-column {
+		width: 4em;
+	}
+
 	.small-column {
-		width: 4.2em;
+		width: 5em;
 	}
 
 	.medium-column {
@@ -356,6 +373,10 @@ div.timer-progress-cell {
 }
 
 @media screen and (min-width: 1281px) and (max-width: 1440px) {
+	.xsmall-column {
+		width: 5em;
+	}
+
 	.small-column {
 		width: 6em;
 	}
@@ -370,6 +391,10 @@ div.timer-progress-cell {
 }
 
 @media screen and (min-width: 1441px) {
+	.xsmall-column {
+		width: 6em;
+	}
+
 	.small-column {
 		width: 9em;
 	}

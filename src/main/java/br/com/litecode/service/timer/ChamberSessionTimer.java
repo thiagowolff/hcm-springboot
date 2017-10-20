@@ -10,14 +10,17 @@ import br.com.litecode.service.push.message.NotificationMessage;
 import br.com.litecode.service.push.message.ProgressMessage;
 import br.com.litecode.util.JmxUtil;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
+@Slf4j
 public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBean {
 	@Autowired
 	private SessionRepository sessionRepository;
@@ -40,8 +43,15 @@ public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBe
 		List<ChamberEvent> chamberEvents = session.getChamber().getChamberEvents();
 
 		for (ChamberEvent chamberEvent : chamberEvents) {
-			sessionClock.register(session, () -> sessionTimeout(session, chamberEvent), chamberEvent.getTimeout());
+			if (session.getElapsedSeconds() > chamberEvent.getTimeout()) {
+				continue;
+			}
+
+			long delay = chamberEvent.getTimeout() - session.getElapsedSeconds();
+			sessionClock.register(session, () -> sessionTimeout(session, chamberEvent), delay);
+			log.debug("Chamber event {} scheduled: {}s", chamberEvent, delay);
 		}
+
 		sessionClock.start(session);
 	}
 
