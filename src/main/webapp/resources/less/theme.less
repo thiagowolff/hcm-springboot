@@ -5,7 +5,7 @@
 	padding: 9px 9px;
 	text-align: left;
 	border: 1px solid @borderColor !important;
-	border-bottom-width: 0px;
+	border-bottom-width: 0;
 }
 
 .tableHeader() {
@@ -27,7 +27,7 @@
 }
 
 .ui-datatable table {
-	border-spacing: 0px;
+	border-spacing: 0;
 	border: 1px solid @primaryThemeColor;
 
 	tbody td {
@@ -48,7 +48,7 @@
 	td {
 		border-right: 1px solid #466B8E !important;
 		text-align: left !important;
-		padding: 0px 10px !important;
+		padding: 0 10px !important;
 		font-size: .9em;
 	}
 }
@@ -110,6 +110,10 @@ div.ui-dialog {
 			color: @defaultIconColor !important;
 		}
 	}
+}
+
+button.ui-state-disabled {
+	opacity: .4 !important;
 }
 
 .ui-progressbar {

@@ -16,7 +16,7 @@ public class NotificationMessage implements Serializable {
 	private String messageDetail;
 
 	public static NotificationMessage create(Session session, String eventType) {
-		ZoneId zoneId = session.getContextData().getTimeZone() != null ? ZoneId.of(session.getContextData().getTimeZone()) : ZoneId.systemDefault();
+		ZoneId zoneId = session.getSessionMetadata().getTimeZone() != null ? ZoneId.of(session.getSessionMetadata().getTimeZone()) : ZoneId.systemDefault();
 		String messageKey = "message." + eventType.toLowerCase();
 		String messageSummary = MessageUtil.getMessage(messageKey + ".summary", session.getChamber().getName(), session.getSessionId());
 		String messageDetail = MessageUtil.getMessage(messageKey + ".detail", LocalDateTime.now(zoneId).format(DateTimeFormatter.ofPattern("HH:mm:ss")));

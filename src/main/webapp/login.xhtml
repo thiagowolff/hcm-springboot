@@ -47,7 +47,7 @@
 						</div>
 						<div class="row">
 							<div class="login-input col-xs-#{isDev ? '4' : '12' }">
-								<p:commandButton id="loginButton" value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" onclick="mixpanel.track('Sign-in', { username: $('#login\\:username').val()})" style="width: 100%;" />
+								<p:commandButton id="loginButton" value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" onclick="mixpanel.track('Sign-in', { username: $('#username').val()});" style="width: 100%;" />
 							</div>
 							<div class="login-input login-button col-xs-2">
 								<p:commandButton icon="fa fa-user fa-lg" value="USER" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}">

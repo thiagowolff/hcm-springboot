@@ -43,11 +43,11 @@ public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBe
 		List<ChamberEvent> chamberEvents = session.getChamber().getChamberEvents();
 
 		for (ChamberEvent chamberEvent : chamberEvents) {
-			if (session.getElapsedSeconds() > chamberEvent.getTimeout()) {
+			if (session.getSessionMetadata().getElapsedTime() > chamberEvent.getTimeout()) {
 				continue;
 			}
 
-			long delay = chamberEvent.getTimeout() - session.getElapsedSeconds();
+			long delay = chamberEvent.getTimeout() - session.getSessionMetadata().getElapsedTime();
 			sessionClock.register(session, () -> sessionTimeout(session, chamberEvent), delay);
 			log.debug("Chamber event {} scheduled: {}s", chamberEvent, delay);
 		}
@@ -64,7 +64,7 @@ public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBe
 			sessionClock.stop(session);
 		}
 
-		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, chamberEvent.toString()), session.getContextData().getStartedBy());
+		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, chamberEvent.toString()), session.getSessionMetadata().getStartedBy());
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBe
 	private void clockTimeout() {
 		for (Session session : sessionClock.getActiveListeners()) {
 			session.updateProgress();
-			pushService.publish(PushChannel.PROGRESS, ProgressMessage.create(session), session.getContextData().getStartedBy());
+			pushService.publish(PushChannel.PROGRESS, ProgressMessage.create(session), session.getSessionMetadata().getStartedBy());
 		}
 	}
 

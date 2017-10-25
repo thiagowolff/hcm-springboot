@@ -119,18 +119,24 @@ public class SessionController implements Serializable {
 		session.setScheduledTime(scheduledTime);
 		session.setStartTime(session.getScheduledTime().toLocalTime());
 		session.setEndTime(endTime);
-		session.getContextData().setCreatedBy((String) SecurityUtils.getSubject().getPrincipal());
+		session.getSessionMetadata().setCreatedBy((String) SecurityUtils.getSubject().getPrincipal());
 		sessionData.getPatients().forEach(session::addPatient);
 		sessionRepository.save(session);
 		invalidateSessionCache();
-		pushService.publish(PushChannel.NOTIFY, NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name()), session.getContextData().getCreatedBy());
+		pushService.publish(PushChannel.NOTIFY, NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name()), session.getSessionMetadata().getCreatedBy());
 	}
 
 	@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }")
 	public void startSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
-		session.init();
-		session.getContextData().setStartedBy((String) SecurityUtils.getSubject().getPrincipal());
+
+		if (session.isPaused()) {
+			session.resume();
+		} else {
+			session.init();
+		}
+
+		session.getSessionMetadata().setStartedBy((String) SecurityUtils.getSubject().getPrincipal());
 		sessionRepository.save(session);
 		sessionTimer.startSession(session);
 	}
@@ -154,8 +160,9 @@ public class SessionController implements Serializable {
 
 		session.setStartTime(session.getScheduledTime().toLocalTime());
 		session.setEndTime(session.getScheduledTime().plus(session.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout(), ChronoUnit.SECONDS).toLocalTime());
-		session.setCurrentProgress(100);
+		session.getSessionMetadata().setCurrentProgress(100);
 		session.setStatus(SessionStatus.FINISHED);
+		session.getSessionMetadata().setPaused(false);
 		sessionRepository.save(session);
 	}
 
@@ -175,7 +182,7 @@ public class SessionController implements Serializable {
 	public void deleteSession(Session session) {
 		sessionTimer.stopSession(session);
 		sessionRepository.delete(session);
-		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(sessionData.getSession(), SessionOperationType.DELETE_SESSION.name()), sessionData.getSession().getContextData().getCreatedBy());
+		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(sessionData.getSession(), SessionOperationType.DELETE_SESSION.name()), sessionData.getSession().getSessionMetadata().getCreatedBy());
 	}
 
 	@PushRefresh
@@ -225,7 +232,7 @@ public class SessionController implements Serializable {
 			session.setScheduledTime(sessionTime);
 			session.setStartTime(sessionTime.toLocalTime());
 			session.setEndTime(sessionTime.plusSeconds(sessionDuration).toLocalTime());
-			session.getContextData().setCreatedBy((String) SecurityUtils.getSubject().getPrincipal());
+			session.getSessionMetadata().setCreatedBy((String) SecurityUtils.getSubject().getPrincipal());
 			fromSession.getPatientSessions().forEach(ps -> session.addPatient(ps.getPatient()));
 			sessionRepository.save(session);
 		}

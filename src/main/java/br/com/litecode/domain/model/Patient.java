@@ -1,5 +1,6 @@
 package br.com.litecode.domain.model;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,9 +47,9 @@ public class Patient {
 	}
 
 	public String getRecordInfo() {
-		String folderNumber = Strings.isNullOrEmpty(this.folderNumber) ? "-" : this.folderNumber.trim();
-		String patientRecord = Strings.isNullOrEmpty(this.patientRecord) ? "-" : this.patientRecord.trim();
-		return String.format("%s: %s | %s: %s", getMessage("label.folderNumber"), folderNumber, getMessage("label.patientRecord"), patientRecord);
+		String record = Strings.isNullOrEmpty(patientRecord) ? null : String.format("%s: %s", getMessage("label.patientRecord"), patientRecord.trim());
+		String folder = Strings.isNullOrEmpty(folderNumber) ? null : String.format("%s: %s", getMessage("label.folderNumber"), folderNumber.trim());
+		return Joiner.on(" | ").skipNulls().join(record, folder);
 	}
 
 	@Override

@@ -8,7 +8,7 @@
 				xmlns:of="http://omnifaces.org/functions"
 				xmlns:lcf="http://litecode.com.br/functions">
 
-	<p:growl id="growl" widgetVar="growl" showDetail="true" life="15000" escape="false" />
+	<p:growl id="growl" widgetVar="growl" showDetail="true" life="10000" escape="false" />
 
 	<div class="content-wrapper">
 		<h:form id="form">
@@ -62,7 +62,11 @@
 
 					<p:column headerText="#{msg['label.id']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg" style="width: 3.2em;">
 						<h:outputText styleClass="session-#{chamberSession.sessionId}" value="#{chamberSession.sessionId}" />
-						<p:tooltip for="@(.session-#{chamberSession.sessionId})" value="#{chamberSession.patients}" position="bottom" hideDelay="2500" escape="false" styleClass="hidden-sm hidden-md hidden-lg" />
+						<h:panelGroup rendered="#{loginController.hasAdminRights() and not empty chamberSession.sessionInfo}">
+							<i class="session-info-#{chamberSession.sessionId} fa fa-info-circle hidden-xs"></i>
+							<p:tooltip for="@(.session-info-#{chamberSession.sessionId})" value="#{chamberSession.sessionInfo}" position="bottom" escape="false" styleClass="hidden-xs" />
+						</h:panelGroup>
+						<p:tooltip for="@(.session-#{chamberSession.sessionId})" value="#{chamberSession.patientNames}" position="bottom" hideDelay="2500" escape="false" styleClass="hidden-sm hidden-md hidden-lg" />
 					</p:column>
 
 					<p:column headerText="#{msg['label.patients']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg large-column hidden-xs" style="vertical-align: top;">
@@ -97,8 +101,9 @@
 						<ui:repeat value="#{sessionController.getChamberPayload(chamberSession)}" var="payloadStatus">
 							<div class="col-md-4" style="padding-left: 2px;">
 								<span class="fa-stack fa-2x" style="font-size: 12px;">
-									<i class="fa fa-circle fa-stack-2x" style="#{payloadStatus eq 'AVAILABLE' ? 'color: #d3d3d3' : payloadStatus eq 'OCCUPIED' ? 'color: #466b8e' : 'color: #b14538'}"></i>
+									<i class="fa fa-circle fa-stack-2x" style="#{payloadStatus eq 'AVAILABLE' ? 'color: #d3d3d3' : payloadStatus eq 'OCCUPIED' ? 'color: #476c8d' : 'color: #d23030'}"></i>
 									<h:panelGroup styleClass="fa fa-circle-o-notch fa-spin fa-fw fa-stack-1x" style="color: #1ee84a; top: 6px;" rendered="#{chamberSession.running and payloadStatus eq 'OCCUPIED' }"/>
+									<h:panelGroup styleClass="fa fa-pause fa-blink fa-stack-1x" style="color: #e8e006; top: 7px; font-size: 10px;" rendered="#{chamberSession.paused and payloadStatus eq 'OCCUPIED' }"/>
 								</span>
 							</div>
 						</ui:repeat>
@@ -144,9 +149,8 @@
 					<p:column headerText="#{msg['label.progress']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column">
 						<div class="timer-progress-cell">
 							<div id="currentTime-#{chamberSession.sessionId}">
-								<h:outputText value="#{sessionTracker.getSession(chamberSession.sessionId).timeRemaining}" rendered="#{chamberSession.running}"/>
-								<h:outputText value="#{chamberSession.timeRemaining}" rendered="#{chamberSession.paused}"/>
-								<h:outputText value="00:00:00" rendered="#{not chamberSession.running and not chamberSession.paused}"/>
+								<h:outputText value="#{chamberSession.timeRemaining}"  rendered="#{chamberSession.running}" />
+								<h:outputText value="#{chamberSession.timeRemaining}" rendered="#{not chamberSession.running}" />
 							</div>
 							<div>
 								<p:progressBar widgetVar="progress-#{chamberSession.sessionId}" labelTemplate="{value}%" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status ne 'FINISHED' and not chamberSession.paused}" />
@@ -157,36 +161,40 @@
 					</p:column>
 
 					<p:column headerText="#{msg['label.controls']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column session-action hidden-xs">
-						<div class="row" style="margin-right: 0px;">
-							<div class="col-sm-6 col-md-3">
-								<p:commandButton title="#{msg['button.start']}" icon="fa fa-play" actionListener="#{sessionController.startSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{chamberSession.running or chamberSession.status eq 'FINISHED'}" oncomplete="mixpanel.track('Start session');"/>
-							</div>
-							<div class="col-sm-6 col-md-3">
-								<p:commandButton title="#{msg['button.pause']}" icon="fa fa-pause" actionListener="#{sessionController.pauseSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{not chamberSession.running}" oncomplete="mixpanel.track('Pause session');"/>
-							</div>
-							<div class="col-sm-6 col-md-3">
-								<p:commandButton title="#{msg['button.stop']}" icon="fa fa-stop" actionListener="#{sessionController.stopSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'CREATED'}" oncomplete="mixpanel.track('Reset session');"/>
-							</div>
-							<div class="col-sm-6 col-md-3">
-								<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'FINISHED'}" oncomplete="mixpanel.track('Finalize session');" />
+						<div class="container-fluid">
+							<div class="row">
+								<div class="col-sm-6 col-md-3">
+									<p:commandButton title="#{msg['button.start']}" icon="fa fa-play" actionListener="#{sessionController.startSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{chamberSession.running or chamberSession.status eq 'FINISHED'}" oncomplete="mixpanel.track('Start session');"/>
+								</div>
+								<div class="col-sm-6 col-md-3">
+									<p:commandButton title="#{msg['button.pause']}" icon="fa fa-pause" actionListener="#{sessionController.pauseSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{not chamberSession.running}" oncomplete="mixpanel.track('Pause session');"/>
+								</div>
+								<div class="col-sm-6 col-md-3">
+									<p:commandButton title="#{msg['button.stop']}" icon="fa fa-stop" actionListener="#{sessionController.stopSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'CREATED'}" oncomplete="mixpanel.track('Reset session');"/>
+								</div>
+								<div class="col-sm-6 col-md-3">
+									<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'FINISHED'}" oncomplete="mixpanel.track('Finalize session');" />
+								</div>
 							</div>
 						</div>
 					</p:column>
 
 					<p:column headerText="#{msg['label.action']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg xsmall-column session-action hidden-xs">
-						<div class="row">
-							<div class="col-md-5">
-								<p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); mixpanel.track('Edit session');" process=":form:chambersGrid" update=":editSessionForm" global="false">
-									<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
-								</p:commandButton>
-							</div>
-							<div class="col-md-5">
-								<p:commandButton id="deleteSessionButton" title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionData.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.status ne 'CREATED' and chamberSession.status ne 'FINISHED'}" rendered="#{loginController.hasAdminRights()}" styleClass="hidden-sm" />
+						<div class="container-fluid">
+							<div class="row">
+								<div class="col-md-5">
+									<p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); mixpanel.track('Edit session');" process=":form:chambersGrid" update=":editSessionForm" global="false">
+										<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
+									</p:commandButton>
+								</div>
+								<div class="col-md-5">
+									<p:commandButton id="deleteSessionButton" title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionData.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.running}" rendered="#{loginController.hasAdminRights()}" styleClass="hidden-sm" />
+								</div>
 							</div>
 						</div>
 					</p:column>
 				</p:dataTable>
-				<h:outputScript>if (typeof resize === "function") resize();</h:outputScript>
+				<h:outputScript>if (typeof resize === 'function') resize();</h:outputScript>
 			</p:dataGrid>
 		</h:form>
 	</div>

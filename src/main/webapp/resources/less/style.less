@@ -29,7 +29,7 @@
 		border: none;
 
 		img {
-			margin: 12px 0px 0px 8px;
+			margin: 12px 0 0 8px;
 			width: 100px;
 		}
 	}
@@ -110,7 +110,7 @@
 		background: @whiteThemeColor;
 
 		table {
-			margin: 0px;
+			margin: 0;
 		}
 	}
 }
@@ -219,13 +219,14 @@ div.timer-progress-cell {
 	}
 }
 
-.ui-button-icon-only span.ui-icon {
+button:not([disabled]).ui-button-icon-only span.ui-icon {
 	&.fa-play { color: @green-500 !important; }
-	&.fa-pause { color: @indigo-500 !important; }
 	&.fa-stop { color: @red-700 !important; }
-	&.fa-fast-forward { color: @indigo-500 !important; }
-	&.fa-pencil { color: @grey-700 !important; }
-	&.fa-trash { color: @grey-700 !important; }
+
+	//&.fa-pause { color: @indigo-500 !important; }
+	//&.fa-fast-forward { color: @indigo-500 !important; }
+	//&.fa-pencil { color: @grey-700 !important; }
+	//&.fa-trash { color: @grey-700 !important; }
 }
 
 .patient {

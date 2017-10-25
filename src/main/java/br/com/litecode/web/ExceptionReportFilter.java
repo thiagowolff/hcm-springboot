@@ -15,7 +15,7 @@ import java.time.Instant;
 @Slf4j
 @WebFilter(asyncSupported = true)
 public class ExceptionReportFilter implements Filter {
-	private static int MAX_EMAILS_PER_MINUTE = 10;
+	private static final int MAX_EMAILS_PER_MINUTE = 10;
 
 	@Autowired
 	private MailService mailService;

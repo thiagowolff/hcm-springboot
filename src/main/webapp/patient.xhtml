@@ -72,13 +72,13 @@
 				<p:inputText id="patientName" value="#{patient.name}" required="true" maxlength="150" size="50" />
 
 				<p:outputLabel value="#{msg['label.patientRecord']}" for="patientRecord" />
-				<p:inputText id="patientRecord" value="#{patient.patientRecord}" maxlength="30" size="15" />
+				<p:inputText id="patientRecord" value="#{patient.patientRecord}" required="true" maxlength="30" size="15" />
 
 				<p:outputLabel value="#{msg['label.folderNumber']}" for="folderNumber" />
 				<p:inputText id="folderNumber" value="#{patient.folderNumber}" maxlength="30" size="15" />
 
 				<p:outputLabel value="#{msg['label.healthInsurance']}" for="healthInsurance" />
-				<p:selectOneMenu id="healthInsurance" value="#{patient.healthInsurance}" editable="true">
+				<p:selectOneMenu id="healthInsurance" value="#{patient.healthInsurance}" required="true" editable="true">
 					<f:selectItem itemLabel="" itemValue=""  />
 					<f:selectItem itemLabel="Bradesco" itemValue="Bradesco" />
 					<f:selectItem itemLabel="Centro Clínico Gaúcho" itemValue="Centro Clínico Gaúcho"  />

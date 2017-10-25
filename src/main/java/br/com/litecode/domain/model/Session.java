@@ -2,9 +2,11 @@ package br.com.litecode.domain.model;
 
 import br.com.litecode.domain.model.ChamberEvent.EventType;
 import br.com.litecode.domain.repository.ContextDataConverter;
+import com.google.common.base.Joiner;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.shiro.SecurityUtils;
 import org.hibernate.annotations.SortNatural;
 import org.omnifaces.util.Faces;
 
@@ -15,7 +17,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 import java.util.SortedSet;
-import java.util.TimeZone;
 import java.util.TreeSet;
 
 @Entity
@@ -23,8 +24,9 @@ import java.util.TreeSet;
 @Setter
 public class Session implements Comparable<Session>, Serializable {
 	public enum SessionStatus { CREATED, COMPRESSING, O2_ON, O2_OFF, SHUTTING_DOWN, FINISHED }
-
 	public enum TimePeriod { MORNING, AFTERNOON, NIGHT }
+
+	private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,25 +48,22 @@ public class Session implements Comparable<Session>, Serializable {
 	private SessionStatus status;
 
 	@Convert(converter = ContextDataConverter.class)
-	private ContextData contextData;
+	private SessionMetadata sessionMetadata;
 
-	private long currentProgress;
-	private long elapsedSeconds;
+	@Transient
 	private String timeRemaining;
-	private boolean paused;
 
 	public Session() {
 		patientSessions = new TreeSet<>();
 		status = SessionStatus.CREATED;
-		paused = false;
-		contextData = new ContextData();
+		sessionMetadata = new SessionMetadata();
 	}
 
 	public LocalDate getSessionDate() {
 		return scheduledTime.toLocalDate();
 	}
 
-	public String getPatients() {
+	public String getPatientNames() {
 		String patients = "";
 		for (PatientSession patientSession : patientSessions) {
 			patients += patientSession.getPatient().getName() + "<br />";
@@ -78,48 +77,75 @@ public class Session implements Comparable<Session>, Serializable {
 
 	public void init() {
 		ZoneId timeZone = Faces.getSessionAttribute("timeZone");
-		contextData.setTimeZone(timeZone == null ? ZoneId.systemDefault().getId() : timeZone.getId());
-		LocalDateTime now = LocalDateTime.now(ZoneId.of(contextData.getTimeZone()));
+		sessionMetadata.setTimeZone(timeZone == null ? ZoneId.systemDefault().getId() : timeZone.getId());
+		LocalDateTime now = LocalDateTime.now(ZoneId.of(sessionMetadata.getTimeZone()));
+		sessionMetadata.setCreatedOn(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
-		if (!paused) {
-			startTime = now.toLocalTime();
-			endTime = now.plus(chamber.getChamberEvent(EventType.COMPLETION).getTimeout(), ChronoUnit.SECONDS).toLocalTime();
-			currentProgress = 0;
-			elapsedSeconds = 0;
-			timeRemaining = LocalTime.MIDNIGHT.plus(Duration.between(startTime, endTime).toMillis(), ChronoUnit.MILLIS).format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-			status = SessionStatus.CREATED;
-		} else {
-			endTime = now.plusSeconds(getRemainingSeconds()).toLocalTime();
-		}
+		startTime = now.toLocalTime();
+		endTime = now.plusSeconds(getDuration()).toLocalTime();
+		sessionMetadata.setCurrentProgress(0);
+		sessionMetadata.setElapsedTime(0);
+		timeRemaining = LocalTime.MIDNIGHT.plusSeconds(getDuration()).format(TIME_FORMAT);
+		status = SessionStatus.CREATED;
 
-		paused = false;
+		sessionMetadata.setPaused(false);
+	}
+
+	public void resume() {
+		LocalDateTime now = LocalDateTime.now(ZoneId.of(sessionMetadata.getTimeZone()));
+		endTime = now.plusSeconds(getDuration() - getSessionMetadata().elapsedTime).toLocalTime();
+		sessionMetadata.setPaused(false);
 	}
 
 	public void reset() {
 		startTime = scheduledTime.toLocalTime();
-		endTime = scheduledTime.plusSeconds(chamber.getChamberEvent(EventType.COMPLETION).getTimeout()).toLocalTime();
+		endTime = scheduledTime.plusSeconds(getDuration()).toLocalTime();
 		status = SessionStatus.CREATED;
-		currentProgress = 0;
-		elapsedSeconds = 0;
-		paused = false;
-		timeRemaining = LocalTime.MIDNIGHT.plus(Duration.between(startTime, endTime).toMillis(), ChronoUnit.MILLIS).format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+		sessionMetadata.setCurrentProgress(0);
+		sessionMetadata.setElapsedTime(0);
+		timeRemaining = LocalTime.MIDNIGHT.plusSeconds(getDuration()).format(TIME_FORMAT);
+		sessionMetadata.setPaused(false);
 	}
 
 	public void pause() {
 		updateProgress();
-		long duration = chamber.getChamberEvent(EventType.COMPLETION).getTimeout();
-		long remainingSeconds = Duration.between(LocalTime.now(ZoneId.of(contextData.getTimeZone())), endTime).getSeconds();
-		elapsedSeconds = duration - remainingSeconds;
-		paused = true;
+		long remainingSeconds = Duration.between(currentTime(), endTime).getSeconds();
+		sessionMetadata.setElapsedTime(getDuration() - remainingSeconds);
+		sessionMetadata.setPaused(true);
 	}
 
 	public void updateProgress() {
-		long remainingSeconds = Duration.between(LocalTime.now(ZoneId.of(contextData.getTimeZone())), endTime).getSeconds();
-		long duration = chamber.getChamberEvent(EventType.COMPLETION).getTimeout();
+		long remainingSeconds = Duration.between(currentTime(), endTime).getSeconds();
+		long duration = getDuration();
 		long elapsedTime = duration - remainingSeconds;
 
-		timeRemaining = LocalTime.MIDNIGHT.plusSeconds(remainingSeconds).format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-		currentProgress = elapsedTime * 100 / duration;
+		timeRemaining = LocalTime.MIDNIGHT.plusSeconds(remainingSeconds).format(TIME_FORMAT);
+		sessionMetadata.setCurrentProgress(elapsedTime * 100 / duration);
+	}
+
+	public long getCurrentProgress() {
+		return sessionMetadata.getCurrentProgress();
+	}
+
+	public String getTimeRemaining() {
+		if (isPaused()) {
+			return LocalTime.MIDNIGHT.plusSeconds(getDuration() - sessionMetadata.getElapsedTime()).format(TIME_FORMAT);
+		}
+
+		if (status == SessionStatus.FINISHED) {
+			return "00:00:00";
+		}
+
+		if (timeRemaining == null) {
+			long remainingSeconds = Duration.between(currentTime(), endTime).getSeconds();
+			timeRemaining = LocalTime.MIDNIGHT.plusSeconds(remainingSeconds).format(TIME_FORMAT);
+		}
+
+		return timeRemaining;
+	}
+
+	public int getDuration() {
+		return chamber.getChamberEvent(EventType.COMPLETION).getTimeout();
 	}
 
 	public TimePeriod getTimePeriod() {
@@ -133,6 +159,18 @@ public class Session implements Comparable<Session>, Serializable {
 		}
 
 		return TimePeriod.AFTERNOON;
+	}
+
+	public String getSessionInfo() {
+		if (sessionMetadata == null) {
+			return "";
+		}
+
+		String createdOn = sessionMetadata.getCreatedOn() == null ? null : "Criada em: " + sessionMetadata.getCreatedOn();
+		String createdBy = sessionMetadata.getCreatedBy() == null ? null : "Criada por: " + sessionMetadata.getCreatedBy();
+		String startedBy = sessionMetadata.getStartedBy() == null ? null : "Iniciada por: " + sessionMetadata.getStartedBy();
+
+		return Joiner.on("<br/>").skipNulls().join(createdOn, createdBy, startedBy);
 	}
 
 	public ChamberEvent getNextChamberEvent() {
@@ -155,12 +193,20 @@ public class Session implements Comparable<Session>, Serializable {
 		return endTime.minusSeconds(nextChamberEvent.getTimeout());
 	}
 
-	public int getRemainingSeconds() {
-		return LocalTime.parse(timeRemaining).toSecondOfDay();
+	public boolean isRunning() {
+		return status != SessionStatus.CREATED && status != SessionStatus.FINISHED && !isPaused();
 	}
 
-	public boolean isRunning() {
-		return status != SessionStatus.CREATED && status != SessionStatus.FINISHED && !paused;
+	public boolean isPaused() {
+		return sessionMetadata.isPaused();
+	}
+
+	private LocalTime currentTime() {
+		if (sessionMetadata.getTimeZone() != null) {
+			return LocalTime.now(ZoneId.of(sessionMetadata.getTimeZone()));
+		} else {
+			return LocalTime.now();
+		}
 	}
 
 	@Override
@@ -189,9 +235,13 @@ public class Session implements Comparable<Session>, Serializable {
 
 	@Getter
 	@Setter
-	public static class ContextData implements Serializable {
+	public static class SessionMetadata implements Serializable {
+		private String createdOn;
 		private String createdBy;
 		private String startedBy;
 		private String timeZone;
+		private long currentProgress;
+		private long elapsedTime;
+		private boolean paused;
 	}
 }

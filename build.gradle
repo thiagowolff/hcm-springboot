@@ -55,9 +55,9 @@ dependencies {
     compile "br.com.litecode:litefaces-enum-i18n:1.0.2"
     compile "org.primefaces.extensions:primefaces-extensions:6.1.1"
     compile"com.github.adminfaces:admin-theme:1.0.0-RC9"
-
     compile "org.omnifaces:omnifaces:1.14.1"
-    compile "com.google.guava:guava:22.0"
+
+    compile "com.google.guava:guava:23.2-jre"
     compile "org.apache.shiro:shiro-core:1.4.0"
     compile "org.apache.shiro:shiro-web:1.4.0"
     compile "org.apache.shiro:shiro-spring:1.4.0"
@@ -65,14 +65,18 @@ dependencies {
     compile "com.itextpdf:itextpdf:5.5.12"
 
     testCompile "org.springframework.boot:spring-boot-starter-test"
-    testCompile "com.google.guava:guava-testlib:23.0"
+//    testCompile "com.google.guava:guava-testlib:23.2-jre"
     testCompile "org.mockito:mockito-core:2.9.0"
     testCompile "org.powermock:powermock-module-junit4:1.7.1"
     testCompile "org.powermock:powermock-api-mockito2:1.7.1"
     testCompile "org.hsqldb:hsqldb"
-    testCompile "org.seleniumhq.selenium:selenium-java:3.6.0"
-    testCompile "org.seleniumhq.selenium.fluent:fluent-selenium:1.18"
-
+    testCompile "org.seleniumhq.selenium:selenium-chrome-driver:3.6.0"
+    testCompile "org.seleniumhq.selenium:selenium-api:3.6.0"
+    testCompile "org.seleniumhq.selenium:selenium-support:3.6.0"
+    testCompile "org.seleniumhq.selenium:selenium-remote-driver:3.6.0"
+    testCompile "org.fluentlenium:fluentlenium-core:3.4.1"
+    testCompile "org.fluentlenium:fluentlenium-junit:3.4.1"
+    testCompile "org.fluentlenium:fluentlenium-assertj:3.4.1"
 }
 
 task compileLess {
@@ -96,7 +100,7 @@ ext.loadVersionProperties = {
 task updateVersion {
     doLast {
         if (gradle.startParameter.taskNames[0] != "deploy") {
-            return;
+            return
         }
 
         def versionProperties = loadVersionProperties()
@@ -104,9 +108,9 @@ task updateVersion {
         def nextMinorVersion = Integer.parseInt(version[2]) + 1
         def newVersion = version[0] + "." + version[1] + "." + nextMinorVersion
 
-        LocalDate versionDate = LocalDate.parse(versionProperties.versionDate, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        LocalDate versionDate = LocalDate.parse(versionProperties.versionDate, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
 
-        if (versionDate.equals(LocalDate.now())) {
+        if (versionDate == LocalDate.now()) {
             println("Version not updated. Current version: $versionProperties.version")
             return
         }
@@ -178,6 +182,7 @@ jar.into('META-INF/resources') {
 }
 
 jar.finalizedBy deleteCss
+jar.baseName = "hcm"
 
 test {
     exclude "br/com/litecode/integration/**"

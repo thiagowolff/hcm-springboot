@@ -19,7 +19,7 @@ public class SessionClock implements Clock<Session> {
 	private TaskScheduler taskScheduler;
 
 	private Map<Session, List<SessionTask>> sessionTasks = new ConcurrentHashMap<>();
-	private Map<Session, List<ScheduledFuture>> activeSessions = new ConcurrentHashMap<>();;
+	private Map<Session, List<ScheduledFuture>> activeSessions = new ConcurrentHashMap<>();
 
 	@Override
 	public void register(Session session, Runnable task, long delay) {
