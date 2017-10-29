@@ -30,9 +30,13 @@ public class User {
 	private Instant creationDate;
 	private String lastAccessLocation;
 	private String sessionId;
+
+	@Embedded
+	private UserPreferences userPreferences;
 	
     public User() {
     	creationDate = Instant.now();
+		userPreferences = new UserPreferences();
     }
 
     public String getLastAccessLocationFormatted() {

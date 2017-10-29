@@ -1,10 +1,7 @@
 package br.com.litecode.controller;
 
-import br.com.litecode.domain.model.Chamber;
+import br.com.litecode.domain.model.*;
 import br.com.litecode.domain.model.ChamberEvent.EventType;
-import br.com.litecode.domain.model.Patient;
-import br.com.litecode.domain.model.PatientSession;
-import br.com.litecode.domain.model.Session;
 import br.com.litecode.domain.model.Session.SessionStatus;
 import br.com.litecode.domain.repository.ChamberRepository;
 import br.com.litecode.domain.repository.SessionRepository;
@@ -119,11 +116,15 @@ public class SessionController implements Serializable {
 		session.setScheduledTime(scheduledTime);
 		session.setStartTime(session.getScheduledTime().toLocalTime());
 		session.setEndTime(endTime);
-		session.getSessionMetadata().setCreatedBy((String) SecurityUtils.getSubject().getPrincipal());
+		session.getSessionMetadata().setCreatedBy(getLoggedUser().getUsername());
+		session.getSessionMetadata().setCreatedOn(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
+
 		sessionData.getPatients().forEach(session::addPatient);
 		sessionRepository.save(session);
 		invalidateSessionCache();
-		pushService.publish(PushChannel.NOTIFY, NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name()), session.getSessionMetadata().getCreatedBy());
+
+		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name(), getLoggedUser().getUserPreferences());
+		pushService.publish(PushChannel.NOTIFY, notificationMessage, getLoggedUser());
 	}
 
 	@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }")
@@ -182,7 +183,9 @@ public class SessionController implements Serializable {
 	public void deleteSession(Session session) {
 		sessionTimer.stopSession(session);
 		sessionRepository.delete(session);
-		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(sessionData.getSession(), SessionOperationType.DELETE_SESSION.name()), sessionData.getSession().getSessionMetadata().getCreatedBy());
+
+		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.DELETE_SESSION.name(), getLoggedUser().getUserPreferences());
+		pushService.publish(PushChannel.NOTIFY,  notificationMessage, getLoggedUser());
 	}
 
 	@PushRefresh
@@ -232,7 +235,8 @@ public class SessionController implements Serializable {
 			session.setScheduledTime(sessionTime);
 			session.setStartTime(sessionTime.toLocalTime());
 			session.setEndTime(sessionTime.plusSeconds(sessionDuration).toLocalTime());
-			session.getSessionMetadata().setCreatedBy((String) SecurityUtils.getSubject().getPrincipal());
+			session.getSessionMetadata().setCreatedBy(getLoggedUser().getUsername());
+			session.getSessionMetadata().setCreatedOn(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
 			fromSession.getPatientSessions().forEach(ps -> session.addPatient(ps.getPatient()));
 			sessionRepository.save(session);
 		}
@@ -291,6 +295,10 @@ public class SessionController implements Serializable {
 	public String getScheduledSessionDates() {
 		Set<LocalDate> sessionDates = scheduledSessionDates.stream().map(LocalDateTime::toLocalDate).collect(Collectors.toSet());
 		return sessionDates.stream().map(date -> "'" + date + "'").collect(Collectors.joining(","));
+	}
+
+	private User getLoggedUser() {
+		return Faces.getSessionAttribute("loggedUser");
 	}
 
 	@Getter

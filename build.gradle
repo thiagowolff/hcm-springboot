@@ -51,10 +51,9 @@ dependencies {
 
     compile "org.joinfaces:jsf-myfaces-spring-boot-starter:2.4.0"
     compile "org.primefaces:primefaces:6.1"
-    compile "org.primefaces:primefaces:6.1"
     compile "br.com.litecode:litefaces-enum-i18n:1.0.2"
     compile "org.primefaces.extensions:primefaces-extensions:6.1.1"
-    compile"com.github.adminfaces:admin-theme:1.0.0-RC9"
+    compile"com.github.adminfaces:admin-theme:1.0.0-RC11"
     compile "org.omnifaces:omnifaces:1.14.1"
 
     compile "com.google.guava:guava:23.2-jre"

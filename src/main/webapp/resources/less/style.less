@@ -60,8 +60,13 @@
 	padding-right: 5px;
 }
 
-.ui-menuitem-link .ui-menuitem-text:hover {
-	color: @primaryThemeColor;
+.ui-menuitem-link {
+	.ui-menuitem-text {
+		padding-left: 5px !important;
+		&:hover {
+			color: @defaultIconColor;
+		}
+	}
 }
 
 .top-menu {

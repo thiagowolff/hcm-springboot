@@ -78,11 +78,9 @@ public class Session implements Comparable<Session>, Serializable {
 	public void init() {
 		ZoneId timeZone = Faces.getSessionAttribute("timeZone");
 		sessionMetadata.setTimeZone(timeZone == null ? ZoneId.systemDefault().getId() : timeZone.getId());
-		LocalDateTime now = LocalDateTime.now(ZoneId.of(sessionMetadata.getTimeZone()));
-		sessionMetadata.setCreatedOn(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
-		startTime = now.toLocalTime();
-		endTime = now.plusSeconds(getDuration()).toLocalTime();
+		startTime = currentTime();
+		endTime = currentTime().plusSeconds(getDuration());
 		sessionMetadata.setCurrentProgress(0);
 		sessionMetadata.setElapsedTime(0);
 		timeRemaining = LocalTime.MIDNIGHT.plusSeconds(getDuration()).format(TIME_FORMAT);
@@ -92,8 +90,7 @@ public class Session implements Comparable<Session>, Serializable {
 	}
 
 	public void resume() {
-		LocalDateTime now = LocalDateTime.now(ZoneId.of(sessionMetadata.getTimeZone()));
-		endTime = now.plusSeconds(getDuration() - getSessionMetadata().elapsedTime).toLocalTime();
+		endTime = currentTime().plusSeconds(getDuration() - getSessionMetadata().elapsedTime);
 		sessionMetadata.setPaused(false);
 	}
 
@@ -120,7 +117,7 @@ public class Session implements Comparable<Session>, Serializable {
 		long elapsedTime = duration - remainingSeconds;
 
 		timeRemaining = LocalTime.MIDNIGHT.plusSeconds(remainingSeconds).format(TIME_FORMAT);
-		sessionMetadata.setCurrentProgress(elapsedTime * 100 / duration);
+		sessionMetadata.setCurrentProgress(Math.min(100, elapsedTime * 100 / duration));
 	}
 
 	public long getCurrentProgress() {
@@ -190,7 +187,7 @@ public class Session implements Comparable<Session>, Serializable {
 			return null;
 		}
 
-		return endTime.minusSeconds(nextChamberEvent.getTimeout());
+		return endTime.minusSeconds(getDuration()).plusSeconds(nextChamberEvent.getTimeout());
 	}
 
 	public boolean isRunning() {
@@ -203,9 +200,9 @@ public class Session implements Comparable<Session>, Serializable {
 
 	private LocalTime currentTime() {
 		if (sessionMetadata.getTimeZone() != null) {
-			return LocalTime.now(ZoneId.of(sessionMetadata.getTimeZone()));
+			return LocalTime.now(ZoneId.of(sessionMetadata.getTimeZone())).truncatedTo(ChronoUnit.SECONDS);
 		} else {
-			return LocalTime.now();
+			return LocalTime.now().truncatedTo(ChronoUnit.SECONDS);
 		}
 	}
 

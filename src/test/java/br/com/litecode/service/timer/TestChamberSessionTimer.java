@@ -39,6 +39,7 @@ public class TestChamberSessionTimer {
 	@Test
 	public void playSession() {
 		Session session = sessionRepository.findOne(1);
+		session.getSessionMetadata().setStartedBy("admin");
 		chamberSessionTimer.startSession(session);
 
 		long numberOfAbsentPatients = session.getPatientSessions().stream().filter(PatientSession::isAbsent).count();

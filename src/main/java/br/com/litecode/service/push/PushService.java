@@ -1,5 +1,6 @@
 package br.com.litecode.service.push;
 
+import br.com.litecode.domain.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -12,12 +13,12 @@ public class PushService {
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
-	public void publish(PushChannel channel, Object message, String user) {
+	public void publish(PushChannel channel, Object message, User user) {
 		Map<String, Object> headers = new HashMap<>();
 		if (user != null) {
-			headers.put("user-name", user);
+			headers.put("user-name", user.getUsername());
 		}
 
-		simpMessagingTemplate.convertAndSend("/topic/" + channel.name().toLowerCase(),  message, headers);
+		simpMessagingTemplate.convertAndSend("/topic/" + channel.name().toLowerCase(), message, headers);
 	}
 }

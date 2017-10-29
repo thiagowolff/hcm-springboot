@@ -1,29 +1,41 @@
 package br.com.litecode.service.timer;
 
+import br.com.litecode.domain.model.Alarm;
 import br.com.litecode.domain.model.ChamberEvent;
 import br.com.litecode.domain.model.Session;
 import br.com.litecode.domain.model.Session.SessionStatus;
+import br.com.litecode.domain.model.User;
+import br.com.litecode.domain.repository.AlarmRepository;
 import br.com.litecode.domain.repository.SessionRepository;
+import br.com.litecode.domain.repository.UserRepository;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushService;
 import br.com.litecode.service.push.message.NotificationMessage;
 import br.com.litecode.service.push.message.ProgressMessage;
 import br.com.litecode.util.JmxUtil;
+import com.google.common.base.Splitter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalTime;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
 @Slf4j
-public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBean {
+public class ChamberSessionTimer implements SessionTimer {
 	@Autowired
 	private SessionRepository sessionRepository;
+
+	@Autowired
+	private UserRepository userRepository;
 
 	@Autowired
 	private PushService pushService;
@@ -31,12 +43,6 @@ public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBe
 	@Autowired
 	@Getter
 	private Clock<Session> sessionClock;
-
-	@PostConstruct
-	private void init() {
-		JmxUtil.registerMBean(this, "SessionTimer");
-		initializeAlarms();
-	}
 
 	@Override
 	public void startSession(Session session) {
@@ -58,13 +64,15 @@ public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBe
 	private void sessionTimeout(Session session, ChamberEvent chamberEvent) {
 		session = sessionRepository.findOne(session.getSessionId());
 		session.setStatus(chamberEvent.getEventType().getSessionStatus());
+		session.updateProgress();
 		sessionRepository.save(session);
 
 		if (session.getStatus() == SessionStatus.FINISHED) {
 			sessionClock.stop(session);
 		}
 
-		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, chamberEvent.toString()), session.getSessionMetadata().getStartedBy());
+		User user = userRepository.findUserByUsername(session.getSessionMetadata().getStartedBy());
+		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, chamberEvent.toString(), user.getUserPreferences()), user);
 	}
 
 	@Override
@@ -76,23 +84,8 @@ public class ChamberSessionTimer implements SessionTimer, ChamberSessionTimerMBe
 	private void clockTimeout() {
 		for (Session session : sessionClock.getActiveListeners()) {
 			session.updateProgress();
-			pushService.publish(PushChannel.PROGRESS, ProgressMessage.create(session), session.getSessionMetadata().getStartedBy());
+			pushService.publish(PushChannel.PROGRESS, ProgressMessage.create(session), null);
 		}
-	}
-
-	@Override
-	public void initializeAlarms() {
-
-	}
-
-	@Override
-	public void pushAlarm(String name, String message) {
-
-	}
-
-	@Override
-	public int getNumberOfActiveTimers() {
-		return 0;
 	}
 }
 

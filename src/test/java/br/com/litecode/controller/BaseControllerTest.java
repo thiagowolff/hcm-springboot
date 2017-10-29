@@ -1,5 +1,6 @@
 package br.com.litecode.controller;
 
+import br.com.litecode.domain.model.User;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.SubjectContext;
@@ -18,6 +19,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -39,16 +43,24 @@ public abstract class BaseControllerTest {
 
     @Before
     public void setUpMocks() {
+        User loggedUser = new User();
+        loggedUser.setUsername("admin");
+
         SecurityManager securityManger = mock(SecurityManager.class);
         Subject subject = mock(Subject.class);
 
         when(securityManger.createSubject(any(SubjectContext.class))).thenReturn(subject);
-        when(subject.getPrincipal()).thenReturn("hcm-test");
+        when(subject.getPrincipal()).thenReturn(loggedUser.getUsername());
 
         ThreadContext.bind(securityManger);
 
         PowerMockito.mockStatic(FacesContext.class);
         when(FacesContext.getCurrentInstance()).thenReturn(facesContext);
         when(facesContext.getExternalContext()).thenReturn(externalContext);
+
+        Map<String, Object> sessionMap = new HashMap<>();
+        sessionMap.put("loggedUser", loggedUser);
+
+        when(facesContext.getExternalContext().getSessionMap()).thenReturn(sessionMap);
     }
 }

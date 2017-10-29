@@ -12,7 +12,7 @@
 
 	<div class="content-wrapper">
 		<h:form id="form">
-			<p:panelGrid columns="8" layout="grid" styleClass="session-toolbar">
+			<p:panelGrid columns="9" layout="grid" styleClass="session-toolbar">
 				<h:panelGroup style="white-space: nowrap;">
 					<p:commandButton icon="fa fa-chevron-left" actionListener="#{sessionController.previousSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
 					<p:calendar id="sessionDate" widgetVar="sessionDate" value="#{sessionController.sessionData.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" beforeShowDay="sessionDates" converter="localDateTimeConverter">
@@ -21,7 +21,7 @@
 					<p:commandButton icon="fa fa-chevron-right" actionListener="#{sessionController.nextSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
 				</h:panelGroup>
 
-				<p:selectOneMenu id="sessionChamber" widgetVar="sessionChamber" value="#{sessionController.sessionData.chamber}" converter="omnifaces.SelectItemsConverter" styleClass="hidden-xs" style="min-width: 85px;">
+				<p:selectOneMenu id="sessionChamber" widgetVar="sessionChamber" value="#{sessionController.sessionData.chamber}" converter="omnifaces.SelectItemsConverter" styleClass="hidden-xs" style="min-width: 100px;">
 					<f:selectItems value="#{chamberController.chambers}" var="chamber" itemValue="#{chamber}" itemLabel="#{chamber.name}"/>
 				</p:selectOneMenu>
 
@@ -40,8 +40,8 @@
 					<p:resetInput target="@form" />
 				</p:commandButton>
 
-				<p:commandButton icon="fa fa-clone" value="#{msg['button.duplicateSessions']}" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary hidden-xs hidden-sm" />
-				<p:commandButton id="printSession" icon="fa fa-print" value="#{msg['button.print']}" process="@this" ajax="false" immediate="true" actionListener="#{sessionController.generateDailySessionsReport}" onclick="this.form.target = '_blank'; mixpanel.track('Print');" styleClass="btn-primary hidden-xs hidden-sm" />
+				<p:commandButton value="#{msg['button.duplicate']}" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary hidden-xs hidden-sm" />
+				<p:commandButton id="printSession" value="#{msg['button.print']}" process="@this" ajax="false" immediate="true" actionListener="#{sessionController.generateDailySessionsReport}" onclick="this.form.target = '_blank'; mixpanel.track('Print');" styleClass="btn-primary hidden-xs hidden-sm" />
 				<p:tooltip for="printSession" value="#{msg['message.dailySessionsReport']}" position="right" escape="false" />
 
 				<p:messages id="messages"/>
@@ -143,19 +143,19 @@
 					</p:column>
 
 					<p:column headerText="#{msg['label.status']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column">
-						<h:outputText value="#{lcf:enum(chamberSession.status)}" styleClass="#{lcf:enumStyle(chamberSession.status)}"/>
+						<div class="session-status-#{chamberSession.sessionId} animate-0">
+							<h:outputText value="#{lcf:enum(chamberSession.status)}" styleClass="#{lcf:enumStyle(chamberSession.status)}"/>
+						</div>
 					</p:column>
 
 					<p:column headerText="#{msg['label.progress']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column">
 						<div class="timer-progress-cell">
 							<div id="currentTime-#{chamberSession.sessionId}">
-								<h:outputText value="#{chamberSession.timeRemaining}"  rendered="#{chamberSession.running}" />
-								<h:outputText value="#{chamberSession.timeRemaining}" rendered="#{not chamberSession.running}" />
+								<h:outputText value="#{chamberSession.timeRemaining}" />
 							</div>
 							<div>
-								<p:progressBar widgetVar="progress-#{chamberSession.sessionId}" labelTemplate="{value}%" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status ne 'FINISHED' and not chamberSession.paused}" />
-								<p:progressBar labelTemplate="{value}%" value="#{chamberSession.currentProgress}" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.paused}" />
-								<p:progressBar value="100" displayOnly="true" labelTemplate="100%" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status eq 'FINISHED' and not chamberSession.paused}" />
+								<p:progressBar widgetVar="progress-#{chamberSession.sessionId}" value="#{chamberSession.currentProgress}" labelTemplate="{value}%" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status ne 'FINISHED'}" />
+								<p:progressBar value="100" displayOnly="true" labelTemplate="100%" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status eq 'FINISHED'}" />
 							</div>
 						</div>
 					</p:column>
@@ -253,10 +253,11 @@
 
 	<h:form>
 		<p:remoteCommand name="updateSessions" process="@this" update=":form:chambersGrid" global="false" />
-		<p:remoteCommand name="refreshSessions" actionListener="#{sessionController.invalidateSessionCache()}" process="@this" update=":form:chambersGrid :editSessionForm" global="false" />
+		<p:remoteCommand name="refreshSessions" oncomplete="onSessionTimeout(this.data)" actionListener="#{sessionController.invalidateSessionCache()}" process="@this" update=":form:chambersGrid :editSessionForm" global="false" />
 	</h:form>
 
 	<script type="text/javascript">
+		//<![CDATA[
 		var loggedUser;
 
 		function register(registrations) {
@@ -281,19 +282,20 @@
 		$().ready(function() {
 			register([
 				{
-					route: '/topic/progress', callback: function (data) {
+					route: '/topic/progress', callback: function(data) {
 						var sessionProgress = JSON.parse(data.body);
 						updateTimer(sessionProgress);
 					}
 				},
 				{
-					route: '/topic/notify', callback: function (data) {
-						handleMessage(JSON.parse(data.body));
-						refreshSessions();
+					route: '/topic/notify', callback: function(data) {
+						var message = JSON.parse(data.body);
+						handleMessage(message);
+						refreshSessions([{ name: "sessionId", value: message.sessionId }]);
 					}
 				},
 				{
-					route: '/topic/refresh', callback: function (data) {
+					route: '/topic/refresh', callback: function(data) {
 						if (data.headers['user-name'] != loggedUser) {
 							refreshSessions();
 						}
@@ -313,14 +315,28 @@
 		});
 
 		function handleMessage(notificationMessage) {
-			var facesMessage = {
-				summary: notificationMessage.messageSummary,
-				detail: notificationMessage.messageDetail,
-				severity: notificationMessage.eventType
-			};
+			if (!notificationMessage.userPreferences.disableNotificationMessages) {
+				var facesMessage = {
+					summary: notificationMessage.messageSummary,
+					detail: notificationMessage.messageDetail,
+					severity: notificationMessage.eventType
+				};
 
-			PF('growl').show([facesMessage]);
-			playSound(notificationMessage.eventType);
+				PF('growl').show([facesMessage]);
+			}
+
+			if (!notificationMessage.userPreferences.disableNotificationSounds) {
+				playSound(notificationMessage.eventType);
+			}
+		}
+
+		function onSessionTimeout(data) {
+			var sessionId = decodeURIComponent(data.match(/&sessionId=([^&]*)/)[1]);
+			var nextEvent = $('.session-status-' + sessionId);
+			$(nextEvent).addClass('rubberBand');
+			setTimeout(function () {
+				$(nextEvent).removeClass('rubberBand');
+			}, 1500);
 		}
 
 		function playSound(eventType) {
@@ -338,26 +354,15 @@
 
 		function progressStep(session) {
 			var widget = PF('progress-' + session.sessionId);
-			if (widget &amp;&amp; session.currentProgress > 0) {
+			if (widget && session.currentProgress > 0) {
 				widget.setValue(session.currentProgress);
 			}
 		}
 
-//		function handleAlarm(alarm) {
-//			var facesMessage = {
-//				summary: alarm.name,
-//				detail: alarm.message,
-//				severity: "info"
-//			};
-//
-//			PF('growl').show([facesMessage]);
-//			playSound(alarm.notificationSound);
-//		}
-
 		var dates = new Array(#{sessionController.scheduledSessionDates});
 
 		function sessionDates(date) {
-			var isoDate = date.getFullYear() + '-' + (date.getMonth() &lt; 9 ? '0' : '') + (date.getMonth() + 1) + '-' + (date.getDate() &lt; 10 ? '0' : '') + date.getDate();
+			var isoDate = date.getFullYear() + '-' + (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1) + '-' + (date.getDate() < 10 ? '0' : '') + date.getDate();
 			var styleClass = dates.indexOf(isoDate) != -1 ? 'session-day' : '';
 			return [ true,  styleClass]
 		}
@@ -366,5 +371,6 @@
 			var colspan = 13 - ($('#form\\:chambersGrid .ui-datatable-tablewrapper th[scope="col"]:hidden').length / 2);
 			$('.ui-rowgroup-header td, .ui-datatable-empty-message td').attr('colspan', colspan);
 		}
+		//]]>
 	</script>
 </ui:composition>
