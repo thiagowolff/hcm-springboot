@@ -14,7 +14,7 @@ import java.util.concurrent.ScheduledFuture;
 
 @Component
 @Slf4j
-public class SessionClock implements Clock<Session> {
+public class SessionTimeTicker implements TimeTicker<Session> {
 	@Autowired
 	private TaskScheduler taskScheduler;
 
@@ -38,7 +38,7 @@ public class SessionClock implements Clock<Session> {
 			activeSessions.computeIfAbsent(session, k -> new ArrayList<>()).add(taskScheduler.schedule(sessionTask.task, startTime));
 		}
 
-		log.info("Session {} started with {} scheduled events", session.getSessionId(), sessionTasks.size());
+		log.info("Session {} started with {} scheduled events", session.getSessionId(), sessionTasks.get(session).size());
 	}
 
 	@Override

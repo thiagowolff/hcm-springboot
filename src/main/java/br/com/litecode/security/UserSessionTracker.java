@@ -3,23 +3,26 @@ package br.com.litecode.security;
 import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.UserRepository;
 import br.com.litecode.service.push.PushRefresh;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.WebApplicationContext;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.SessionScoped;
 import javax.servlet.http.HttpSession;
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Scope(WebApplicationContext.SCOPE_APPLICATION)
+@ApplicationScoped
 @Component
-public class UserSessionTracker {
-	@Autowired private UserRepository userRepository;
+public class UserSessionTracker implements Serializable {
+	@Autowired
+	private UserRepository userRepository;
 
 	private Map<User, HttpSession> userSessions;
-	
+
 	@PostConstruct
 	public void init() {
 		userSessions = new ConcurrentHashMap<>();

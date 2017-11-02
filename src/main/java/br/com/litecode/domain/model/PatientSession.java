@@ -15,11 +15,11 @@ public class PatientSession implements Comparable<PatientSession>, Serializable 
 	private Integer patientSessionId;
 
 	@ManyToOne
-	@JoinColumn(name = "patient_id")
+	@JoinColumn(name = "patient_id", nullable = false)
 	private Patient patient;
 
 	@ManyToOne
-	@JoinColumn(name = "session_id")
+	@JoinColumn(name = "session_id", nullable = false)
 	private Session session;
 
 	private boolean absent;

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 @Component
-public class FakeSessionClock implements Clock<Session> {
+public class ControlledSessionTimeTicker implements TimeTicker<Session> {
 	private List<Runnable> sessionTasks = new ArrayList<>();
 
 	@Override

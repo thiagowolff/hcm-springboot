@@ -1,7 +1,6 @@
 package br.com.litecode.domain.model;
 
 import com.google.common.base.Joiner;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
@@ -28,8 +27,9 @@ public class User {
 	private String name;
 	private Instant lastAccess;
 	private Instant creationDate;
-	private String lastAccessLocation;
 	private String sessionId;
+	private String lastAccessLocation;
+	private String timeZone;
 
 	@Embedded
 	private UserPreferences userPreferences;

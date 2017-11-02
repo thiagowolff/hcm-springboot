@@ -5,6 +5,7 @@ import br.com.litecode.domain.model.ChamberEvent.EventType;
 import br.com.litecode.domain.model.Session.SessionStatus;
 import br.com.litecode.domain.repository.ChamberRepository;
 import br.com.litecode.domain.repository.SessionRepository;
+import br.com.litecode.security.UserSessionTracker;
 import br.com.litecode.service.SessionReportService;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushRefresh;
@@ -34,7 +35,10 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import java.io.IOException;
 import java.io.Serializable;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -77,6 +81,9 @@ public class SessionController implements Serializable {
 
 	private List<LocalDateTime> scheduledSessionDates;
 
+	@Autowired
+	private UserSessionTracker userSessionTracker;
+
 	private enum ChamberPayloadStatus { AVAILABLE, OCCUPIED, ABSENT }
 	private enum SessionOperationType { CREATE_SESSION, DELETE_SESSION }
 
@@ -116,8 +123,8 @@ public class SessionController implements Serializable {
 		session.setScheduledTime(scheduledTime);
 		session.setStartTime(session.getScheduledTime().toLocalTime());
 		session.setEndTime(endTime);
-		session.getSessionMetadata().setCreatedBy(getLoggedUser().getUsername());
-		session.getSessionMetadata().setCreatedOn(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
+		session.setCreatedBy(getLoggedUser());
+		session.setCreatedOn(Instant.now());
 
 		sessionData.getPatients().forEach(session::addPatient);
 		sessionRepository.save(session);
@@ -137,7 +144,7 @@ public class SessionController implements Serializable {
 			session.init();
 		}
 
-		session.getSessionMetadata().setStartedBy((String) SecurityUtils.getSubject().getPrincipal());
+		session.getExecutionMetadata().setStartedBy((String) SecurityUtils.getSubject().getPrincipal());
 		sessionRepository.save(session);
 		sessionTimer.startSession(session);
 	}
@@ -161,9 +168,9 @@ public class SessionController implements Serializable {
 
 		session.setStartTime(session.getScheduledTime().toLocalTime());
 		session.setEndTime(session.getScheduledTime().plus(session.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout(), ChronoUnit.SECONDS).toLocalTime());
-		session.getSessionMetadata().setCurrentProgress(100);
+		session.getExecutionMetadata().setCurrentProgress(100);
 		session.setStatus(SessionStatus.FINISHED);
-		session.getSessionMetadata().setPaused(false);
+		session.getExecutionMetadata().setPaused(false);
 		sessionRepository.save(session);
 	}
 
@@ -235,8 +242,8 @@ public class SessionController implements Serializable {
 			session.setScheduledTime(sessionTime);
 			session.setStartTime(sessionTime.toLocalTime());
 			session.setEndTime(sessionTime.plusSeconds(sessionDuration).toLocalTime());
-			session.getSessionMetadata().setCreatedBy(getLoggedUser().getUsername());
-			session.getSessionMetadata().setCreatedOn(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
+			session.setCreatedBy(getLoggedUser());
+			session.setCreatedOn(Instant.now());
 			fromSession.getPatientSessions().forEach(ps -> session.addPatient(ps.getPatient()));
 			sessionRepository.save(session);
 		}

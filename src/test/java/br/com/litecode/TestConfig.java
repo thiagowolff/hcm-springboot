@@ -1,7 +1,7 @@
 package br.com.litecode;
 
-import br.com.litecode.service.timer.Clock;
-import br.com.litecode.service.timer.FakeSessionClock;
+import br.com.litecode.service.timer.TimeTicker;
+import br.com.litecode.service.timer.ControlledSessionTimeTicker;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.context.annotation.Bean;
@@ -12,8 +12,8 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 @Configuration
 public class TestConfig {
 	@Bean
-    public Clock sessionClock() {
-        return new FakeSessionClock();
+    public TimeTicker sessionClock() {
+        return new ControlledSessionTimeTicker();
     }
 
     @Bean

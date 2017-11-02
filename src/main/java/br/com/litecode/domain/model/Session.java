@@ -3,12 +3,9 @@ package br.com.litecode.domain.model;
 import br.com.litecode.domain.model.ChamberEvent.EventType;
 import br.com.litecode.domain.repository.ContextDataConverter;
 import com.google.common.base.Joiner;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SortNatural;
-import org.omnifaces.util.Faces;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -33,11 +30,11 @@ public class Session implements Comparable<Session>, Serializable {
 	private Integer sessionId;
 
 	@ManyToOne
-	@JoinColumn(name = "chamber_id")
+	@JoinColumn(name = "chamber_id", nullable = false)
 	private Chamber chamber;
 
 	@SortNatural
-	@OneToMany(mappedBy = "session", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
 	private SortedSet<PatientSession> patientSessions;
 
 	private LocalDateTime scheduledTime;
@@ -48,15 +45,25 @@ public class Session implements Comparable<Session>, Serializable {
 	private SessionStatus status;
 
 	@Convert(converter = ContextDataConverter.class)
-	private SessionMetadata sessionMetadata;
+	private ExecutionMetadata executionMetadata;
+
+	private Instant createdOn;
+
+	@OneToOne
+	@JoinColumn(name = "created_by")
+	private User createdBy;
 
 	@Transient
 	private String timeRemaining;
 
+	@Transient
+	private Clock clock;
+
 	public Session() {
 		patientSessions = new TreeSet<>();
 		status = SessionStatus.CREATED;
-		sessionMetadata = new SessionMetadata();
+		executionMetadata = new ExecutionMetadata();
+		clock = Clock.systemDefaultZone();
 	}
 
 	public LocalDate getSessionDate() {
@@ -76,39 +83,33 @@ public class Session implements Comparable<Session>, Serializable {
 	}
 
 	public void init() {
-		ZoneId timeZone = Faces.getSessionAttribute("timeZone");
-		sessionMetadata.setTimeZone(timeZone == null ? ZoneId.systemDefault().getId() : timeZone.getId());
-
 		startTime = currentTime();
 		endTime = currentTime().plusSeconds(getDuration());
-		sessionMetadata.setCurrentProgress(0);
-		sessionMetadata.setElapsedTime(0);
 		timeRemaining = LocalTime.MIDNIGHT.plusSeconds(getDuration()).format(TIME_FORMAT);
 		status = SessionStatus.CREATED;
-
-		sessionMetadata.setPaused(false);
+		executionMetadata.init();
+		executionMetadata.setPaused(false);
 	}
 
 	public void resume() {
-		endTime = currentTime().plusSeconds(getDuration() - getSessionMetadata().elapsedTime);
-		sessionMetadata.setPaused(false);
+		endTime = currentTime().plusSeconds(getDuration() - this.getExecutionMetadata().elapsedTime);
+		executionMetadata.setPaused(false);
 	}
 
 	public void reset() {
 		startTime = scheduledTime.toLocalTime();
 		endTime = scheduledTime.plusSeconds(getDuration()).toLocalTime();
 		status = SessionStatus.CREATED;
-		sessionMetadata.setCurrentProgress(0);
-		sessionMetadata.setElapsedTime(0);
 		timeRemaining = LocalTime.MIDNIGHT.plusSeconds(getDuration()).format(TIME_FORMAT);
-		sessionMetadata.setPaused(false);
+		executionMetadata.init();
+		executionMetadata.setPaused(false);
 	}
 
 	public void pause() {
 		updateProgress();
 		long remainingSeconds = Duration.between(currentTime(), endTime).getSeconds();
-		sessionMetadata.setElapsedTime(getDuration() - remainingSeconds);
-		sessionMetadata.setPaused(true);
+		executionMetadata.setElapsedTime(getDuration() - remainingSeconds);
+		executionMetadata.setPaused(true);
 	}
 
 	public void updateProgress() {
@@ -117,16 +118,16 @@ public class Session implements Comparable<Session>, Serializable {
 		long elapsedTime = duration - remainingSeconds;
 
 		timeRemaining = LocalTime.MIDNIGHT.plusSeconds(remainingSeconds).format(TIME_FORMAT);
-		sessionMetadata.setCurrentProgress(Math.min(100, elapsedTime * 100 / duration));
+		executionMetadata.setCurrentProgress(Math.min(100, elapsedTime * 100 / duration));
 	}
 
 	public long getCurrentProgress() {
-		return sessionMetadata.getCurrentProgress();
+		return executionMetadata.getCurrentProgress();
 	}
 
 	public String getTimeRemaining() {
 		if (isPaused()) {
-			return LocalTime.MIDNIGHT.plusSeconds(getDuration() - sessionMetadata.getElapsedTime()).format(TIME_FORMAT);
+			return LocalTime.MIDNIGHT.plusSeconds(getDuration() - executionMetadata.getElapsedTime()).format(TIME_FORMAT);
 		}
 
 		if (status == SessionStatus.FINISHED) {
@@ -159,13 +160,13 @@ public class Session implements Comparable<Session>, Serializable {
 	}
 
 	public String getSessionInfo() {
-		if (sessionMetadata == null) {
+		if (executionMetadata == null) {
 			return "";
 		}
 
-		String createdOn = sessionMetadata.getCreatedOn() == null ? null : "Criada em: " + sessionMetadata.getCreatedOn();
-		String createdBy = sessionMetadata.getCreatedBy() == null ? null : "Criada por: " + sessionMetadata.getCreatedBy();
-		String startedBy = sessionMetadata.getStartedBy() == null ? null : "Iniciada por: " + sessionMetadata.getStartedBy();
+		String createdOn = this.createdOn == null ? null : "Criada em: " + this.createdOn.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+		String createdBy = this.createdBy == null ? null : "Criada por: " + this.createdBy.getUsername();
+		String startedBy = executionMetadata.getStartedBy() == null ? null : "Iniciada por: " + executionMetadata.getStartedBy();
 
 		return Joiner.on("<br/>").skipNulls().join(createdOn, createdBy, startedBy);
 	}
@@ -195,15 +196,11 @@ public class Session implements Comparable<Session>, Serializable {
 	}
 
 	public boolean isPaused() {
-		return sessionMetadata.isPaused();
+		return executionMetadata.isPaused();
 	}
 
 	private LocalTime currentTime() {
-		if (sessionMetadata.getTimeZone() != null) {
-			return LocalTime.now(ZoneId.of(sessionMetadata.getTimeZone())).truncatedTo(ChronoUnit.SECONDS);
-		} else {
-			return LocalTime.now().truncatedTo(ChronoUnit.SECONDS);
-		}
+		return LocalTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 	}
 
 	@Override
@@ -232,13 +229,15 @@ public class Session implements Comparable<Session>, Serializable {
 
 	@Getter
 	@Setter
-	public static class SessionMetadata implements Serializable {
-		private String createdOn;
-		private String createdBy;
-		private String startedBy;
-		private String timeZone;
+	public static class ExecutionMetadata implements Serializable {
 		private long currentProgress;
 		private long elapsedTime;
 		private boolean paused;
+		private String startedBy;
+
+		public void init() {
+			currentProgress = 0;
+			elapsedTime = 0;
+		}
 	}
 }

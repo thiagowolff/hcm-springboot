@@ -23,14 +23,16 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.TimeZone;
 
 @RequestScoped
 @Component
 @Slf4j
 public class LoginController {
-	@Autowired private UserRepository userRepository;
-	@Autowired private UserSessionTracker userSessionTracker;
+	@Autowired
+	private UserRepository userRepository;
+
+	@Autowired
+	private UserSessionTracker userSessionTracker;
 
 	private String username;
 	private String password;
@@ -54,13 +56,19 @@ public class LoginController {
 			String lastAccessLocation = getLastAccessLocation();
 			if (lastAccessLocation != null) {
 				user.setLastAccessLocation(lastAccessLocation);
-				log.info("Last access location: {}", user.getLastAccessLocation());
+				log.debug("Last access location: {}", user.getLastAccessLocation());
+			}
+
+			ZoneId timeZone = Faces.getSessionAttribute("timeZone");
+			if (timeZone != null) {
+				user.setTimeZone(timeZone.getId());
+			} else {
+				user.setTimeZone(ZoneId.systemDefault().getId());
 			}
 
 			userRepository.save(user);
 			userSessionTracker.addUserSession(user, Faces.getSession());
-
-			Faces.setSessionAttribute("loggedUser", user);
+			Faces.getSessionMap().put("loggedUser", user);
 			Faces.redirect("");
 
 			log.info("User {} logged in successfully", user.getUsername());

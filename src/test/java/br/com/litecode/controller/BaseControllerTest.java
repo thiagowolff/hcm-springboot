@@ -44,6 +44,7 @@ public abstract class BaseControllerTest {
     @Before
     public void setUpMocks() {
         User loggedUser = new User();
+        loggedUser.setUserId(1);
         loggedUser.setUsername("admin");
 
         SecurityManager securityManger = mock(SecurityManager.class);

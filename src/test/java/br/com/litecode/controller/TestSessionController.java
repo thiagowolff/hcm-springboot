@@ -10,8 +10,8 @@ import br.com.litecode.domain.repository.ChamberRepository;
 import br.com.litecode.domain.repository.PatientRepository;
 import br.com.litecode.domain.repository.SessionRepository;
 import br.com.litecode.service.timer.ChamberSessionTimer;
-import br.com.litecode.service.timer.Clock;
-import br.com.litecode.service.timer.FakeSessionClock;
+import br.com.litecode.service.timer.TimeTicker;
+import br.com.litecode.service.timer.ControlledSessionTimeTicker;
 import br.com.litecode.util.MessageUtil;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,8 +35,8 @@ public class TestSessionController extends BaseControllerTest {
 	@Import(Application.class)
 	public static class TestConfig {
 		@Bean
-		public Clock sessionClock() {
-			return new FakeSessionClock();
+		public TimeTicker sessionClock() {
+			return new ControlledSessionTimeTicker();
 		}
 	}
 
@@ -168,7 +168,7 @@ public class TestSessionController extends BaseControllerTest {
 	public void startSession() {
 		Session session = sessionRepository.findOne(1);
 		sessionController.startSession(session);
-		chamberSessionTimer.getSessionClock().elapseTime(session);
+		chamberSessionTimer.getSessionTimeTicker().elapseTime(session);
 
 		Session startedSession = sessionRepository.findOne(session.getSessionId());
 		assertThat(startedSession.isRunning()).isTrue();

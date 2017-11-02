@@ -36,12 +36,12 @@
 					<f:selectItems value="#{patientController.patients}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
 				</p:selectCheckboxMenu>
 
-				<p:commandButton value="#{msg['button.add']}" id="addButton" actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true" styleClass="btn-primary hidden-xs" oncomplete="mixpanel.track('Add session');">
+				<p:commandButton id="addButton" value="#{msg['button.add']}" icon="fa fa-plus"  actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true" styleClass="btn-primary hidden-xs" oncomplete="mixpanel.track('Add session');">
 					<p:resetInput target="@form" />
 				</p:commandButton>
 
-				<p:commandButton value="#{msg['button.duplicate']}" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary hidden-xs hidden-sm" />
-				<p:commandButton id="printSession" value="#{msg['button.print']}" process="@this" ajax="false" immediate="true" actionListener="#{sessionController.generateDailySessionsReport}" onclick="this.form.target = '_blank'; mixpanel.track('Print');" styleClass="btn-primary hidden-xs hidden-sm" />
+				<p:commandButton value="#{msg['button.duplicate']}" icon="fa fa-copy" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary hidden-xs hidden-sm" />
+				<p:commandButton id="printSession" value="#{msg['button.print']}" icon="fa fa-print" process="@this" ajax="false" immediate="true" actionListener="#{sessionController.generateDailySessionsReport}" onclick="this.form.target = '_blank'; mixpanel.track('Print');" styleClass="btn-primary hidden-xs hidden-sm" />
 				<p:tooltip for="printSession" value="#{msg['message.dailySessionsReport']}" position="right" escape="false" />
 
 				<p:messages id="messages"/>
@@ -102,8 +102,8 @@
 							<div class="col-md-4" style="padding-left: 2px;">
 								<span class="fa-stack fa-2x" style="font-size: 12px;">
 									<i class="fa fa-circle fa-stack-2x" style="#{payloadStatus eq 'AVAILABLE' ? 'color: #d3d3d3' : payloadStatus eq 'OCCUPIED' ? 'color: #476c8d' : 'color: #d23030'}"></i>
-									<h:panelGroup styleClass="fa fa-circle-o-notch fa-spin fa-fw fa-stack-1x" style="color: #1ee84a; top: 6px;" rendered="#{chamberSession.running and payloadStatus eq 'OCCUPIED' }"/>
-									<h:panelGroup styleClass="fa fa-pause fa-blink fa-stack-1x" style="color: #e8e006; top: 7px; font-size: 10px;" rendered="#{chamberSession.paused and payloadStatus eq 'OCCUPIED' }"/>
+									<h:panelGroup styleClass="fa fa-circle-o-notch fa-spin fa-fw fa-stack-1x" style="color: #1ee84a;" rendered="#{chamberSession.running and payloadStatus eq 'OCCUPIED' }"/>
+									<h:panelGroup styleClass="fa fa-pause fa-blink fa-stack-1x" style="color: #e8e006; font-size: 10px;" rendered="#{chamberSession.paused and payloadStatus eq 'OCCUPIED' }"/>
 								</span>
 							</div>
 						</ui:repeat>
@@ -333,9 +333,11 @@
 		function onSessionTimeout(data) {
 			var sessionId = decodeURIComponent(data.match(/&sessionId=([^&]*)/)[1]);
 			var nextEvent = $('.session-status-' + sessionId);
-			$(nextEvent).addClass('rubberBand');
+			var effect = 'pulse';
+
+			$(nextEvent).addClass(effect);
 			setTimeout(function () {
-				$(nextEvent).removeClass('rubberBand');
+				$(nextEvent).removeClass(effect);
 			}, 1500);
 		}
 

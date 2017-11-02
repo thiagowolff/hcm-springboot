@@ -2,7 +2,7 @@ package br.com.litecode.service.timer;
 
 import java.util.Set;
 
-public interface Clock<T> {
+public interface TimeTicker<T> {
 	void start(T listener);
 
 	void stop(T listener);

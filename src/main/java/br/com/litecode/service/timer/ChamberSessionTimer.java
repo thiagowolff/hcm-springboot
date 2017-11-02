@@ -42,23 +42,23 @@ public class ChamberSessionTimer implements SessionTimer {
 
 	@Autowired
 	@Getter
-	private Clock<Session> sessionClock;
+	private TimeTicker<Session> sessionTimeTicker;
 
 	@Override
 	public void startSession(Session session) {
 		List<ChamberEvent> chamberEvents = session.getChamber().getChamberEvents();
 
 		for (ChamberEvent chamberEvent : chamberEvents) {
-			if (session.getSessionMetadata().getElapsedTime() > chamberEvent.getTimeout()) {
+			if (session.getExecutionMetadata().getElapsedTime() > chamberEvent.getTimeout()) {
 				continue;
 			}
 
-			long delay = chamberEvent.getTimeout() - session.getSessionMetadata().getElapsedTime();
-			sessionClock.register(session, () -> sessionTimeout(session, chamberEvent), delay);
+			long delay = chamberEvent.getTimeout() - session.getExecutionMetadata().getElapsedTime();
+			sessionTimeTicker.register(session, () -> sessionTimeout(session, chamberEvent), delay);
 			log.debug("Chamber event {} scheduled: {}s", chamberEvent, delay);
 		}
 
-		sessionClock.start(session);
+		sessionTimeTicker.start(session);
 	}
 
 	private void sessionTimeout(Session session, ChamberEvent chamberEvent) {
@@ -68,21 +68,21 @@ public class ChamberSessionTimer implements SessionTimer {
 		sessionRepository.save(session);
 
 		if (session.getStatus() == SessionStatus.FINISHED) {
-			sessionClock.stop(session);
+			sessionTimeTicker.stop(session);
 		}
 
-		User user = userRepository.findUserByUsername(session.getSessionMetadata().getStartedBy());
-		pushService.publish(PushChannel.NOTIFY,  NotificationMessage.create(session, chamberEvent.toString(), user.getUserPreferences()), user);
+		User user = userRepository.findUserByUsername(session.getExecutionMetadata().getStartedBy());
+		pushService.publish(PushChannel.NOTIFY, NotificationMessage.create(session, chamberEvent.toString(), user.getUserPreferences()), user);
 	}
 
 	@Override
 	public void stopSession(Session session) {
-		sessionClock.stop(session);
+		sessionTimeTicker.stop(session);
 	}
 
 	@Scheduled(fixedRate = 1000)
 	private void clockTimeout() {
-		for (Session session : sessionClock.getActiveListeners()) {
+		for (Session session : sessionTimeTicker.getActiveListeners()) {
 			session.updateProgress();
 			pushService.publish(PushChannel.PROGRESS, ProgressMessage.create(session), null);
 		}

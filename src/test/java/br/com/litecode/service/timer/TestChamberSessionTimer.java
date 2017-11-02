@@ -7,6 +7,7 @@ import br.com.litecode.domain.model.Session;
 import br.com.litecode.domain.model.Session.SessionStatus;
 import br.com.litecode.domain.repository.PatientRepository;
 import br.com.litecode.domain.repository.SessionRepository;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,17 +40,26 @@ public class TestChamberSessionTimer {
 	@Autowired
 	private SessionTimer chamberSessionTimer;
 
+	private Session session;
+
+	@Before
+	public void setUp() {
+		session = sessionRepository.findOne(1);
+		session.setClock(getFixedClockAt(session.getScheduledTime()));
+	}
+
 	@Test
 	public void playSession() {
-		Session session = sessionRepository.findOne(1);
-		session.getSessionMetadata().setStartedBy("admin");
-		chamberSessionTimer.startSession(session);
-
 		long numberOfAbsentPatients = session.getPatientSessions().stream().filter(PatientSession::isAbsent).count();
 
+		chamberSessionTimer.startSession(session);
 		for (ChamberEvent chamberEvent : session.getChamber().getChamberEvents()) {
-			chamberSessionTimer.getSessionClock().elapseTime(session);
+			chamberSessionTimer.getSessionTimeTicker().elapseTime(session);
 			assertThat(chamberEvent.getEventType().getSessionStatus()).isEqualTo(session.getStatus());
+
+			session.setClock(getFixedClockAt(session.getScheduledTime().plusSeconds(chamberEvent.getTimeout())));
+			System.out.println(session.getTimeRemaining());
+			System.out.println(session.getCurrentProgress());
 		}
 
 		assertThat(session.getStatus()).isEqualTo(SessionStatus.FINISHED);
@@ -54,5 +67,11 @@ public class TestChamberSessionTimer {
 
 		List<PatientStats> patientStats = patientRepository.findPatienStats(session.getSessionId(), LocalDateTime.now());
 		patientStats.forEach(ps -> assertThat(ps.getCompletedSessions()).isEqualTo(1));
+	}
+
+	private Clock getFixedClockAt(LocalDateTime dateTime){
+		ZoneId zoneId = ZoneId.systemDefault();
+		Instant instant = dateTime.atZone(zoneId).toInstant();
+		return Clock.fixed(instant, zoneId);
 	}
 }

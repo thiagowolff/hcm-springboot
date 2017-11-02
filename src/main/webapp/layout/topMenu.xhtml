@@ -25,7 +25,7 @@
 						<p:tooltip for="statisticsMenuButton" value="#{msg['menu.statistics']}" position="bottom"/>
 					</li>
 					<li>
-						<p:menuButton value="#{''}" styleClass="header-menu" icon="fa fa-cog">
+						<p:menuButton value="#{''}" styleClass="header-menu" icon="fa fa-cogs">
 							<p:menuitem value="#{msg['menu.disableMessages']}" icon="fa #{loggedUser.userPreferences.disableNotificationMessages ? 'fa-toggle-off' : 'fa-toggle-on'}" actionListener="#{userController.setUser(loggedUser)}" action="#{userController.toggleNotificationMessages}" update="@form" />
 							<p:menuitem value="#{msg['menu.disableSounds']}" icon="fa #{loggedUser.userPreferences.disableNotificationSounds ? 'fa-toggle-off' : 'fa-toggle-on'}" actionListener="#{userController.setUser(loggedUser)}" action="#{userController.toggleNotificationSounds}" update="@form" />
 						</p:menuButton>
