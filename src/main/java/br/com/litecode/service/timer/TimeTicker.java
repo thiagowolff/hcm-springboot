@@ -11,6 +11,6 @@ public interface TimeTicker<T> {
 
 	Set<T> getActiveListeners();
 
-	default void elapseTime(T listener) {
+	default void elapseTime(T listener, int secondsToElapse) {
 	}
 }

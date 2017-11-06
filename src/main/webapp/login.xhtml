@@ -17,12 +17,9 @@
 				<pe:tooltip for="logo" value="" />
 				<div class="container">
 					<div class="row login-logo">
-						<div class="col-xs-2">
-							<p:graphicImage id="logo" value="/resources/images/logo-white.png" styleClass="animate-0 zoomIn" />
-						</div>
-						<div class="col-xs-10">
-							<div class="login-title">#{msg['title.appTitle']}</div>
-							<div class="version animate-2 fadeIn" style="#{loginController.newVersion ? 'color: #57f547' : ''}">#{version['version']}</div>
+						<div class="col-xs-12">
+							<p:graphicImage id="logo" value="/resources/images/logo-large.png" styleClass="animate-0 zoomIn" />
+							<div class="version animate-2 fadeIn" style="#{loginController.newVersion ? 'color: #00a55b; font-size: 11px !important;' : 'color: #2e363b;'}">#{version['version']}</div>
 						</div>
 					</div>
 
@@ -46,23 +43,23 @@
 							</div>
 						</div>
 						<div class="row">
-							<div class="login-input col-xs-#{isDev ? '4' : '12' }">
+							<div class="login-input col-xs-#{isDev ? '3' : '12' }">
 								<p:commandButton id="loginButton" value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" onclick="mixpanel.track('Sign-in', { username: $('#username').val()});" style="width: 100%;" />
 							</div>
-							<div class="login-input login-button col-xs-2">
-								<p:commandButton icon="fa fa-user fa-lg" value="USER" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}">
+							<div class="login-input login-button col-xs-3">
+								<p:commandButton value="USER" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}" styleClass="btn-success">
 									<f:setPropertyActionListener value="user" target="#{loginController.username}" />
 									<f:setPropertyActionListener value="123" target="#{loginController.password}" />
 								</p:commandButton>
 							</div>
-								<div class="login-input login-button col-xs-2">
-								<p:commandButton icon="fa fa-cog fa-lg" value="ADMIN" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}">
+							<div class="login-input login-button col-xs-3">
+								<p:commandButton value="ADMIN" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}" styleClass="btn-success">
 									<f:setPropertyActionListener value="admin" target="#{loginController.username}" />
 									<f:setPropertyActionListener value="123" target="#{loginController.password}" />
 								</p:commandButton>
-								</div>
-									<div class="login-input login-button col-xs-2">
-								<p:commandButton icon="fa fa-wrench fa-lg" value="DEV" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}">
+							</div>
+							<div class="login-input login-button col-xs-3">
+								<p:commandButton value="DEV" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}" styleClass="btn-success">
 									<f:setPropertyActionListener value="thiago" target="#{loginController.username}" />
 									<f:setPropertyActionListener value="admin" target="#{loginController.password}" />
 								</p:commandButton>

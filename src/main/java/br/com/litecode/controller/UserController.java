@@ -48,7 +48,7 @@ public class UserController implements Serializable {
 
 	public Iterable<User> getUsers() {
 		if (users == null) {
-			users = userRepository.findAll();
+			users = userRepository.findActiveUsers();
 		}
 		return users;
 	}
@@ -59,7 +59,7 @@ public class UserController implements Serializable {
 	}
 	
 	public void saveUser() {
-		if (!isUserNameUnique(user)) {
+		if (!isUsernameUnique(user)) {
 			Messages.addGlobalError("error.userAlreadyExists");
 			RequestContext.getCurrentInstance().addCallbackParam("validationFailed", true);
 			return;
@@ -77,7 +77,7 @@ public class UserController implements Serializable {
 		return new Sha256Hash(password).toBase64();
 	}
 
-	private boolean isUserNameUnique(User user) {
+	private boolean isUsernameUnique(User user) {
 		for (User existingUser : userRepository.findAll()) {
 			if (!existingUser.equals(user) && existingUser.getUsername().equalsIgnoreCase(user.getUsername())) {
 				return false;
@@ -87,17 +87,19 @@ public class UserController implements Serializable {
 	}	
 	
 	public void deleteUser() {
-		userRepository.delete(user);
+		user.setActive(false);
+		user.setUsername(user.getUsername() + "[" + user.getUserId() + "]");
+		userRepository.save(user);
 		users = null;
 	}
 
 	public void toggleNotificationMessages() {
-		user.getUserPreferences().setDisableNotificationMessages(!user.getUserPreferences().isDisableNotificationMessages());
+		user.getUserSettings().setNotificationMessages(!user.getUserSettings().isNotificationMessages());
 		userRepository.save(user);
 	}
 
 	public void toggleNotificationSounds() {
-		user.getUserPreferences().setDisableNotificationSounds(!user.getUserPreferences().isDisableNotificationSounds());
+		user.getUserSettings().setNotificationSounds(!user.getUserSettings().isNotificationSounds());
 		userRepository.save(user);
 	}
 

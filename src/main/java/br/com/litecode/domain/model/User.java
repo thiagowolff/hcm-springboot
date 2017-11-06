@@ -25,6 +25,7 @@ public class User {
 	private String username;
 	private String password;
 	private String name;
+	private boolean active;
 	private Instant lastAccess;
 	private Instant creationDate;
 	private String sessionId;
@@ -32,11 +33,12 @@ public class User {
 	private String timeZone;
 
 	@Embedded
-	private UserPreferences userPreferences;
+	private UserSettings userSettings;
 	
     public User() {
+    	active = true;
     	creationDate = Instant.now();
-		userPreferences = new UserPreferences();
+		userSettings = new UserSettings();
     }
 
     public String getLastAccessLocationFormatted() {

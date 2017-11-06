@@ -1,10 +1,7 @@
 package br.com.litecode.service.timer;
 
-import br.com.litecode.domain.model.Alarm;
-import br.com.litecode.domain.model.ChamberEvent;
-import br.com.litecode.domain.model.Session;
+import br.com.litecode.domain.model.*;
 import br.com.litecode.domain.model.Session.SessionStatus;
-import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.AlarmRepository;
 import br.com.litecode.domain.repository.SessionRepository;
 import br.com.litecode.domain.repository.UserRepository;
@@ -72,7 +69,8 @@ public class ChamberSessionTimer implements SessionTimer {
 		}
 
 		User user = userRepository.findUserByUsername(session.getExecutionMetadata().getStartedBy());
-		pushService.publish(PushChannel.NOTIFY, NotificationMessage.create(session, chamberEvent.toString(), user.getUserPreferences()), user);
+		UserSettings userSettings = user != null ? user.getUserSettings() : null;
+		pushService.publish(PushChannel.NOTIFY, NotificationMessage.create(session, chamberEvent.toString(), userSettings), user);
 	}
 
 	@Override

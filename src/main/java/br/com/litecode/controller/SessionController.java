@@ -130,7 +130,7 @@ public class SessionController implements Serializable {
 		sessionRepository.save(session);
 		invalidateSessionCache();
 
-		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name(), getLoggedUser().getUserPreferences());
+		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name(), getLoggedUser().getUserSettings());
 		pushService.publish(PushChannel.NOTIFY, notificationMessage, getLoggedUser());
 	}
 
@@ -191,7 +191,7 @@ public class SessionController implements Serializable {
 		sessionTimer.stopSession(session);
 		sessionRepository.delete(session);
 
-		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.DELETE_SESSION.name(), getLoggedUser().getUserPreferences());
+		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.DELETE_SESSION.name(), getLoggedUser().getUserSettings());
 		pushService.publish(PushChannel.NOTIFY,  notificationMessage, getLoggedUser());
 	}
 

@@ -315,7 +315,7 @@
 		});
 
 		function handleMessage(notificationMessage) {
-			if (!notificationMessage.userPreferences.disableNotificationMessages) {
+			if (notificationMessage.userSettings.notificationMessages) {
 				var facesMessage = {
 					summary: notificationMessage.messageSummary,
 					detail: notificationMessage.messageDetail,
@@ -325,7 +325,7 @@
 				PF('growl').show([facesMessage]);
 			}
 
-			if (!notificationMessage.userPreferences.disableNotificationSounds) {
+			if (notificationMessage.userSettings.notificationSounds) {
 				playSound(notificationMessage.eventType);
 			}
 		}

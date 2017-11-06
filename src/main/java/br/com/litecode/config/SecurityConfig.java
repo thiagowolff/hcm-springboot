@@ -64,7 +64,7 @@ public class SecurityConfig {
 		JdbcRealm jdbcRealm = new JdbcRealm();
 		jdbcRealm.setDataSource(dataSource);
 		jdbcRealm.setCredentialsMatcher(credentialsMatcher);
-		jdbcRealm.setAuthenticationQuery("select password from user where username = ?");
+		jdbcRealm.setAuthenticationQuery("select password from user where active = 1 and username = ?");
 		jdbcRealm.setUserRolesQuery("select role from user where username = ?");
 		jdbcRealm.init();
 		return jdbcRealm;
