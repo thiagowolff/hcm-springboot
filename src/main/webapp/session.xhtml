@@ -66,7 +66,7 @@
 							<i class="session-info-#{chamberSession.sessionId} fa fa-info-circle hidden-xs"></i>
 							<p:tooltip for="@(.session-info-#{chamberSession.sessionId})" value="#{chamberSession.sessionInfo}" position="bottom" escape="false" styleClass="hidden-xs" />
 						</h:panelGroup>
-						<p:tooltip for="@(.session-#{chamberSession.sessionId})" value="#{chamberSession.patientNames}" position="bottom" hideDelay="2500" escape="false" styleClass="hidden-sm hidden-md hidden-lg" />
+						<p:tooltip for="@(.session-#{chamberSession.sessionId})" value="#{chamberSession.patientNames}" position="bottom" escape="false" showEvent="click" onShow="setTimeout(function () { PF('sessionInfo-#{chamberSession.sessionId}').hide(); }, 3000);" widgetVar="sessionInfo-#{chamberSession.sessionId}" styleClass="hidden-sm hidden-md hidden-lg" />
 					</p:column>
 
 					<p:column headerText="#{msg['label.patients']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg large-column hidden-xs" style="vertical-align: top;">
@@ -124,6 +124,14 @@
 					</p:column>
 
 					<p:column headerText="#{msg['label.nextEvent']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column hidden-sm hidden-xs">
+						<div class="event-progress">
+							<ui:repeat value="#{chamberSession.chamber.chamberEvents}" var="event" varStatus="status">
+								<span class="fa-stack fa-2x" style="font-size: 3px; color: #898989;">
+									<i class="fa fa-circle fa-stack-2x"></i>
+									<h:panelGroup styleClass="fa fa-circle fa-stack-1x #{not status.last and event eq chamberSession.currentChamberEvent ? 'fa-blink' : ''}" style="#{not empty chamberSession.currentChamberEvent and event le chamberSession.currentChamberEvent ? 'color: #1ee84a' : ''}" />
+								</span>
+							</ui:repeat>
+						</div>
 						<div>
 							<h:outputText value="#{lcf:enum(chamberSession.nextChamberEvent.eventType)}" rendered="#{chamberSession.nextChamberEvent ne null}" />
 						</div>

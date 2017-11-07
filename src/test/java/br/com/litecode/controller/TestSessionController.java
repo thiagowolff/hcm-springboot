@@ -168,7 +168,7 @@ public class TestSessionController extends BaseControllerTest {
 	public void startSession() {
 		Session session = sessionRepository.findOne(1);
 		sessionController.startSession(session);
-		chamberSessionTimer.getSessionTimeTicker().elapseTime(session);
+		chamberSessionTimer.getSessionTimeTicker().elapseTime(session, 0);
 
 		Session startedSession = sessionRepository.findOne(session.getSessionId());
 		assertThat(startedSession.isRunning()).isTrue();

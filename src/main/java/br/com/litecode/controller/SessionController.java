@@ -166,11 +166,13 @@ public class SessionController implements Serializable {
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionTimer.stopSession(session);
 
+		ChamberEvent completionEvent = session.getChamber().getChamberEvent(EventType.COMPLETION);
 		session.setStartTime(session.getScheduledTime().toLocalTime());
-		session.setEndTime(session.getScheduledTime().plus(session.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout(), ChronoUnit.SECONDS).toLocalTime());
-		session.getExecutionMetadata().setCurrentProgress(100);
+		session.setEndTime(session.getScheduledTime().plus(completionEvent.getTimeout(), ChronoUnit.SECONDS).toLocalTime());
 		session.setStatus(SessionStatus.FINISHED);
+		session.getExecutionMetadata().setCurrentProgress(100);
 		session.getExecutionMetadata().setPaused(false);
+		session.getExecutionMetadata().setCurrentEvent(completionEvent);
 		sessionRepository.save(session);
 	}
 

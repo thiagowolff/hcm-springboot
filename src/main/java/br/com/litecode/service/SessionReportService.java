@@ -16,9 +16,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -39,13 +42,17 @@ public class SessionReportService {
 	@Autowired
 	private PatientRepository patientRepository;
 
-	public byte[] generateSessionReport(LocalDate sessionDate) throws DocumentException {
+	public byte[] generateSessionReport(LocalDate sessionDate) throws DocumentException, IOException {
 		Iterable<Chamber> chambers = chamberRepository.findAll();
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		Document document = new Document(PageSize.A4.rotate());
 		PdfWriter.getInstance(document, outputStream);
 		document.open();
+
+//		Image image = Image.getInstance(new ClassPathResource("logo-large.png").getURL());
+//		document.add(image);
+
 		document.add(new Paragraph(MessageUtil.getMessage("title.appTitle"), new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD, BaseColor.BLACK)));
 		document.add(new Paragraph(sessionDate.format(DateTimeFormatter.ofPattern("d 'de' MMMM 'de' YYYY")), new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL, BaseColor.BLACK)));
 		document.add(Chunk.NEWLINE);

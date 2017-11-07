@@ -103,7 +103,7 @@ body {
 .app-title {
 	position: relative;
 	float: left;
-	top: 20px;
+	top: 18px;
 	font-family: open-sans-bold;
 	left: 25px;
 	font-size: 24px;
@@ -263,7 +263,7 @@ button:not([disabled]).ui-button-icon-only span.ui-icon {
 	&-absent { color:@colorShuttingDownStatus; }
 }
 
-.ui-progressbar {
+.ui-progressbar  {
 	&.finished {
 		div.ui-progressbar-value { border-color: @colorFinishedStatus; background:  @colorFinishedStatus; }
 	}
@@ -276,6 +276,13 @@ button:not([disabled]).ui-button-icon-only span.ui-icon {
 	&.shutting_down {
 		div.ui-progressbar-value { border-color:@colorShuttingDownStatus; background: @colorShuttingDownStatus; }
 	}
+}
+
+.event-progress {
+	.finished { color:  @colorFinishedStatus; }
+	.o2_on { color:  @colorO2OnStatus; }
+	.o2_off { color:  @colorO2OffStatus; }
+	.shutting_down { color: @colorShuttingDownStatus; }
 }
 
 .ui-growl-image.ui-growl-image {

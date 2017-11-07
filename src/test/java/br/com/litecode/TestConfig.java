@@ -12,7 +12,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 @Configuration
 public class TestConfig {
 	@Bean
-    public TimeTicker sessionClock() {
+    public TimeTicker sessionTimeTicker() {
         return new ControlledSessionTimeTicker();
     }
 

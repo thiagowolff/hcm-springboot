@@ -3,6 +3,10 @@ package br.com.litecode.service.timer;
 import br.com.litecode.domain.model.Session;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,10 +35,19 @@ public class ControlledSessionTimeTicker implements TimeTicker<Session> {
 	}
 
 	@Override
-	public void elapseTime(Session session) {
+	public void elapseTime(Session session, int secondsToElapse) {
 		Runnable task = sessionTasks.remove(0);
 		if (task != null) {
+			if (session.getNextChamberEvent() != null) {
+				session.setClock(getFixedClockAt(session.getScheduledTime().plusSeconds(secondsToElapse)));
+			}
 			task.run();
 		}
+	}
+
+	private Clock getFixedClockAt(LocalDateTime dateTime){
+		ZoneId zoneId = ZoneId.systemDefault();
+		Instant instant = dateTime.atZone(zoneId).toInstant();
+		return Clock.fixed(instant, zoneId);
 	}
 }

@@ -71,11 +71,12 @@ public class Session implements Comparable<Session>, Serializable {
 	}
 
 	public String getPatientNames() {
-		String patients = "";
+		StringBuffer patients = new StringBuffer();
 		for (PatientSession patientSession : patientSessions) {
-			patients += patientSession.getPatient().getName() + "<br />";
+			String style = patientSession.isAbsent() ? "style=\"color: #ff7043;\"" : "";
+			patients.append("<span " + style + ">").append(patientSession.getPatient().getName()).append("</span> <br />");
 		}
-		return patients;
+		return patients.toString();
 	}
 
 	public void addPatient(Patient patient) {
@@ -119,6 +120,7 @@ public class Session implements Comparable<Session>, Serializable {
 
 		timeRemaining = LocalTime.MIDNIGHT.plusSeconds(remainingSeconds).format(TIME_FORMAT);
 		executionMetadata.setCurrentProgress(Math.min(100, elapsedTime * 100 / duration));
+		executionMetadata.setElapsedTime(elapsedTime);
 	}
 
 	public long getCurrentProgress() {
@@ -169,6 +171,13 @@ public class Session implements Comparable<Session>, Serializable {
 		String startedBy = executionMetadata.getStartedBy() == null ? null : "Iniciada por: " + executionMetadata.getStartedBy();
 
 		return Joiner.on("<br/>").skipNulls().join(createdOn, createdBy, startedBy);
+	}
+
+	public ChamberEvent getCurrentChamberEvent() {
+		if (status == SessionStatus.FINISHED) {
+			return chamber.getChamberEvent(EventType.COMPLETION);
+		}
+		return executionMetadata.getCurrentEvent();
 	}
 
 	public ChamberEvent getNextChamberEvent() {
@@ -231,6 +240,7 @@ public class Session implements Comparable<Session>, Serializable {
 	@Setter
 	public static class ExecutionMetadata implements Serializable {
 		private long currentProgress;
+		private ChamberEvent currentEvent;
 		private long elapsedTime;
 		private boolean paused;
 		private String startedBy;
@@ -238,6 +248,7 @@ public class Session implements Comparable<Session>, Serializable {
 		public void init() {
 			currentProgress = 0;
 			elapsedTime = 0;
+			currentEvent = null;
 		}
 	}
 }

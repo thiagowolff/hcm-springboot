@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -15,7 +16,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 @Entity
 @Getter
 @Setter
-public class ChamberEvent implements Comparable<ChamberEvent> {
+public class ChamberEvent implements Comparable<ChamberEvent>, Serializable {
 	@AllArgsConstructor
 	@Getter
 	public enum EventType {
@@ -56,5 +57,20 @@ public class ChamberEvent implements Comparable<ChamberEvent> {
 	@Override
 	public String toString() {
 		return eventType.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		ChamberEvent that = (ChamberEvent) o;
+
+		return eventId.equals(that.eventId);
+	}
+
+	@Override
+	public int hashCode() {
+		return eventId.hashCode();
 	}
 }

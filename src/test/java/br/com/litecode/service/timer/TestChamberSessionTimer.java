@@ -21,6 +21,9 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalField;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +48,8 @@ public class TestChamberSessionTimer {
 	@Before
 	public void setUp() {
 		session = sessionRepository.findOne(1);
-		session.setClock(getFixedClockAt(session.getScheduledTime()));
+		session.setClock(Clock.fixed(session.getScheduledTime().atZone(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault()));
+		session.init();
 	}
 
 	@Test
@@ -54,24 +58,16 @@ public class TestChamberSessionTimer {
 
 		chamberSessionTimer.startSession(session);
 		for (ChamberEvent chamberEvent : session.getChamber().getChamberEvents()) {
-			chamberSessionTimer.getSessionTimeTicker().elapseTime(session);
+			chamberSessionTimer.getSessionTimeTicker().elapseTime(session, chamberEvent.getTimeout());
 			assertThat(chamberEvent.getEventType().getSessionStatus()).isEqualTo(session.getStatus());
-
-			session.setClock(getFixedClockAt(session.getScheduledTime().plusSeconds(chamberEvent.getTimeout())));
-			System.out.println(session.getTimeRemaining());
-			System.out.println(session.getCurrentProgress());
 		}
 
+		assertThat(session.getCurrentProgress()).isEqualTo(100);
+		assertThat(session.getTimeRemaining()).isEqualTo("00:00:00");
 		assertThat(session.getStatus()).isEqualTo(SessionStatus.FINISHED);
 		assertThat(session.getPatientSessions().stream().filter(PatientSession::isAbsent).count()).isEqualTo(numberOfAbsentPatients);
 
 		List<PatientStats> patientStats = patientRepository.findPatienStats(session.getSessionId(), LocalDateTime.now());
 		patientStats.forEach(ps -> assertThat(ps.getCompletedSessions()).isEqualTo(1));
-	}
-
-	private Clock getFixedClockAt(LocalDateTime dateTime){
-		ZoneId zoneId = ZoneId.systemDefault();
-		Instant instant = dateTime.atZone(zoneId).toInstant();
-		return Clock.fixed(instant, zoneId);
 	}
 }
