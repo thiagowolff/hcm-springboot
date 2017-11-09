@@ -61,12 +61,12 @@
 					</p:headerRow>
 
 					<p:column headerText="#{msg['label.id']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg" style="width: 3.2em;">
-						<h:outputText styleClass="session-#{chamberSession.sessionId}" value="#{chamberSession.sessionId}" />
+						<h:outputText id="sessionId" value="#{chamberSession.sessionId}" />
+						<p:tooltip for="sessionId" value="#{chamberSession.patientNames}" position="bottom" escape="false" styleClass="hidden-sm hidden-md hidden-lg" />
 						<h:panelGroup rendered="#{loginController.hasAdminRights() and not empty chamberSession.sessionInfo}">
 							<i class="session-info-#{chamberSession.sessionId} fa fa-info-circle hidden-xs"></i>
 							<p:tooltip for="@(.session-info-#{chamberSession.sessionId})" value="#{chamberSession.sessionInfo}" position="bottom" escape="false" styleClass="hidden-xs" />
 						</h:panelGroup>
-						<p:tooltip for="@(.session-#{chamberSession.sessionId})" value="#{chamberSession.patientNames}" position="bottom" escape="false" showEvent="click" onShow="setTimeout(function () { PF('sessionInfo-#{chamberSession.sessionId}').hide(); }, 3000);" widgetVar="sessionInfo-#{chamberSession.sessionId}" styleClass="hidden-sm hidden-md hidden-lg" />
 					</p:column>
 
 					<p:column headerText="#{msg['label.patients']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg large-column hidden-xs" style="vertical-align: top;">
