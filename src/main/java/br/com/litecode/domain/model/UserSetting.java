@@ -8,11 +8,11 @@ import javax.persistence.Embeddable;
 @Embeddable
 @Getter
 @Setter
-public class UserSettings {
+public class UserSetting {
 	private boolean notificationMessages;
 	private boolean notificationSounds;
 
-	public UserSettings() {
+	public UserSetting() {
 		notificationMessages = true;
 		notificationSounds = true;
 	}

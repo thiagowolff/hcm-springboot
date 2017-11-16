@@ -9,9 +9,9 @@
 		<locale-config>
 			<default-locale>pt</default-locale>
 		</locale-config>
-		<message-bundle>br.com.litecode.messages</message-bundle>
+		<message-bundle>messages</message-bundle>
 		<resource-bundle>
-			<base-name>br.com.litecode.messages</base-name>
+			<base-name>messages</base-name>
 			<var>msg</var>
 		</resource-bundle>
 		<resource-bundle>

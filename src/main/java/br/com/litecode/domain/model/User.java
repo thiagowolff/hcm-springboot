@@ -33,12 +33,12 @@ public class User {
 	private String timeZone;
 
 	@Embedded
-	private UserSettings userSettings;
+	private UserSetting userSetting;
 	
     public User() {
     	active = true;
     	creationDate = Instant.now();
-		userSettings = new UserSettings();
+		userSetting = new UserSetting();
     }
 
     public String getLastAccessLocationFormatted() {

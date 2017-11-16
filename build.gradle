@@ -96,8 +96,11 @@ ext.loadVersionProperties = {
     return versionProperties
 }
 
+def currentVersion = loadVersionProperties().version
+
 task updateVersion {
     doLast {
+        println(currentVersion)
         if (gradle.startParameter.taskNames[0] != "deploy") {
             return
         }
@@ -148,16 +151,16 @@ task deploy(dependsOn: "bootRepackage") {
                 def today = new Date().format('yyyy.MM.dd.HH.mm')
 
                 try {
-                    execute "cp /opt/hcm/hcm.jar /opt/hcm/releases/hcm-" + today + ".jar"
+                    execute "cp /opt/hcm/hcm.jar /opt/hcm/releases/hcm-${currentVersion}-${today}.jar"
                 } catch (Exception e) {
                     println "Unable to backup previous release"
                 }
 
-                println("Stopping application...")
-                execute "service hcm stop"
-
                 println("Uploading JAR...")
                 put from: "build/libs/hcm.jar", into: "/opt/hcm/hcm.jar"
+
+                println("Stopping application...")
+                execute "service hcm stop"
 
                 println("Initiating application...")
                 execute "chmod +x /opt/hcm/hcm.jar"

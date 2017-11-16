@@ -50,7 +50,7 @@
 			<p:link styleClass="animate-1 fadeIn text-primary" style="position: absolute; left: 15px; z-index: 2;" onclick="PF('helpDialog').show(); return false;"><i class="fa fa-question-circle" /> #{msg['title.help']}</p:link>
 			<div class="animate-1 fadeIn">
 				<span>#{msg['title.poweredBy']} &#8211;</span>
-				<span class="animate-3 fadeIn" style="#{loginController.newVersion ? 'color: green' : ''}">v. #{version['version']} (#{version['versionUpdatedOn']} #{version['versionDate']})</span>
+				<span class="animate-3 fadeIn" style="#{loginController.newVersion ? 'color: green' : ''}">#{version['version']} (#{version['versionUpdatedOn']} #{version['versionDate']})</span>
 			</div>
 		</footer>
 

@@ -62,10 +62,13 @@
 
 					<p:column headerText="#{msg['label.id']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg" style="width: 3.2em;">
 						<h:outputText id="sessionId" value="#{chamberSession.sessionId}" />
-						<p:tooltip for="sessionId" value="#{chamberSession.patientNames}" position="bottom" escape="false" styleClass="hidden-sm hidden-md hidden-lg" />
 						<h:panelGroup rendered="#{loginController.hasAdminRights() and not empty chamberSession.sessionInfo}">
 							<i class="session-info-#{chamberSession.sessionId} fa fa-info-circle hidden-xs"></i>
 							<p:tooltip for="@(.session-info-#{chamberSession.sessionId})" value="#{chamberSession.sessionInfo}" position="bottom" escape="false" styleClass="hidden-xs" />
+						</h:panelGroup>
+						<h:panelGroup styleClass="hidden-sm hidden-md hidden-lg">
+							<i class="session-#{chamberSession.sessionId} fa fa-info-circle"></i>
+							<p:tooltip for="@(.session-#{chamberSession.sessionId})" value="#{chamberSession.patientNames}" position="bottom" escape="false" showEvent="touchstart" hideEvent="click" hideDelay="3000" />
 						</h:panelGroup>
 					</p:column>
 
@@ -97,7 +100,7 @@
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.capacity']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg text-left hidden-sm hidden-xs" style="width: 8.5em;">
+					<p:column headerText="#{msg['label.capacity']}" styleClass="capacity #{lcf:enumStyle(chamberSession.status)}-bg text-left hidden-sm hidden-xs">
 						<ui:repeat value="#{sessionController.getChamberPayload(chamberSession)}" var="payloadStatus">
 							<div class="col-md-4" style="padding-left: 2px;">
 								<span class="fa-stack fa-2x" style="font-size: 12px;">
@@ -123,10 +126,10 @@
 						</h:outputText>
 					</p:column>
 
-					<p:column headerText="#{msg['label.nextEvent']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column hidden-sm hidden-xs">
+					<p:column headerText="#{msg['label.nextEvent']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column hidden-md hidden-sm hidden-xs">
 						<div class="event-progress">
 							<ui:repeat value="#{chamberSession.chamber.chamberEvents}" var="event" varStatus="status">
-								<span class="fa-stack fa-2x" style="font-size: 3px; color: #898989;">
+								<span class="fa-stack fa-2x" style="font-size: 3px; color: #486d8c;">
 									<i class="fa fa-circle fa-stack-2x"></i>
 									<h:panelGroup styleClass="fa fa-circle fa-stack-1x #{not status.last and event eq chamberSession.currentChamberEvent ? 'fa-blink' : ''}" style="#{not empty chamberSession.currentChamberEvent and event le chamberSession.currentChamberEvent ? 'color: #1ee84a' : ''}" />
 								</span>
@@ -190,12 +193,17 @@
 					<p:column headerText="#{msg['label.action']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg xsmall-column session-action hidden-xs">
 						<div class="container-fluid">
 							<div class="row">
-								<div class="col-md-5">
+								<div class="col-md-4">
 									<p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); mixpanel.track('Edit session');" process=":form:chambersGrid" update=":editSessionForm" global="false">
 										<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
 									</p:commandButton>
 								</div>
-								<div class="col-md-5">
+								<div class="col-md-4">
+									<p:commandButton title="#{msg['button.switch']}" icon="fa fa-exchange" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('switchChamberDialog').show(); mixpanel.track('Switch chamber dialog');" process=":form:chambersGrid" update=":switchChamberForm" global="false">
+										<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
+									</p:commandButton>
+								</div>
+								<div class="col-md-4">
 									<p:commandButton id="deleteSessionButton" title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionData.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.running}" rendered="#{loginController.hasAdminRights()}" styleClass="hidden-sm" />
 								</div>
 							</div>
@@ -237,6 +245,24 @@
 					<p:commandButton process="@this" update=":form:chambersGrid, :editSessionForm:sessionPatientsTable, :editSessionForm:newSessionPatients" actionListener="#{sessionController.removePatientFromSession(sessionPatient)}" icon="fa fa-trash" title="#{msg['button.delete']}" />
 				</p:column>
 			</p:dataTable>
+		</p:dialog>
+	</h:form>
+
+	<h:form id="switchChamberForm">
+		<p:dialog header="#{msg['label.switchChamber']}" widgetVar="switchChamberDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
+			<div class="row ui-fluid">
+				<div class="col-md-3">
+					<p:outputLabel value="#{msg['label.chamber']}"/>
+				</div>
+				<div class="col-md-5">
+					<p:selectOneMenu id="newSessionChamber" value="#{sessionController.sessionData.chamber}" converter="omnifaces.SelectItemsConverter" style="min-width: 100px;">
+						<f:selectItems value="#{chamberController.chambers}" var="chamber" itemValue="#{chamber}" itemLabel="#{chamber.name}"/>
+					</p:selectOneMenu>
+				</div>
+				<div class="col-md-4">
+					<p:commandButton value="#{msg['button.edit']}" process="@this, newSessionChamber" update=":form:chambersGrid" actionListener="#{sessionController.switchSessionChamber()}" oncomplete="PF('switchChamberDialog').hide(); mixpanel.track('Switch session chamber');" styleClass="btn-primary"/>
+				</div>
+			</div>
 		</p:dialog>
 	</h:form>
 
@@ -323,17 +349,17 @@
 		});
 
 		function handleMessage(notificationMessage) {
-			if (notificationMessage.userSettings.notificationMessages) {
+			if (!notificationMessage.userSetting || notificationMessage.userSetting.notificationMessages) {
 				var facesMessage = {
 					summary: notificationMessage.messageSummary,
 					detail: notificationMessage.messageDetail,
-					severity: notificationMessage.eventType
+					severity: notificationMessage.eventType || 'info'
 				};
 
 				PF('growl').show([facesMessage]);
 			}
 
-			if (notificationMessage.userSettings.notificationSounds) {
+			if (notificationMessage.userSetting && notificationMessage.userSetting.notificationSounds) {
 				playSound(notificationMessage.eventType);
 			}
 		}

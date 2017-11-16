@@ -13,7 +13,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import javax.el.ELException;
@@ -40,7 +42,7 @@ public class ServletConfig extends WebMvcConfigurerAdapter implements ServletCon
 	public void onStartup(ServletContext servletContext) throws ServletException {
 		initMessageResolver();
 
-		servletContext.setInitParameter("litefaces.ENUM_MESSAGE_BUNDLE", "br.com.litecode.enums");
+		servletContext.setInitParameter("litefaces.ENUM_MESSAGE_BUNDLE", "enums");
 		servletContext.setInitParameter("litefaces.ENUM_KEY_PREFIX", "enum");
 
 		try {
@@ -53,7 +55,7 @@ public class ServletConfig extends WebMvcConfigurerAdapter implements ServletCon
 	}
 
 	private void initMessageResolver() {
-		final ResourceBundle bundle = ResourceBundle.getBundle("br.com.litecode.messages");
+		final ResourceBundle bundle = ResourceBundle.getBundle("messages");
 
 		Messages.setResolver((message, params) -> {
 			if (bundle.containsKey(message)) {

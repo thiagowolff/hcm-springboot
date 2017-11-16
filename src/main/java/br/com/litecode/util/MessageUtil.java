@@ -4,7 +4,7 @@ import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 public final class MessageUtil {
-	private static final String BUNDLE_NAME = "br.com.litecode.messages";
+	private static final String BUNDLE_NAME = "messages";
 	private static final ResourceBundle bundle;
 	
 	static {

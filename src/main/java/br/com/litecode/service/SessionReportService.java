@@ -8,19 +8,20 @@ import br.com.litecode.domain.repository.ChamberRepository;
 import br.com.litecode.domain.repository.PatientRepository;
 import br.com.litecode.domain.repository.SessionRepository;
 import br.com.litecode.util.MessageUtil;
+import com.google.common.io.ByteStreams;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfWriter;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.omnifaces.util.Faces;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -50,8 +51,10 @@ public class SessionReportService {
 		PdfWriter.getInstance(document, outputStream);
 		document.open();
 
-//		Image image = Image.getInstance(new ClassPathResource("logo-large.png").getURL());
-//		document.add(image);
+		Image image = Image.getInstance(ByteStreams.toByteArray(Faces.getResourceAsStream("/resources/images/logo-large.png")));
+		image.scalePercent(50, 50);
+		image.setAbsolutePosition(document.getPageSize().getWidth() - 140, document.getPageSize().getHeight() - 80);
+		document.add(image);
 
 		document.add(new Paragraph(MessageUtil.getMessage("title.appTitle"), new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD, BaseColor.BLACK)));
 		document.add(new Paragraph(sessionDate.format(DateTimeFormatter.ofPattern("d 'de' MMMM 'de' YYYY")), new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL, BaseColor.BLACK)));

@@ -94,12 +94,12 @@ public class UserController implements Serializable {
 	}
 
 	public void toggleNotificationMessages() {
-		user.getUserSettings().setNotificationMessages(!user.getUserSettings().isNotificationMessages());
+		user.getUserSetting().setNotificationMessages(!user.getUserSetting().isNotificationMessages());
 		userRepository.save(user);
 	}
 
 	public void toggleNotificationSounds() {
-		user.getUserSettings().setNotificationSounds(!user.getUserSettings().isNotificationSounds());
+		user.getUserSetting().setNotificationSounds(!user.getUserSetting().isNotificationSounds());
 		userRepository.save(user);
 	}
 
