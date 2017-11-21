@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" 
-	  xmlns:cc="http://java.sun.com/jsf/composite" 
+	  xmlns:composite="http://java.sun.com/jsf/composite"
 	  xmlns:p="http://primefaces.org/ui">
 	  
-	<cc:interface>
-		<cc:attribute name="title" />
-		<cc:attribute name="update" />
-		<cc:attribute name="oncomplete" />
-		<cc:attribute name="addButtonAction" method-signature="void actionListener(javax.faces.event.ActionEvent)" />
-		<cc:attribute name="addButtonLabel" default="#{msg['button.add']}" />
-	</cc:interface>
+	<composite:interface>
+		<composite:attribute name="title" />
+		<composite:attribute name="update" />
+		<composite:attribute name="oncomplete" />
+		<composite:attribute name="addButtonAction" method-signature="void actionListener(javax.faces.event.ActionEvent)" />
+		<composite:attribute name="addButtonLabel" default="#{msg['button.add']}" />
+	</composite:interface>
 
-	<cc:implementation>
+	<composite:implementation>
 		<div class="header-panel">
 			<div class="header-panel-top">
 				<div class="header-panel-title animate-0 zoomIn">
@@ -25,9 +25,9 @@
                          rendered="#{not empty cc.attrs.addButtonAction}" />
 				</div>
 				<div class="header-panel-content">
-					<cc:insertChildren />
+					<composite:insertChildren />
 				</div>
 			</div>
 		</div>
-	</cc:implementation>
+	</composite:implementation>
 </html>

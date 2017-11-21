@@ -3,8 +3,8 @@
 				xmlns:f="http://xmlns.jcp.org/jsf/core"
 				xmlns:h="http://xmlns.jcp.org/jsf/html"
 				xmlns:p="http://primefaces.org/ui"
-				xmlns:lc="http://java.sun.com/jsf/composite/components">
-	
+				xmlns:lc="http://xmlns.jcp.org/jsf/composite/components">
+
 	<h:form id="patientsForm">
 		<p:growl id="messages" severity="info"/>
 
@@ -12,8 +12,8 @@
 
 		<div class="content-wrapper">
 			<p:dataTable id="patientsTable" widgetVar="patientsTable" value="#{patientController.patients}" var="patient" paginator="true" rows="10" paginatorAlwaysVisible="false" filteredValue="#{patientController.filteredPatients}"
-				 currentPageReportTemplate="({startRecord} de {totalRecords})"
-				 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="10,25,100,500" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
+			 currentPageReportTemplate="({startRecord} de {totalRecords})"
+			 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="10,25,100,500" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
 
 				<f:facet name="header">
 					<p:outputPanel style="text-align: right;">
@@ -25,16 +25,20 @@
 				<ui:param name="patientStats" value="#{patientController.getPatientStats(patient.patientId)}" />
 
 				<p:column headerText="#{msg['label.name']}" sortBy="#{patient.name}" filterBy="#{patient.name}" filterStyle="display: none;" styleClass="text-left" priority="1">
-	          		<h:outputText value="#{patient.name}" />
+					<h:outputText value="#{patient.name}" />
 				</p:column>
 				<p:column headerText="#{msg['label.patientRecord']}" filterBy="#{patient.patientRecord}" filterStyle="display: none;" priority="1">
-	          		<h:outputText value="#{patient.patientRecord}" />
+					<h:outputText value="#{patient.patientRecord}" />
 				</p:column>
 				<p:column headerText="#{msg['label.folderNumber']}" filterBy="#{patient.folderNumber}" filterStyle="display: none;" priority="2">
-	          		<h:outputText value="#{patient.folderNumber}" />
+					<h:outputText value="#{patient.folderNumber}" />
 				</p:column>
-				<p:column headerText="#{msg['label.healthInsurance']}" styleClass="text-left" priority="3">
-	          		<h:outputText value="#{patient.healthInsurance}" />
+				<p:column styleClass="text-left" priority="3">
+					<f:facet name="header">
+						<h:outputText value="#{msg['label.healthInsurance']}" />
+						<p:commandButton process="@this" update=":healthInsuranceForm" actionListener="#{healthInsuranceController.refresh()}" oncomplete="PF('healthInsuranceDialog').show(); PF('healthInsuranceTable').getPaginator().setPage(0);" icon="fa fa-pencil-square-o" title="#{msg['button.manage']}" global="false" />
+					</f:facet>
+					<h:outputText value="#{patient.healthInsurance.name}" />
 				</p:column>
 				<p:column headerText="#{msg['label.numberOfSessions']}" width="100" priority="2">
 					<h:outputText value="#{patientStats.completedSessions + patientStats.absentSessions}" />
@@ -78,19 +82,10 @@
 				<p:inputText id="folderNumber" value="#{patient.folderNumber}" maxlength="30" size="15" />
 
 				<p:outputLabel value="#{msg['label.healthInsurance']}" for="healthInsurance" />
-				<p:selectOneMenu id="healthInsurance" value="#{patient.healthInsurance}" required="true" editable="true">
-					<f:selectItem itemLabel="" itemValue=""  />
-					<f:selectItem itemLabel="Bradesco" itemValue="Bradesco" />
-					<f:selectItem itemLabel="Centro Clínico Gaúcho" itemValue="Centro Clínico Gaúcho"  />
-					<f:selectItem itemLabel="Fusex" itemValue="Fusex" />
-					<f:selectItem itemLabel="Golden Cross" itemValue="Golden Cross" />
-					<f:selectItem itemLabel="Ipê" itemValue="Ipê" />
-					<f:selectItem itemLabel="Life" itemValue="Life" />
-					<f:selectItem itemLabel="Particular" itemValue="Particular" />
-					<f:selectItem itemLabel="Saúde Paz" itemValue="Saúde Paz" />
-					<f:selectItem itemLabel="SUS" itemValue="SUS" />
-					<f:selectItem itemLabel="Unimed" itemValue="Unimed" />
-					<f:selectItem itemLabel="Verte" itemValue="Verte" />
+
+				<p:selectOneMenu id="healthInsurance" value="#{patient.healthInsurance}" required="true" converter="omnifaces.SelectItemsConverter">
+					<f:selectItem itemValue="" itemLabel=""/>
+					<f:selectItems value="#{healthInsuranceController.healthInsurances}" var="healthInsurance" itemValue="#{healthInsurance}" itemLabel="#{healthInsurance.name}"/>
 				</p:selectOneMenu>
 
 				<p:outputLabel value="#{msg['label.email']}" for="patientEmail" />
@@ -109,12 +104,39 @@
 		</p:dialog>
 	</h:form>
 
-	<h:form id="confirmDeletePatientForm">
-		<p:confirmDialog message="#{msg['confirmation.deletePatient']}" header="#{msg['title.deletePatient']}" severity="alert" widgetVar="confirmDeletePatientDialog">
-			<p:messages autoUpdate="true" />
-			<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDeletePatientDialog').hide();" styleClass="btn-danger pull-right" />
-			<p:commandButton value="#{msg['button.delete']}" actionListener="#{patientController.deletePatient}" process="@form" update=":patientsForm:messages, :patientsForm:patientsTable" oncomplete="if (!args.validationFailed) { PF('confirmDeletePatientDialog').hide(); PF('patientsTable').clearFilters(); }" styleClass="btn-primary pull-right" />
-		</p:confirmDialog>
+	<lc:confirmDeleteDialog entity="Patient" deleteAction="#{patientController.deletePatient()}" update=":patientsForm:messages, :patientsForm:patientsTable" oncomplete="PF('patientsTable').clearFilters();" />
+
+	<h:form id="healthInsuranceForm">
+		<p:dialog header="#{msg['title.manageHealthInsurance']}" widgetVar="healthInsuranceDialog" fitViewport="true" resizable="false" showEffect="fade" modal="true" width="40%">
+			<p:messages id="healthInsuranceMessages" />
+
+			<p:panelGrid id="healthInsuranceGrid" columns="3">
+				<p:outputLabel value="#{msg['label.healthInsurance']}" for="healthInsuranceName" />
+				<p:inputText id="healthInsuranceName" value="#{healthInsuranceController.healthInsuranceName}" required="true" maxlength="100" size="40" />
+				<p:commandButton value="#{msg['button.add']}" actionListener="#{healthInsuranceController.addHealthInsurance}" process="@this, healthInsuranceName" update="healthInsuranceTable" validateClient="true" styleClass="btn-primary" />
+			</p:panelGrid>
+
+			<p:separator />
+
+			<p:dataTable id="healthInsuranceTable" widgetVar="healthInsuranceTable" value="#{healthInsuranceController.healthInsurances}" var="healthInsurance" editable="true" paginator="true" rows="8" paginatorAlwaysVisible="false" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
+				<p:ajax event="rowEdit" listener="#{healthInsuranceController.onRowEdit}" update="healthInsuranceTable, :patientsForm:patientsTable" oncomplete="PF('patientsTable').clearFilters();" />
+
+				<p:column headerText="#{msg['label.id']}" styleClass="small-column">
+					<h:outputText value="#{healthInsurance.healthInsuranceId}" />
+				</p:column>
+
+				<p:column headerText="#{msg['label.name']}" sortBy="#{healthInsurance.name}" styleClass="text-left">
+					<p:cellEditor>
+						<f:facet name="output"><h:outputText value="#{healthInsurance.name}" /></f:facet>
+						<f:facet name="input"><p:inputText id="modelInput" value="#{healthInsurance.name}" /></f:facet>
+					</p:cellEditor>
+				</p:column>
+				<p:column headerText="#{msg['label.action']}" width="100">
+					<p:rowEditor />
+					<p:commandButton process="@this" actionListener="#{healthInsuranceController.deleteHealthInsurance(healthInsurance)}" update="healthInsuranceTable, :patientsForm:patientsTable, :healthInsuranceForm:healthInsuranceMessages" icon="fa fa-trash" title="#{msg['button.delete']}" />
+				</p:column>
+			</p:dataTable>
+		</p:dialog>
 	</h:form>
 
 	<script type="text/javascript">

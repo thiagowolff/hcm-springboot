@@ -105,9 +105,9 @@ public class SessionController implements Serializable {
 	public void addSession() {
 		int sessionDuration = sessionData.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout();
 		LocalDateTime scheduledTime = sessionData.getSessionDate().atTime(sessionData.getSessionTime());
-		LocalTime endTime = scheduledTime.plusSeconds(sessionDuration).toLocalTime();
+		LocalDateTime endTime = scheduledTime.plusSeconds(sessionDuration);
 
-		boolean isScheduled = sessionRepository.isSessionScheduled(sessionData.getChamber().getChamberId(), scheduledTime);
+		boolean isScheduled = sessionRepository.isSessionScheduled(sessionData.getChamber().getChamberId(), scheduledTime, endTime);
 		if (isScheduled) {
 			Messages.addGlobalError(MessageUtil.getMessage("error.sessionAlreadyCreatedForPeriod"));
 			return;
@@ -122,7 +122,7 @@ public class SessionController implements Serializable {
 		session.setChamber(sessionData.getChamber());
 		session.setScheduledTime(scheduledTime);
 		session.setStartTime(session.getScheduledTime().toLocalTime());
-		session.setEndTime(endTime);
+		session.setEndTime(endTime.toLocalTime());
 		session.setCreatedBy(getLoggedUser());
 		session.setCreatedOn(Instant.now());
 
@@ -249,6 +249,7 @@ public class SessionController implements Serializable {
 			fromSession.getPatientSessions().forEach(ps -> session.addPatient(ps.getPatient()));
 			sessionRepository.save(session);
 		}
+		evictSessionCacheByDate(toSessionsDate);
 		invalidateSessionCache();
 	}
 
@@ -289,12 +290,16 @@ public class SessionController implements Serializable {
 	}
 
 	public void invalidateSessionCache() {
+		evictSessionCacheByDate(sessionData.getSessionDate());
+		sessionData.reset();
+	}
+
+	private void evictSessionCacheByDate(LocalDate date) {
 		List<List<Object>> keys = new ArrayList<>();
 		for (Chamber chamber : chamberRepository.findAll()) {
-			keys.add(Lists.newArrayList(chamber.getChamberId(), sessionData.getSessionDate()));
+			keys.add(Lists.newArrayList(chamber.getChamberId(), date));
 		}
 		keys.forEach(sessionCache::evict);
-		sessionData.reset();
 	}
 
 	public void generateDailySessionsReport() {

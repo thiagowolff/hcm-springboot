@@ -17,6 +17,6 @@ public interface ChartsRepository extends Repository<Session, Serializable> {
 	@Query(value = "select name, count(*) from session join chamber using (chamber_id) group by name", nativeQuery = true)
 	List<Object[]> findSessionsPerChamber();
 
-	@Query(value = "select ifnull(health_insurance, 'N/D'), count(*) from patient_session join patient using (patient_id) group by health_insurance order by count(*) desc", nativeQuery = true)
+	@Query(value = "select ifnull(hs.name, 'N/D'), count(*) from patient_session join patient using (patient_id) left join health_insurance hs using (health_insurance_id) group by hs.name order by count(*) desc", nativeQuery = true)
 	List<Object[]> findSessionsPerHealthInsurance();
 }

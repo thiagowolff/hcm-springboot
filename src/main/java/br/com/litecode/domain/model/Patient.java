@@ -24,12 +24,15 @@ public class Patient {
 	private String name;
 	private String patientRecord;
 	private String folderNumber;
-	private String healthInsurance;
 	private String email;
 	private String phoneNumber;
 	private LocalDate birthDate;
 	private LocalDateTime creationDate;
 	private boolean active;
+
+	@ManyToOne
+	@JoinColumn(name = "health_insurance_id")
+	private HealthInsurance healthInsurance;
 
 	@OneToMany(mappedBy = "patient")
 	private Set<PatientSession> patientSessions;

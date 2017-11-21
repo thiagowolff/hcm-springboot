@@ -166,7 +166,7 @@ public class SessionReportService {
 
 			table.addCell(createCell(patientName));
 			table.addCell(createCell(new TableCell(rowIndex, () -> patientSession.isAbsent() ? "" : "x", Element.ALIGN_CENTER)));
-			table.addCell(createCell(new TableCell(rowIndex, patientSession.getPatient()::getHealthInsurance, Element.ALIGN_LEFT)));
+			table.addCell(createCell(new TableCell(rowIndex, patientSession.getPatient().getHealthInsurance()::getName, Element.ALIGN_LEFT)));
 			table.addCell(createCell(new TableCell(rowIndex, patientSession.getPatient()::getPatientRecord, Element.ALIGN_CENTER)));
 			table.addCell(createCell(new TableCell(rowIndex, patientSession.getPatient()::getFolderNumber, Element.ALIGN_CENTER)));
 

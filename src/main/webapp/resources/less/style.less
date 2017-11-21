@@ -251,11 +251,14 @@ div.timer-progress-cell {
 button:not([disabled]).ui-button-icon-only span.ui-icon {
 	&.fa-play { color: @green-500 !important; }
 	&.fa-stop { color: @red-700 !important; }
+}
 
-	//&.fa-pause { color: @indigo-500 !important; }
-	//&.fa-fast-forward { color: @indigo-500 !important; }
-	//&.fa-pencil { color: @grey-700 !important; }
-	//&.fa-trash { color: @grey-700 !important; }
+th .ui-button-icon-only {
+	right: 0px;
+	position: absolute;
+	top: 2px;
+
+	.fa { color: @lightBlueThemeColor !important; }
 }
 
 .patient {
@@ -337,10 +340,14 @@ button:not([disabled]).ui-button-icon-only span.ui-icon {
 .ui-datatable td.session-action {
 	padding: 1px 10px !important;
 	div {
-		padding: 2px;
+		padding: 0;
 		.ui-button-icon-left {
 			margin-left: -12px;
 		}
+	}
+
+	.row button.ui-button {
+		height: 16px;
 	}
 }
 
@@ -356,6 +363,16 @@ button:not([disabled]).ui-button-icon-only span.ui-icon {
 
 .capacity {
 	width: 8.5em;
+}
+
+.ui-row-editor.ui-helper-clearfix {
+	display: inline-flex;
+	position: relative;
+	top: 4px;
+
+	&> .row button.ui-button {
+		height: 24px;
+	}
 }
 
 @media screen and (max-width: 640px) {

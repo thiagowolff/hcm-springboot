@@ -67,12 +67,12 @@ public class PatientController implements Serializable {
 	public void deletePatient() {
 		patient.setActive(false);
 		patientRepository.save(patient);
-		patients = null;
+		refresh();
 	}
 	
 	public void savePatient() {
 		patientRepository.save(patient);
-		patients = null;
+		refresh();
 	}
 
 	public Patient getPatient() {
@@ -81,6 +81,10 @@ public class PatientController implements Serializable {
 
 	public void setPatient(Patient patient) {
 		this.patient = patient;
+	}
+
+	public void refresh() {
+		this.patients = null;
 	}
 
 	public void newPatient() {

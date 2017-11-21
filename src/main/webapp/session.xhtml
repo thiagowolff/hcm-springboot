@@ -87,7 +87,7 @@
 					<p:column headerText="#{msg['label.healthInsurance']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column hidden-sm hidden-xs" style="vertical-align: top">
 						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
 							<div class="long-text text-left">
-								<h:outputText value="#{empty patientSession.patient.healthInsurance ? '-' : patientSession.patient.healthInsurance}" />
+								<h:outputText value="#{empty patientSession.patient.healthInsurance ? '-' : patientSession.patient.healthInsurance.name}" />
 							</div>
 						</ui:repeat>
 					</p:column>
@@ -199,7 +199,7 @@
 									</p:commandButton>
 								</div>
 								<div class="col-md-4">
-									<p:commandButton title="#{msg['button.switch']}" icon="fa fa-exchange" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('switchChamberDialog').show(); mixpanel.track('Switch chamber dialog');" process=":form:chambersGrid" update=":switchChamberForm" global="false">
+									<p:commandButton title="#{msg['button.move']}" icon="fa fa-arrows-alt" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('moveSessionDialog').show(); mixpanel.track('Move session dialog');" process=":form:chambersGrid" update=":moveSessionForm" global="false">
 										<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
 									</p:commandButton>
 								</div>
@@ -248,8 +248,8 @@
 		</p:dialog>
 	</h:form>
 
-	<h:form id="switchChamberForm">
-		<p:dialog header="#{msg['label.switchChamber']}" widgetVar="switchChamberDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
+	<h:form id="moveSessionForm">
+		<p:dialog header="#{msg['label.moveSession']}" widgetVar="moveSessionDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
 			<div class="row ui-fluid">
 				<div class="col-md-3">
 					<p:outputLabel value="#{msg['label.chamber']}"/>
@@ -260,7 +260,7 @@
 					</p:selectOneMenu>
 				</div>
 				<div class="col-md-4">
-					<p:commandButton value="#{msg['button.edit']}" process="@this, newSessionChamber" update=":form:chambersGrid" actionListener="#{sessionController.switchSessionChamber()}" oncomplete="PF('switchChamberDialog').hide(); mixpanel.track('Switch session chamber');" styleClass="btn-primary"/>
+					<p:commandButton value="#{msg['button.move']}" process="@this, newSessionChamber" update=":form:chambersGrid" actionListener="#{sessionController.switchSessionChamber()}" oncomplete="PF('moveSessionDialog').hide(); mixpanel.track('Move session');" styleClass="btn-primary"/>
 				</div>
 			</div>
 		</p:dialog>

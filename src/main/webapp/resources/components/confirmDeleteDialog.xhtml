@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:composite="http://xmlns.jcp.org/jsf/composite"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html"
+	  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	  xmlns:of="http://omnifaces.org/functions"
+	  xmlns:p="http://primefaces.org/ui">
+
+<composite:interface>
+	<composite:attribute name="entity" />
+	<composite:attribute name="update" />
+	<composite:attribute name="oncomplete" />
+	<composite:attribute name="deleteAction" method-signature="void actionListener(javax.faces.event.ActionEvent)" />
+</composite:interface>
+
+<composite:implementation>
+	<h:form>
+		<p:confirmDialog message="#{msg[of:concat('confirmation.delete', cc.attrs.entity)]}" header="#{msg[of:concat('title.delete', cc.attrs.entity)]}" widgetVar="confirmDelete#{cc.attrs.entity}Dialog">
+			<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDelete#{cc.attrs.entity}Dialog').hide();" styleClass="btn-danger pull-right" />
+			<p:commandButton value="#{msg['button.delete']}" actionListener="#{cc.attrs.deleteAction}" process="@form" update="#{cc.attrs.update}" oncomplete="PF('confirmDelete#{cc.attrs.entity}Dialog').hide(); #{cc.attrs.oncomplete}" styleClass="btn-primary pull-right" />
+		</p:confirmDialog>
+	</h:form>
+</composite:implementation>
+</html>
