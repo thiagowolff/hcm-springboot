@@ -375,6 +375,17 @@ th .ui-button-icon-only {
 	}
 }
 
+.logged-user {
+	position: absolute;
+	top: 0;
+	right: 0;
+	padding: 0 10px;
+	font-size: 12px;
+	&.dev { color: @green-500;	}
+	&.admin { color: @deepOrange-500; }
+	&.user { color: @grey-600; }
+}
+
 @media screen and (max-width: 640px) {
 	.small-column {
 		width: 3.8em;

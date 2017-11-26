@@ -6,7 +6,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.Instant;
 
-//@Entity
+@Entity
 @Getter
 @Setter
 public class AuditLog {
@@ -22,6 +22,11 @@ public class AuditLog {
 	private User user;
 
 	public AuditLog() {
+	}
+
+	public AuditLog(String message, User user) {
+		this.message = message;
+		this.user = user;
 		auditDate = Instant.now();
 	}
 }

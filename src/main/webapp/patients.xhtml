@@ -60,7 +60,7 @@
 					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" update=":patientInputForm" oncomplete="PF('patientDialog').show();" icon="fa fa-pencil" title="#{msg['button.edit']}" global="false">
 						<p:resetInput target=":patientInputForm:patientGrid" />
 					</p:commandButton>
-					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" onclick="PF('confirmDeletePatientDialog').show();" icon="fa fa-trash" title="#{msg['button.delete']}" />
+					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" onclick="PF('confirmDeletePatientDialog').show();" icon="fa fa-trash" title="#{msg['button.delete']}" rendered="#{loginController.hasAdminRights()}" />
 				</p:column>
 			</p:dataTable>
 		</div>

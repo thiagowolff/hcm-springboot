@@ -7,6 +7,8 @@ import br.com.litecode.domain.repository.ChamberRepository;
 import br.com.litecode.domain.repository.SessionRepository;
 import br.com.litecode.security.UserSessionTracker;
 import br.com.litecode.service.SessionReportService;
+import br.com.litecode.service.audit.Audit;
+import br.com.litecode.service.audit.Audit.OperationType;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushRefresh;
 import br.com.litecode.service.push.PushService;
@@ -102,7 +104,8 @@ public class SessionController implements Serializable {
 	}
 
 	@Transactional
-	public void addSession() {
+	//@Audit(OperationType.CREATE)
+	public Session addSession() {
 		int sessionDuration = sessionData.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout();
 		LocalDateTime scheduledTime = sessionData.getSessionDate().atTime(sessionData.getSessionTime());
 		LocalDateTime endTime = scheduledTime.plusSeconds(sessionDuration);
@@ -110,12 +113,12 @@ public class SessionController implements Serializable {
 		boolean isScheduled = sessionRepository.isSessionScheduled(sessionData.getChamber().getChamberId(), scheduledTime, endTime);
 		if (isScheduled) {
 			Messages.addGlobalError(MessageUtil.getMessage("error.sessionAlreadyCreatedForPeriod"));
-			return;
+			return null;
 		}
 
 		if (sessionData.getPatients().size() > sessionData.getChamber().getCapacity()) {
 			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", sessionData.getChamber().getCapacity()));
-			return;
+			return null;
 		}
 
 		Session session = new Session();
@@ -132,6 +135,8 @@ public class SessionController implements Serializable {
 
 		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name(), getLoggedUser().getUserSetting());
 		pushService.publish(PushChannel.NOTIFY, notificationMessage, getLoggedUser());
+
+		return session;
 	}
 
 	@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }")
@@ -186,6 +191,7 @@ public class SessionController implements Serializable {
 		sessionRepository.save(session);
 	}
 
+	//@Audit(OperationType.DELETE)
 	@PushRefresh
 	@Transactional
 	@Caching(evict = { @CacheEvict(cacheNames = "patient", allEntries = true), @CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }") })

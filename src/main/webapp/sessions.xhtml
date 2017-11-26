@@ -36,12 +36,12 @@
 					<f:selectItems value="#{patientController.patients}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
 				</p:selectCheckboxMenu>
 
-				<p:commandButton id="addButton" value="#{msg['button.add']}" icon="fa fa-plus"  actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true" styleClass="btn-primary hidden-xs" oncomplete="mixpanel.track('Add session');">
+				<p:commandButton id="addButton" value="#{msg['button.add']}" icon="fa fa-plus"  actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true" styleClass="btn-primary btn-sm hidden-xs" oncomplete="mixpanel.track('Add session');">
 					<p:resetInput target="@form" />
 				</p:commandButton>
 
-				<p:commandButton value="#{msg['button.duplicate']}" icon="fa fa-copy" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary hidden-xs hidden-sm" />
-				<p:commandButton id="printSession" value="#{msg['button.print']}" icon="fa fa-print" process="@this" ajax="false" immediate="true" actionListener="#{sessionController.generateDailySessionsReport}" onclick="this.form.target = '_blank'; mixpanel.track('Print');" styleClass="btn-primary hidden-xs hidden-sm" />
+				<p:commandButton value="#{msg['button.duplicate']}" icon="fa fa-copy" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary btn-sm hidden-xs hidden-sm" />
+				<p:commandButton id="printSession" value="#{msg['button.print']}" icon="fa fa-print" process="@this" ajax="false" immediate="true" actionListener="#{sessionController.generateDailySessionsReport}" onclick="this.form.target = '_blank'; mixpanel.track('Print');" styleClass="btn-primary btn-sm hidden-xs hidden-sm" />
 				<p:tooltip for="printSession" value="#{msg['message.dailySessionsReport']}" position="right" escape="false" />
 
 				<p:messages id="messages"/>
@@ -193,19 +193,21 @@
 					<p:column headerText="#{msg['label.action']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg xsmall-column session-action hidden-xs">
 						<div class="container-fluid">
 							<div class="row">
-								<div class="col-md-4">
+								<div class="col-md-#{loginController.hasAdminRights() ? '4' : '12'}">
 									<p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); mixpanel.track('Edit session');" process=":form:chambersGrid" update=":editSessionForm" global="false">
 										<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
 									</p:commandButton>
 								</div>
+								<ui:fragment rendered="#{loginController.hasAdminRights()}">
 								<div class="col-md-4">
 									<p:commandButton title="#{msg['button.move']}" icon="fa fa-arrows-alt" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('moveSessionDialog').show(); mixpanel.track('Move session dialog');" process=":form:chambersGrid" update=":moveSessionForm" global="false">
 										<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
 									</p:commandButton>
 								</div>
 								<div class="col-md-4">
-									<p:commandButton id="deleteSessionButton" title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionData.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.running}" rendered="#{loginController.hasAdminRights()}" styleClass="hidden-sm" />
+									<p:commandButton id="deleteSessionButton" title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionData.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.running}" styleClass="hidden-sm" />
 								</div>
+								</ui:fragment>
 							</div>
 						</div>
 					</p:column>

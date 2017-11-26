@@ -2,26 +2,29 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 	  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 	  xmlns:h="http://xmlns.jcp.org/jsf/html"
-	  xmlns:p="http://primefaces.org/ui">
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	  xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
 	
 	<ui:composition>
 		<h:form prependId="false">
+			<div class="logged-user #{fn:toLowerCase(loggedUser.role)}">#{loggedUser.username}</div>
 			<div class="navbar hidden-xs hidden-sm">
 				<ul class="nav navbar-nav">
 					<li>
-						<p:commandButton id="sessionsMenuButton" actionListener="#{navigationController.setActivePage('/session.xhtml')}" process="@this" update=":content" icon="fa fa-clock-o" styleClass="btn-flat" />
+						<p:button id="sessionsMenuButton" pt:url="/" icon="fa fa-clock-o" styleClass="btn-flat" onclick="return false" />
 						<p:tooltip for="sessionsMenuButton" value="#{msg['menu.sessions']}" position="bottom"/>
 					</li>
 					<li>
-						<p:commandButton id="patientsMenuButton" actionListener="#{navigationController.setActivePage('/patient.xhtml')}" update=":content" icon="fa fa-id-badge" rendered="#{loginController.hasAdminRights()}" styleClass="btn-flat" />
+						<p:button id="patientsMenuButton" pt:url="/patients" icon="fa fa-id-badge" styleClass="btn-flat" onclick="return false" />
 						<p:tooltip for="patientsMenuButton" value="#{msg['menu.patients']}" position="bottom"/>
 					</li>
 					<li>
-						<p:commandButton id="chambersMenuButton" actionListener="#{navigationController.setActivePage('/chamber.xhtml')}" update=":content" icon="fa fa-server" rendered="#{loginController.hasAdminRights()}" />
+						<p:button id="chambersMenuButton" pt:url="/chambers" icon="fa fa-server" onclick="return false" rendered="#{loginController.hasAdminRights()}" />
 						<p:tooltip for="chambersMenuButton" value="#{msg['menu.chambers']}" position="bottom"/>
 					</li>
 					<li>
-						<p:commandButton id="statisticsMenuButton" actionListener="#{navigationController.setActivePage('/charts.xhtml')}" update=":content" icon="fa fa-bar-chart" styleClass="btn-flat" />
+						<p:button id="statisticsMenuButton" pt:url="/charts" icon="fa fa-bar-chart" styleClass="btn-flat" onclick="return false" />
 						<p:tooltip for="statisticsMenuButton" value="#{msg['menu.statistics']}" position="bottom"/>
 					</li>
 					<li>
@@ -34,7 +37,7 @@
 						<p:menuButton value="#{''}" styleClass="header-menu" icon="fa fa-user">
 							<p:menuitem value="#{loggedUser.name}" icon="fa fa-user-md" disabled="true" />
 							<p:separator/>
-							<p:menuitem value="#{msg['menu.users']}" actionListener="#{navigationController.setActivePage('/user.xhtml')}" action="#{userController.setUsers(null)}" update=":content" icon="fa fa-user" rendered="#{loginController.hasAdminRights()}" />
+							<p:menuitem value="#{msg['menu.users']}" url="/users" icon="fa fa-user" onclick="return false" rendered="#{loginController.hasAdminRights()}" />
 							<p:menuitem value="#{msg['menu.logout']}" process="@this" action="#{loginController.logout}" icon="fa fa-sign-out" />
 						</p:menuButton>
 					</li>
@@ -45,17 +48,43 @@
 					<p:menuButton value="#{''}" styleClass="header-menu" icon="fa fa-ellipsis-v">
 						<p:menuitem value="#{loggedUser.name}" icon="fa fa-user-md" disabled="true" />
 						<p:separator/>
-						<p:menuitem value="#{msg['menu.sessions']}" actionListener="#{navigationController.setActivePage('/session.xhtml')}" update=":content" icon="fa fa-clock-o" />
-						<p:menuitem value="#{msg['menu.patients']}" actionListener="#{navigationController.setActivePage('/patient.xhtml')}" update=":content" icon="fa fa-id-badge" rendered="#{loginController.hasAdminRights()}" />
-						<p:menuitem value="#{msg['menu.chambers']}" actionListener="#{navigationController.setActivePage('/chamber.xhtml')}" update=":content" icon="fa fa-server" rendered="#{loginController.hasAdminRights()}" />
-						<p:menuitem value="#{msg['menu.statistics']}" actionListener="#{navigationController.setActivePage('/charts.xhtml')}" update=":content" icon="fa fa-bar-chart" />
+						<p:menuitem value="#{msg['menu.sessions']}" url="/" icon="fa fa-clock-o" />
+						<p:menuitem value="#{msg['menu.patients']}" url="/patients" icon="fa fa-id-badge" />
+						<p:menuitem value="#{msg['menu.chambers']}" url="/chambers" icon="fa fa-server" rendered="#{loginController.hasAdminRights()}" />
+						<p:menuitem value="#{msg['menu.statistics']}" url="/charts" icon="fa fa-bar-chart" />
 						<p:separator rendered="#{loginController.hasAdminRights()}" />
-						<p:menuitem value="#{msg['menu.users']}" actionListener="#{navigationController.setActivePage('/user.xhtml')}" action="#{userController.setUsers(null)}" update=":content" icon="fa fa-user" rendered="#{loginController.hasAdminRights()}" />
+						<p:menuitem value="#{msg['menu.users']}" url="/users" icon="fa fa-user" rendered="#{loginController.hasAdminRights()}" />
 						<p:separator/>
 						<p:menuitem value="#{msg['menu.logout']}" process="@this" action="#{loginController.logout}" icon="fa fa-sign-out" />
 					</p:menuButton>
 				</div>
 			</div>
+
+			<p:remoteCommand name="updateNavigation" process="@this" actionListener="#{navigationController.updateNavigation()}" update=":content"/>
+
+			<script>
+				$(document).ready(function() {
+					$('.top-menu button, a.ui-menuitem-link').click(function(event) {
+						event.preventDefault();
+
+						var currentPage = $(this).attr('url') || $(this).attr('href');
+
+						if (!currentPage || currentPage === '#') {
+							return;
+						}
+
+						history.pushState(null, null, currentPage);
+						updateNavigation([{name: 'activePage', value: currentPage}]);
+					})
+
+					window.addEventListener('popstate', function(e) {
+						var url = location.href;
+						url = url.substring(url.lastIndexOf('/'), url.length)
+						updateNavigation([{name: 'activePage', value: url}]);
+					});
+				});
+			</script>
 		</h:form>
+
 	</ui:composition>
 </html>

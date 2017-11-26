@@ -1,21 +1,18 @@
 package br.com.litecode.config;
 
+import br.com.litecode.controller.NavigationController;
 import lombok.extern.slf4j.Slf4j;
-import org.omnifaces.filter.FacesExceptionFilter;
 import org.omnifaces.util.Messages;
 import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.web.servlet.ErrorPage;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import javax.el.ELException;
@@ -68,6 +65,10 @@ public class ServletConfig extends WebMvcConfigurerAdapter implements ServletCon
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		registry.addViewController("/").setViewName("forward:/index.xhtml");
+
+		for (String page : NavigationController.pageLinkMapping.keySet()) {
+			registry.addViewController(page).setViewName("forward:/index.xhtml");
+		}
 		registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
 		super.addViewControllers(registry);
 	}

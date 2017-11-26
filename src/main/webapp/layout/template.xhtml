@@ -67,15 +67,10 @@
 		</p:dialog>
 
 		<script>
-			function calculateHeight() {
-				var height = $(window).height();
-				$("#leftMenu").css('height', height);
-				$("div.content").css('height', height - 100);
-			}
-
 			$(document).ready(function() {
-				calculateHeight();
-				$(window).bind('resize', calculateHeight);
+				var url = location.href;
+				url = url.substring(url.lastIndexOf('/'), url.length)
+				updateNavigation([{name: 'activePage', value: url}]);
 			});
 		</script>
 	</h:body>

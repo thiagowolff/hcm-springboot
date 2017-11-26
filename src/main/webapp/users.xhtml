@@ -82,14 +82,9 @@
 		</h:form>
 	</p:dialog>
 
-	<h:form id="confirmDeleteUserForm">
-   		<p:confirmDialog message="#{msg['confirmation.deleteUser']}" header="#{msg['title.deleteUser']}" severity="alert" widgetVar="confirmDeleteUserDialog">  
-	    	<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDeleteUserDialog').hide()" styleClass="btn-danger pull-right" />
-	    	<p:commandButton value="#{msg['button.delete']}" process="@this" update=":usersForm:userTable" oncomplete="PF('confirmDeleteUserDialog').hide()" actionListener="#{userController.deleteUser}" styleClass="btn-primary pull-right" />
-		</p:confirmDialog>
-  	</h:form>
-  	
-  	<h:form id="changePasswordForm">
+	<lc:confirmDeleteDialog entity="User" deleteAction="#{userController.deleteUser()}" update=":usersForm:userTable" />
+
+	<h:form id="changePasswordForm">
    		<p:dialog header="#{msg['label.password']}" widgetVar="changePasswordDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
    			<p:messages autoUpdate="true"/>
    			<p:panelGrid id="changePasswordGrid" columns="2" styleClass="dialog-content">
