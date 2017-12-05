@@ -14,11 +14,11 @@
 		<h:form id="form">
 			<p:panelGrid columns="9" layout="grid" styleClass="session-toolbar">
 				<h:panelGroup style="white-space: nowrap;">
-					<p:commandButton icon="fa fa-chevron-left" actionListener="#{sessionController.previousSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
+					<p:commandButton icon="fa fa-arrow-left" actionListener="#{sessionController.previousSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
 					<p:calendar id="sessionDate" widgetVar="sessionDate" value="#{sessionController.sessionData.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" beforeShowDay="sessionDates" converter="localDateTimeConverter">
 						<p:ajax event="dateSelect" process="@this" update="chambersGrid"/>
 					</p:calendar>
-					<p:commandButton icon="fa fa-chevron-right" actionListener="#{sessionController.nextSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
+					<p:commandButton icon="fa fa-arrow-right" actionListener="#{sessionController.nextSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
 				</h:panelGroup>
 
 				<p:selectOneMenu id="sessionChamber" widgetVar="sessionChamber" value="#{sessionController.sessionData.chamber}" converter="omnifaces.SelectItemsConverter" styleClass="hidden-xs" style="min-width: 100px;">
@@ -40,7 +40,7 @@
 					<p:resetInput target="@form" />
 				</p:commandButton>
 
-				<p:commandButton value="#{msg['button.duplicate']}" icon="fa fa-copy" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary btn-sm hidden-xs hidden-sm" />
+				<p:commandButton value="#{msg['button.duplicate']}" icon="fa fa-copy" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary btn-sm hidden-xs hidden-sm" disabled="#{not loginController.hasAdminRights()}" />
 				<p:commandButton id="printSession" value="#{msg['button.print']}" icon="fa fa-print" process="@this" ajax="false" immediate="true" actionListener="#{sessionController.generateDailySessionsReport}" onclick="this.form.target = '_blank'; mixpanel.track('Print');" styleClass="btn-primary btn-sm hidden-xs hidden-sm" />
 				<p:tooltip for="printSession" value="#{msg['message.dailySessionsReport']}" position="right" escape="false" />
 

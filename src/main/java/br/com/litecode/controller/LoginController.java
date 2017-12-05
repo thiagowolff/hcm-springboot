@@ -23,6 +23,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.TimeZone;
 
 @RequestScoped
 @Component
@@ -63,7 +64,7 @@ public class LoginController {
 			if (timeZone != null) {
 				user.setTimeZone(timeZone.getId());
 			} else {
-				user.setTimeZone(ZoneId.systemDefault().getId());
+				user.setTimeZone(getDefaultTimeZone());
 			}
 
 			userRepository.save(user);
@@ -118,6 +119,12 @@ public class LoginController {
 		ZoneId timeZone = ZoneId.of("GMT" + clientTimeZone);
 		Faces.getSessionMap().put("timeZone", timeZone);
 		log.info("Client time zone: {}", timeZone);
+	}
+
+	private String getDefaultTimeZone() {
+		int offsetInMillis = TimeZone.getDefault().getRawOffset();
+		String offset = String.format("%02d:%02d", Math.abs(offsetInMillis / 3600000), Math.abs((offsetInMillis / 60000) % 60));
+		return "GMT" + (offsetInMillis >= 0 ? "+" : "-") + offset;
 	}
 
 	public boolean hasDevRights() {

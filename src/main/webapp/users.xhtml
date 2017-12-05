@@ -42,7 +42,7 @@
 					</p:commandButton>
 					<p:commandButton process="@this" actionListener="#{userController.setUser(user)}" onclick="PF('confirmDeleteUserDialog').show()" icon="fa fa-trash" title="#{msg['button.delete']}" disabled="#{loggedUser.username eq user.username}" />
 					<p:commandButton process="@this" update=":content" actionListener="#{userController.killUserSession(user)}" icon="fa fa-sign-out" title="#{msg['button.killSession']}" rendered="#{loginController.hasDevRights() and user.sessionId ne null and loggedUser.username ne user.username}">
-						<f:setPropertyActionListener value="/user.xhtml" target="#{navigationController.activePage}" />
+						<f:setPropertyActionListener value="/users.xhtml" target="#{navigationController.activePage}" />
 					</p:commandButton>
 				</p:column>
 			</p:dataTable>
