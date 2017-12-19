@@ -70,13 +70,15 @@
 		<ui:param name="patient" value="#{patientController.patient}" />
 		<p:dialog header="#{patient.patientId eq null ? msg['title.newPatient'] : msg['title.editPatient']}" widgetVar="patientDialog" fitViewport="true" resizable="false" showEffect="fade" modal="true">
 			<p:messages id="dialogMessages" autoUpdate="true" />
-			
+
 			<p:panelGrid id="patientGrid" columns="2">
 				<p:outputLabel value="#{msg['label.name']}" for="patientName" />
 				<p:inputText id="patientName" value="#{patient.name}" required="true" maxlength="150" size="50" />
 
-				<p:outputLabel value="#{msg['label.patientRecord']}" for="patientRecord" />
-				<p:inputText id="patientRecord" value="#{patient.patientRecord}" required="true" maxlength="30" size="15" />
+				<p:outputLabel value="#{msg['label.patientRecord']}" sortBy="#{patient.patientRecord}" for="patientRecord" />
+				<p:inputText id="patientRecord" value="#{patient.patientRecord}" required="true" maxlength="30" size="15">
+					<f:validateRegex pattern="[0-9]{4,20}" />
+				</p:inputText>
 
 				<p:outputLabel value="#{msg['label.folderNumber']}" for="folderNumber" />
 				<p:inputText id="folderNumber" value="#{patient.folderNumber}" maxlength="30" size="15" />

@@ -29,4 +29,19 @@
 	<factory>
     	<exception-handler-factory>br.com.litecode.web.AjaxExceptionHandlerFactory</exception-handler-factory>
 	</factory>
+
+	<faces-config-extension>
+		<facelets-processing>
+			<file-extension>.xhtml</file-extension>
+			<process-as>xhtml</process-as>
+			<oam-compress-spaces>true</oam-compress-spaces>
+		</facelets-processing>
+		<view-pool-mapping>
+			<url-pattern>/*</url-pattern>
+			<parameter>
+				<name>org.apache.myfaces.VIEW_POOL_MAX_POOL_SIZE</name>
+				<value>5</value>
+			</parameter>
+		</view-pool-mapping>
+	</faces-config-extension>
 </faces-config>

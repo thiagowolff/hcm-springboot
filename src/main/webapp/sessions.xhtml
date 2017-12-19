@@ -40,7 +40,7 @@
 					<p:resetInput target="@form" />
 				</p:commandButton>
 
-				<p:commandButton value="#{msg['button.duplicate']}" icon="fa fa-copy" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary btn-sm hidden-xs hidden-sm" disabled="#{not loginController.hasAdminRights()}" />
+				<p:commandButton value="#{msg['button.duplicate']}" icon="fa fa-copy" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary btn-sm hidden-xs hidden-sm" />
 				<p:commandButton id="printSession" value="#{msg['button.print']}" icon="fa fa-print" process="@this" ajax="false" immediate="true" actionListener="#{sessionController.generateDailySessionsReport}" onclick="this.form.target = '_blank'; mixpanel.track('Print');" styleClass="btn-primary btn-sm hidden-xs hidden-sm" />
 				<p:tooltip for="printSession" value="#{msg['message.dailySessionsReport']}" position="right" escape="false" />
 
@@ -66,10 +66,11 @@
 							<i class="session-info-#{chamberSession.sessionId} fa fa-info-circle hidden-xs"></i>
 							<p:tooltip for="@(.session-info-#{chamberSession.sessionId})" value="#{chamberSession.sessionInfo}" position="bottom" escape="false" styleClass="hidden-xs" />
 						</h:panelGroup>
-						<h:panelGroup styleClass="hidden-sm hidden-md hidden-lg">
-							<i class="session-#{chamberSession.sessionId} fa fa-info-circle"></i>
-							<p:tooltip for="@(.session-#{chamberSession.sessionId})" value="#{chamberSession.patientNames}" position="bottom" escape="false" showEvent="touchstart" hideEvent="click" hideDelay="3000" />
-						</h:panelGroup>
+					</p:column>
+
+					<p:column headerText="#{msg['label.patients']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column hidden-sm hidden-md hidden-lg">
+						<i class="session-#{chamberSession.sessionId} fa fa-info-circle"></i>
+						<p:tooltip for="@(.session-#{chamberSession.sessionId})" value="#{chamberSession.patientNames}" position="bottom" escape="false" showEvent="touchstart" hideEvent="touchend" hideDelay="1000" />
 					</p:column>
 
 					<p:column headerText="#{msg['label.patients']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg large-column hidden-xs" style="vertical-align: top;">
@@ -193,12 +194,11 @@
 					<p:column headerText="#{msg['label.action']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg xsmall-column session-action hidden-xs">
 						<div class="container-fluid">
 							<div class="row">
-								<div class="col-md-#{loginController.hasAdminRights() ? '4' : '12'}">
+								<div class="col-md-4">
 									<p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); mixpanel.track('Edit session');" process=":form:chambersGrid" update=":editSessionForm" global="false">
 										<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
 									</p:commandButton>
 								</div>
-								<ui:fragment rendered="#{loginController.hasAdminRights()}">
 								<div class="col-md-4">
 									<p:commandButton title="#{msg['button.move']}" icon="fa fa-arrows-alt" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('moveSessionDialog').show(); mixpanel.track('Move session dialog');" process=":form:chambersGrid" update=":moveSessionForm" global="false">
 										<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
@@ -207,7 +207,6 @@
 								<div class="col-md-4">
 									<p:commandButton id="deleteSessionButton" title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionData.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.running}" styleClass="hidden-sm" />
 								</div>
-								</ui:fragment>
 							</div>
 						</div>
 					</p:column>
@@ -406,7 +405,8 @@
 		}
 
 		function resize() {
-			var colspan = 13 - ($('#form\\:chambersGrid .ui-datatable-tablewrapper th[scope="col"]:hidden').length / 2);
+			var numberOfColumns = 14;
+			var colspan = numberOfColumns - ($('#form\\:chambersGrid .ui-datatable-tablewrapper th[scope="col"]:hidden').length / 2);
 			$('.ui-rowgroup-header td, .ui-datatable-empty-message td').attr('colspan', colspan);
 		}
 		//]]>

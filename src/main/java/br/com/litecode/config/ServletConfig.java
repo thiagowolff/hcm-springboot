@@ -41,6 +41,9 @@ public class ServletConfig extends WebMvcConfigurerAdapter implements ServletCon
 
 		servletContext.setInitParameter("litefaces.ENUM_MESSAGE_BUNDLE", "enums");
 		servletContext.setInitParameter("litefaces.ENUM_KEY_PREFIX", "enum");
+		servletContext.setInitParameter("primefaces.COLLECT_SCRIPTS", "true");
+		servletContext.setInitParameter("org.apache.myfaces.SUPPORT_MANAGED_BEANS", "false");
+		servletContext.setInitParameter("org.apache.myfaces.INIT_PARAM_CACHE_EL_EXPRESSIONS", "alwaysRecompile");
 
 		try {
 			ResourceBundle versionBundle = ResourceBundle.getBundle("version");

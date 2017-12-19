@@ -5,9 +5,13 @@ import br.com.litecode.domain.model.Patient.PatientStats;
 import br.com.litecode.domain.model.PatientSession;
 import br.com.litecode.domain.model.Session;
 import br.com.litecode.domain.repository.PatientRepository;
+import br.com.litecode.util.MessageUtil;
+import org.omnifaces.util.Faces;
+import org.omnifaces.util.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,9 +73,14 @@ public class PatientController implements Serializable {
 		patientRepository.save(patient);
 		refresh();
 	}
-	
+
 	public void savePatient() {
-		patientRepository.save(patient);
+		try {
+			patientRepository.save(patient);
+		} catch (DataIntegrityViolationException e) {
+			Faces.validationFailed();
+			Messages.addGlobalError(MessageUtil.getMessage("error.patientRecord"));
+		}
 		refresh();
 	}
 

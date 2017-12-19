@@ -15,6 +15,7 @@ buildscript {
 plugins {
     id "org.springframework.boot" version "1.5.8.RELEASE"
     id "org.hidetake.ssh" version "2.9.0"
+    id "com.eriwen.gradle.css" version "2.14.0"
 }
 
 apply plugin: "java"
@@ -22,6 +23,7 @@ apply plugin: "org.springframework.boot"
 
 sourceCompatibility = 1.8
 def webAppDir = "src/main/webapp"
+def resourcesDir = "$webAppDir/resources"
 
 springBoot {
     executable = true
@@ -49,11 +51,11 @@ dependencies {
 
     runtime "mysql:mysql-connector-java"
 
-    compile "org.joinfaces:jsf-myfaces-spring-boot-starter:2.4.0"
+    compile "org.joinfaces:jsf-myfaces-spring-boot-starter:2.4.1"
     compile "org.primefaces:primefaces:6.1"
     compile "br.com.litecode:litefaces-enum-i18n:1.0.2"
     compile "org.primefaces.extensions:primefaces-extensions:6.1.1"
-    compile"com.github.adminfaces:admin-theme:1.0.0-RC11"
+    compile "com.github.adminfaces:admin-theme:1.0.0-RC11"
     compile "org.omnifaces:omnifaces:1.14.1"
 
     compile "com.google.guava:guava:23.2-jre"
@@ -78,10 +80,14 @@ dependencies {
     testCompile "org.fluentlenium:fluentlenium-assertj:3.4.1"
 }
 
+minifyCss {
+    source = "$resourcesDir/css/style.css"
+    dest = "$resourcesDir/css/style.min.css"
+}
+
 task compileLess {
     doLast {
         def lessCompiler = new LessCompiler()
-        def resourcesDir = "$webAppDir/resources"
 
         ant.replace(file: "$resourcesDir/less/style.less", token: "?ln=less", value: "")
         lessCompiler.compile(file("$projectDir/$resourcesDir/less/style.less"), file("$projectDir/$resourcesDir/css/style.css"))
@@ -138,8 +144,8 @@ remotes {
 
 task deleteCss {
     doLast {
-        def cssFile = new File("$webAppDir/resources/css/style.css")
-        cssFile.delete()
+        def cssFiles = [ new File("$webAppDir/resources/css/style.css"), new File("$webAppDir/resources/css/style.min.css") ]
+        cssFiles.each { file ->  file.delete() }
     }
 }
 
@@ -177,7 +183,7 @@ compileJava {
 }
 
 processResources.dependsOn "updateVersion"
-jar.dependsOn "compileLess"
+jar.dependsOn = [ "compileLess", "minifyCss" ]
 
 jar.into('META-INF/resources') {
     from('src/main/webapp')
