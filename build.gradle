@@ -54,7 +54,6 @@ dependencies {
     compile "org.joinfaces:jsf-myfaces-spring-boot-starter:2.4.1"
     compile "org.primefaces:primefaces:6.1"
     compile "br.com.litecode:litefaces-enum-i18n:1.0.2"
-    compile "org.primefaces.extensions:primefaces-extensions:6.1.1"
     compile "com.github.adminfaces:admin-theme:1.0.0-RC11"
     compile "org.omnifaces:omnifaces:1.14.1"
 
@@ -119,7 +118,7 @@ task updateVersion {
         LocalDate versionDate = LocalDate.parse(versionProperties.versionDate, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
 
         if (versionDate == LocalDate.now()) {
-            println("Version not updated. Current version: $versionProperties.version")
+            println("Version already incremented. Current version: $versionProperties.version")
             return
         }
 
@@ -166,6 +165,7 @@ task deploy(dependsOn: "bootRepackage") {
                 put from: "build/libs/hcm.jar", into: "/opt/hcm/hcm.jar"
 
                 println("Stopping application...")
+                execute "systemctl daemon-reload"
                 execute "service hcm stop"
 
                 println("Initiating application...")

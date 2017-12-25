@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" 
-	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html"
+	  xmlns:o="http://omnifaces.org/ui">
 	
 	<ui:composition>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -9,22 +10,24 @@
 
 		<title>#{msg['title.appTitle']}</title>
 		
-		<link rel="shortcut icon" href="#{request.contextPath}/images/favicon.ico" type="image/x-icon" />
+		<link rel="shortcut icon" href="#{request.contextPath}/resources/images/favicon.ico" type="image/x-icon" />
 
 		<ui:param name="development" value="#{facesContext.application.projectStage eq 'Development'}" />
 		<ui:param name="stylesheet" value="#{development ? 'less' : 'css'}" />
-		
+
+		<h:outputStylesheet library="css" name="animate.min.css" />
 		<link type="text/css" rel="stylesheet#{development ? '/less' : ''}" href="#{request.contextPath}/javax.faces.resource/style#{development ? '' : '.min'}.#{stylesheet}?ln=#{stylesheet}&amp;version=#{version['version']}" />
+
 		<h:outputScript library="js" name="less-2.7.2.min.js" rendered="#{development}" />
 		<h:outputScript library="js" name="locale-primefaces.js" target="body" />
-		<h:outputScript library="js" name="sockjs.min.js" target="body" />
-		<h:outputScript library="js" name="stomp.min.js" target="body" />
+		<h:outputScript library="js" name="sockjs.min.js" target="head" />
+		<h:outputScript library="js" name="stomp.min.js" target="head" />
 
-		<script type="text/javascript" async="async" src="https://www.gstatic.com/charts/loader.js"></script>
+		<script type="text/javascript" defer="defer" async="async" src="https://www.gstatic.com/charts/loader.js"></script>
 
 		<ui:param name="mixpanelToken" value="#{development ? 'ec61f205e12274eb424df17e0bae6a83' : 'be3ae0d0aa2f4e6f10798deaac19bd20'}" />
 
-		<script async="async">
+		<script>
 			//<![CDATA[
 			(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,
 			0)))}}var d=a;"undefined"!==typeof f?d=a[f]=[]:f="mixpanel";d.people=d.people||[];d.toString=function(b){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);b||(a+=" (stub)");return a};d.people.toString=function(){return d.toString(1)+".people (stub)"};k="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
@@ -32,20 +35,5 @@
 			mixpanel.init("#{mixpanelToken}");
 			//]]>
 		</script>
-
-		<ui:fragment rendered="#{not development}">
-			<script async="async">
-				//<![CDATA[
-//				(function(h,o,t,j,a,r){
-//					h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-//					h._hjSettings={hjid:689783,hjsv:6};
-//					a=o.getElementsByTagName('head')[0];
-//					r=o.createElement('script');r.async=1;
-//					r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-//					a.appendChild(r);
-//				})(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
-				//]]>
-			</script>
-		</ui:fragment>
 	</ui:composition>
 </html>

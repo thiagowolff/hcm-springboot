@@ -30,7 +30,6 @@ public class ExceptionReportFilter implements Filter {
 		numberOfEmailsSent = 0;
 	}
 
-
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		try {

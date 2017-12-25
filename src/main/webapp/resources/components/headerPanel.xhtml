@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" 
 	  xmlns:composite="http://java.sun.com/jsf/composite"
+	  xmlns:o="http://omnifaces.org/ui"
 	  xmlns:p="http://primefaces.org/ui">
 	  
 	<composite:interface>
@@ -12,6 +13,7 @@
 	</composite:interface>
 
 	<composite:implementation>
+		<o:cache>
 		<div class="header-panel">
 			<div class="header-panel-top">
 				<div class="header-panel-title animate-1 fadeInLeft">
@@ -29,5 +31,6 @@
 				</div>
 			</div>
 		</div>
+		</o:cache>
 	</composite:implementation>
 </html>

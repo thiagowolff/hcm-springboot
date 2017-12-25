@@ -2,10 +2,12 @@ package br.com.litecode.config;
 
 import br.com.litecode.controller.NavigationController;
 import lombok.extern.slf4j.Slf4j;
+import org.omnifaces.filter.CacheControlFilter;
 import org.omnifaces.util.Messages;
 import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.web.servlet.ErrorPage;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +20,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import javax.el.ELException;
 import javax.faces.application.ViewExpiredException;
 import javax.faces.webapp.FacesServlet;
+import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import java.text.MessageFormat;
@@ -33,6 +36,16 @@ public class ServletConfig extends WebMvcConfigurerAdapter implements ServletCon
 		ServletRegistrationBean facesServlet = new ServletRegistrationBean(new FacesServlet(), "*.xhtml", "/javax.faces.resource/*");
 		facesServlet.setAsyncSupported(true);
 		return facesServlet;
+	}
+
+	@Bean
+	public FilterRegistrationBean cacheControlRegistration() {
+		FilterRegistrationBean registration = new FilterRegistrationBean();
+		registration.setFilter(new CacheControlFilter());
+		registration.addUrlPatterns("*.png");
+		registration.addInitParameter("expires", "30d");
+		registration.setName("cache30days");
+		return registration;
 	}
 
 	@Override

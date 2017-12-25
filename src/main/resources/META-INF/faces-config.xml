@@ -21,6 +21,8 @@
 
 		<action-listener>org.omnifaces.eventlistener.ResetInputAjaxActionListener</action-listener>
 
+		<resource-handler>org.omnifaces.resourcehandler.CDNResourceHandler</resource-handler>
+		<resource-handler>org.omnifaces.resourcehandler.CombinedResourceHandler</resource-handler>
 		<resource-handler>org.omnifaces.resourcehandler.UnmappedResourceHandler</resource-handler>
 
 		<el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>
@@ -29,6 +31,10 @@
 	<factory>
     	<exception-handler-factory>br.com.litecode.web.AjaxExceptionHandlerFactory</exception-handler-factory>
 	</factory>
+
+	<lifecycle>
+		<phase-listener>br.com.litecode.web.LogPhaseListener</phase-listener>
+	</lifecycle>
 
 	<faces-config-extension>
 		<facelets-processing>
@@ -44,4 +50,10 @@
 			</parameter>
 		</view-pool-mapping>
 	</faces-config-extension>
+
+	<ordering>
+		<after>
+			<name>primefaces</name>
+		</after>
+	</ordering>
 </faces-config>

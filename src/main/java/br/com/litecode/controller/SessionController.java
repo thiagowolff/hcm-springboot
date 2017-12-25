@@ -346,5 +346,10 @@ public class SessionController implements Serializable {
 			session = new Session();
 			patients.clear();
 		}
+
+
+		public void today() {
+			sessionDate = LocalDate.now();
+		}
 	}
 }

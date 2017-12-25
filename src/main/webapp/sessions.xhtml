@@ -4,9 +4,9 @@
 				xmlns:fn="http://java.sun.com/jsp/jstl/functions"
 				xmlns:h="http://xmlns.jcp.org/jsf/html"
 				xmlns:p="http://primefaces.org/ui"
-				xmlns:pe="http://primefaces.org/ui/extensions"
 				xmlns:of="http://omnifaces.org/functions"
-				xmlns:lcf="http://litecode.com.br/functions">
+				xmlns:lcf="http://litecode.com.br/functions"
+				xmlns:o="http://omnifaces.org/ui">
 
 	<p:growl id="growl" widgetVar="growl" showDetail="true" life="10000" escape="false" />
 
@@ -15,10 +15,13 @@
 			<p:panelGrid columns="9" layout="grid" styleClass="session-toolbar">
 				<h:panelGroup style="white-space: nowrap;">
 					<p:commandButton icon="fa fa-arrow-left" actionListener="#{sessionController.previousSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
-					<p:calendar id="sessionDate" widgetVar="sessionDate" value="#{sessionController.sessionData.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" beforeShowDay="sessionDates" converter="localDateTimeConverter">
-						<p:ajax event="dateSelect" process="@this" update="chambersGrid"/>
-					</p:calendar>
-					<p:commandButton icon="fa fa-arrow-right" actionListener="#{sessionController.nextSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
+					<h:panelGroup>
+						<p:calendar id="sessionDate" locale="pt" widgetVar="sessionDate" value="#{sessionController.sessionData.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" beforeShowDay="sessionDates" converter="localDateTimeConverter">
+							<p:ajax event="dateSelect" process="@this" update="chambersGrid"/>
+						</p:calendar>
+						<p:commandLink value="#{msg['label.today']}" actionListener="#{sessionController.sessionData.today()}" styleClass="today" process="@this" update="chambersGrid, sessionDate" />
+					</h:panelGroup>
+					<p:commandButton icon="fa fa-arrow-right" actionListener="#{sessionController.nextSessionDate()}" process="@this" update="chambersGrid, sessionDate" style="margin-left: -18px;" />
 				</h:panelGroup>
 
 				<p:selectOneMenu id="sessionChamber" widgetVar="sessionChamber" value="#{sessionController.sessionData.chamber}" converter="omnifaces.SelectItemsConverter" styleClass="hidden-xs" style="min-width: 100px;">
@@ -26,10 +29,7 @@
 				</p:selectOneMenu>
 
 				<h:panelGroup styleClass="hidden-xs">
-					<pe:timePicker id="sessionTime" label="#{msg['label.time']}" widgetVar="sessionTime" value="#{sessionController.sessionData.sessionTime}" mode="spinner" startHours="6" endHours="22" showOn="focus" intervalMinutes="15" required="true">
-						<f:converter converterId="localDateTimeConverter" />
-						<f:attribute name="pattern" value="HH:mm" />
-					</pe:timePicker>
+					<p:calendar id="sessionTime" locale="pt" label="#{msg['label.time']}" value="#{sessionController.sessionData.sessionTime}" widgetVar="sessionTime" pattern="HH:mm" size="5" timeOnly="true" timeControlType="select" minHour="6" maxHour="22" stepMinute="10" converter="localDateTimeConverter" required="true" />
 				</h:panelGroup>
 
 				<p:selectCheckboxMenu id="sessionPatients" widgetVar="sessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionData.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true"  styleClass="hidden-xs">
@@ -56,7 +56,7 @@
 
 					<p:headerRow>
 						<p:column colspan="13">
-							<h:outputText value="#{lcf:enum(chamberSession.timePeriod)}" />
+							#{lcf:enum(chamberSession.timePeriod)}
 						</p:column>
 					</p:headerRow>
 
@@ -88,7 +88,7 @@
 					<p:column headerText="#{msg['label.healthInsurance']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column hidden-sm hidden-xs" style="vertical-align: top">
 						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
 							<div class="long-text text-left">
-								<h:outputText value="#{empty patientSession.patient.healthInsurance ? '-' : patientSession.patient.healthInsurance.name}" />
+								#{empty patientSession.patient.healthInsurance ? '-' : patientSession.patient.healthInsurance.name}
 							</div>
 						</ui:repeat>
 					</p:column>
@@ -96,7 +96,7 @@
 					<p:column headerText="#{msg['label.attendance']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-xs" style="vertical-align: top; white-space: nowrap">
 						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
 							<div>
-								<h:outputText value="#{patientStats[patientSession.patient.patientId].completedSessions}" />
+								#{patientStats[patientSession.patient.patientId].completedSessions}
 							</div>
 						</ui:repeat>
 					</p:column>
@@ -163,7 +163,7 @@
 					<p:column headerText="#{msg['label.progress']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column">
 						<div class="timer-progress-cell">
 							<div id="currentTime-#{chamberSession.sessionId}">
-								<h:outputText value="#{chamberSession.timeRemaining}" />
+								#{chamberSession.timeRemaining}
 							</div>
 							<div>
 								<p:progressBar widgetVar="progress-#{chamberSession.sessionId}" value="#{chamberSession.currentProgress}" labelTemplate="{value}%" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status ne 'FINISHED'}" />
@@ -200,7 +200,7 @@
 									</p:commandButton>
 								</div>
 								<div class="col-md-4">
-									<p:commandButton title="#{msg['button.move']}" icon="fa fa-arrows-alt" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('moveSessionDialog').show(); mixpanel.track('Move session dialog');" process=":form:chambersGrid" update=":moveSessionForm" global="false">
+									<p:commandButton title="#{msg['button.move']}" icon="fa fa-arrows-alt" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('moveSessionDialog').show(); mixpanel.track('Move session dialog');" process=":form:chambersGrid" update=":moveSessionForm" global="false" disabled="#{chamberSession.running}">
 										<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
 									</p:commandButton>
 								</div>
@@ -231,10 +231,10 @@
 			</div>
 			<p:dataTable id="sessionPatientsTable" styleClass="dialog-table" var="sessionPatient" value="#{sessionController.sessionData.session.patientSessions}" emptyMessage="#{msg['message.noData']}">
 				<p:column headerText="#{msg['label.id']}" width="50">
-					<h:outputText value="#{sessionPatient.patient.patientId}" />
+					#{sessionPatient.patient.patientId}
 				</p:column>
 				<p:column headerText="#{msg['label.name']}" styleClass="text-left">
-					<h:outputText value="#{sessionPatient.patient.name}" />
+					#{sessionPatient.patient.name}
 				</p:column>
 				<p:column headerText="#{msg['label.status']}" width="120">
 					<ui:param name="status" value="#{msg[sessionPatient.absent ? 'label.patientSessionAbsent' : 'label.patientSessionPresent']}" />
@@ -294,12 +294,22 @@
 	<script type="text/javascript">
 		//<![CDATA[
 		var loggedUser;
+		var socket;
+		var stompClient;
 
-		function register(registrations) {
-			var socket = SockJS('/push');
-			var stompClient = Stomp.over(socket);
+		function initWebsocket() {
+			if (socket && stompClient) {
+				return;
+			}
+
+			socket = SockJS('/push');
+			stompClient = Stomp.over(socket);
 			stompClient.debug = null;
 
+			console.log("Websocket initialized!")
+		}
+
+		function register(registrations) {
 			stompClient.connect({}, function(frame) {
 				loggedUser = frame.headers['user-name'];
 				registrations.forEach(function (registration) {
@@ -315,28 +325,32 @@
 		}
 
 		$().ready(function() {
-			register([
-				{
-					route: '/topic/progress', callback: function(data) {
+			initWebsocket();
+
+			if (stompClient && !stompClient.connected) {
+				register([
+					{
+						route: '/topic/progress', callback: function (data) {
 						var sessionProgress = JSON.parse(data.body);
 						updateTimer(sessionProgress);
 					}
-				},
-				{
-					route: '/topic/notify', callback: function(data) {
+					},
+					{
+						route: '/topic/notify', callback: function (data) {
 						var message = JSON.parse(data.body);
 						handleMessage(message);
-						refreshSessions([{ name: "sessionId", value: message.sessionId }]);
+						refreshSessions([{name: "sessionId", value: message.sessionId}]);
 					}
-				},
-				{
-					route: '/topic/refresh', callback: function(data) {
+					},
+					{
+						route: '/topic/refresh', callback: function (data) {
 						if (data.headers['user-name'] != loggedUser) {
 							refreshSessions();
 						}
 					}
-				}
-			]);
+					}
+				]);
+			}
 
 			setTimeout(function () {
 				resize();

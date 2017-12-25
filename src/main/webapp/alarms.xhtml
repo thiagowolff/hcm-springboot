@@ -1,0 +1,107 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+				xmlns:f="http://xmlns.jcp.org/jsf/core"
+				xmlns:h="http://xmlns.jcp.org/jsf/html"
+				xmlns:p="http://primefaces.org/ui"
+				xmlns:o="http://omnifaces.org/ui"
+				xmlns:lcf="http://litecode.com.br/functions"
+				xmlns:lc="http://java.sun.com/jsf/composite/components">
+	
+	<h:form id="alarmsForm">
+		<lc:headerPanel title="#{msg['title.alarms']}" addButtonAction="#{alarmController.newUser()}" update=":alarmForm" oncomplete="PF('alarmDialog').show()" />
+
+		<div class="content-wrapper">
+			<p:dataTable id="alarmTable" var="user" value="#{alarmController.alarms}" paginator="true" rows="20" paginatorPosition="bottom" paginatorAlwaysVisible="false" emptyMessage="#{msg['message.noData']}">
+				<p:column headerText="#{msg['label.login']}" sortBy="#{alarm.username}" styleClass="text-left medium-column" priority="1">
+					<h:outputText id="username" value="#{alarm.username}" style="color: #{alarm.sessionId ne null ? '#00d02a' : '#000000'}" />
+				</p:column>
+				
+				<p:column headerText="#{msg['label.name']}" sortBy="#{alarm.name}" styleClass="text-left" priority="1">
+					<h:outputText value="#{alarm.name}" />
+				</p:column>
+				<p:column headerText="#{msg['label.role']}" styleClass="text-left" priority="2">
+					<h:outputText value="#{lcf:enum(alarm.role)}" />
+				</p:column>
+
+				<p:column headerText="#{msg['label.creationDate']}" sortBy="#{alarm.creationDate}" width="150" priority="3">
+					<h:outputText value="#{alarm.creationDate}" converter="localDateTimeConverter" />
+				</p:column>
+				
+				<p:column headerText="#{msg['label.lastAccess']}" sortBy="#{alarm.lastAccess}" width="150" priority="1">
+					<h:outputText id="userLastAccess" value="#{alarm.lastAccess}">
+						<f:converter converterId="localDateTimeConverter" />
+						<f:attribute name="pattern" value="dd/MM/yyyy HH:mm:ss" />
+					</h:outputText>
+					<p:tooltip for="#{p:component('userLastAccess')}" value="#{alarm.lastAccessLocationFormatted}" position="bottom" escape="false" rendered="#{loginController.hasDevRights()}" />
+				</p:column>
+				
+				<p:column headerText="#{msg['label.action']}" width="175" priority="4" styleClass="text-left">
+					<p:commandButton process="@this" update=":alarmForm" actionListener="#{alarmController.setUser(user)}" oncomplete="PF('alarmDialog').show()" icon="fa fa-pencil" title="#{msg['button.edit']}" />
+					<p:commandButton process="@this" update=":changePasswordForm" actionListener="#{alarmController.setUser(user)}" oncomplete="PF('changePasswordDialog').show()" icon="fa fa-lock" title="#{msg['button.changePassword']}" >
+						<p:resetInput target=":changePasswordForm" />
+					</p:commandButton>
+					<p:commandButton process="@this" actionListener="#{alarmController.setUser(user)}" onclick="PF('confirmDeleteUserDialog').show()" icon="fa fa-trash" title="#{msg['button.delete']}" disabled="#{loggedUser.username eq alarm.username}" />
+					<p:commandButton process="@this" update=":content" actionListener="#{alarmController.killUserSession(user)}" icon="fa fa-sign-out" title="#{msg['button.killSession']}" rendered="#{loginController.hasDevRights() and alarm.sessionId ne null and loggedUser.username ne alarm.username}">
+						<f:setPropertyActionListener value="/alarms.xhtml" target="#{navigationController.activePage}" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+		</div>
+	</h:form>
+
+	<o:importConstants type="br.com.litecode.domain.model.User.Role" />
+
+	<p:dialog header="#{msg['label.user']}" widgetVar="alarmDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true" fitViewport="true">
+		<h:form id="alarmForm">
+			<ui:param name="newUser" value="#{alarmController.alarm.userId eq null}" />
+			<p:messages id="userMessages" autoUpdate="true" />
+			<p:panelGrid id="userGrid" columns="2" styleClass="dialog-content">
+				<p:outputLabel value="#{msg['label.name']}" for="fullName" />
+				<p:inputText id="fullName" value="#{alarmController.alarm.name}" maxlength="80" required="true" size="50" />
+
+				<p:outputLabel value="#{msg['label.login']}" for="userLogin" />
+				<p:inputText id="userLogin" value="#{alarmController.alarm.username}" size="50" maxlength="50" required="true" />
+
+				<p:outputLabel value="#{msg['label.role']}" for="role" />
+				<p:selectOneMenu id="role" value="#{alarmController.alarm.role}" required="true" converter="omnifaces.SelectItemsConverter">
+					<f:selectItem itemLabel="#{lcf:enum(Role.DEV)}" itemValue="#{Role.DEV}" itemDisabled="#{not loginController.hasDevRights()}" />
+					<f:selectItem itemLabel="#{lcf:enum(Role.ADMIN)}" itemValue="#{Role.ADMIN}" />
+					<f:selectItem itemLabel="#{lcf:enum(Role.USER)}" itemValue="#{Role.USER}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel value="#{msg['label.password']}" for="password" rendered="#{newUser}"/>
+				<p:password id="password" value="#{alarmController.alarm.password}" required="true" requiredMessage="#{msg['error.passwordRequired']}" match="matchPassword" validatorMessage="#{msg['error.passwordMismatch']}" rendered="#{newUser}" />
+
+				<p:outputLabel value="#{msg['label.passwordConfirmation']}" for="matchPassword" rendered="#{newUser}"/>
+				<p:password id="matchPassword" value="#{alarmController.alarm.password}" maxlength="50" required="true" requiredMessage="#{msg['error.passwordConfirmationRequired']}" validatorMessage="#{msg['error.maxLength']}" rendered="#{newUser}" />
+			</p:panelGrid>
+
+			<p:separator />
+			<p:commandButton value="#{msg['button.cancel']}" type="button" onclick="PF('alarmDialog').hide()" styleClass="btn-danger pull-right" />
+			<p:commandButton value="#{msg['button.save']}" actionListener="#{alarmController.saveUser}" process="@form" update="userMessages, :alarmsForm:alarmTable" oncomplete="if (!args.validationFailed) PF('alarmDialog').hide()" validateClient="true" styleClass="btn-primary pull-right" />
+		</h:form>
+	</p:dialog>
+
+	<lc:confirmDeleteDialog entity="User" deleteAction="#{alarmController.deleteUser()}" update=":alarmsForm:alarmTable" />
+
+	<h:form id="changePasswordForm">
+   		<p:dialog header="#{msg['label.password']}" widgetVar="changePasswordDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
+   			<p:messages autoUpdate="true"/>
+   			<p:panelGrid id="changePasswordGrid" columns="2" styleClass="dialog-content">
+   				<p:outputLabel value="#{msg['label.password']}" for="newPassword" />
+   				<p:password id="newPassword" value="#{alarmController.alarm.password}" required="true" match="matchNewPassword" requiredMessage="#{msg['error.passwordRequired']}" validatorMessage="#{msg['error.passwordMismatch']}" />
+   				<p:outputLabel value="#{msg['label.passwordConfirmation']}" for="matchNewPassword" />
+				<p:password id="matchNewPassword" value="#{alarmController.alarm.password}" required="true" requiredMessage="#{msg['error.passwordConfirmationRequired']}"  />
+			</p:panelGrid>
+
+			<p:separator />
+			<p:commandButton value="#{msg['button.cancel']}" type="button" onclick="PF('changePasswordDialog').hide()" styleClass="btn-danger pull-right" />
+			<p:commandButton value="#{msg['button.save']}" action="#{alarmController.saveUserPassword}" process="changePasswordForm" oncomplete="if (!args.validationFailed) { PF('changePasswordDialog').hide(); }" styleClass="btn-primary pull-right" />
+   		</p:dialog>
+  	</h:form>
+	<script>
+		$().ready(function() {
+			mixpanel.track('Alarms page');
+		})
+	</script>
+</ui:composition>

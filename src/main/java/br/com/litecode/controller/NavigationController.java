@@ -1,6 +1,7 @@
 package br.com.litecode.controller;
 
 import org.omnifaces.util.Faces;
+import org.primefaces.context.RequestContext;
 import org.springframework.stereotype.Component;
 
 import javax.faces.view.ViewScoped;
@@ -24,11 +25,17 @@ public class NavigationController implements Serializable {
 	private String activePage = "/sessions.xhtml";
 
 	public void updateNavigation() {
-		String currentPage = (String) Faces.getRequestParameter("activePage");
+		String currentPage = Faces.getRequestParameter("activePage");
+		String update = Faces.getRequestParameter("update");
 
 		String pageLink = pageLinkMapping.get(currentPage);
-		if (!pageLink.equals(activePage)) {
-			activePage = pageLink;
+		if (pageLink.equals(activePage)) {
+			return;
+		}
+		activePage = pageLink;
+
+		if (update != null) {
+			RequestContext.getCurrentInstance().update(update);
 		}
 	}
 
