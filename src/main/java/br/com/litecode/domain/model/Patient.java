@@ -1,5 +1,6 @@
 package br.com.litecode.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -35,6 +37,7 @@ public class Patient {
 	private HealthInsurance healthInsurance;
 
 	@OneToMany(mappedBy = "patient")
+	@JsonIgnore
 	private Set<PatientSession> patientSessions;
 
 	public Patient() {
@@ -53,6 +56,13 @@ public class Patient {
 		String record = Strings.isNullOrEmpty(patientRecord) ? null : String.format("%s: %s", getMessage("label.patientRecord"), patientRecord.trim());
 		String folder = Strings.isNullOrEmpty(folderNumber) ? null : String.format("%s: %s", getMessage("label.folderNumber"), folderNumber.trim());
 		return Joiner.on(" | ").skipNulls().join(record, folder);
+	}
+
+	public Integer getAge() {
+		if (birthDate == null) {
+			return null;
+		}
+		return Period.between(birthDate, LocalDate.now()).getYears();
 	}
 
 	@Override

@@ -62,7 +62,7 @@ public class ChamberSessionTimer implements SessionTimer {
 		session = sessionRepository.findOne(session.getSessionId());
 		session.setStatus(chamberEvent.getEventType().getSessionStatus());
 		session.getExecutionMetadata().setCurrentEvent(chamberEvent);
-		session.updateProgress();
+ 		session.updateProgress();
 		sessionRepository.save(session);
 
 		if (session.getStatus() == SessionStatus.FINISHED) {

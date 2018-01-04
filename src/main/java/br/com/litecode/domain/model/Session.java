@@ -132,6 +132,10 @@ public class Session implements Comparable<Session>, Serializable {
 			return LocalTime.MIDNIGHT.plusSeconds(getDuration() - executionMetadata.getElapsedTime()).format(TIME_FORMAT);
 		}
 
+		if (status == SessionStatus.CREATED && timeRemaining == null) {
+			return LocalTime.MIDNIGHT.plusSeconds(getDuration()).format(TIME_FORMAT);
+		}
+
 		if (status == SessionStatus.FINISHED) {
 			return "00:00:00";
 		}

@@ -12,7 +12,7 @@
 
 		<div class="content-wrapper">
 			<p:dataTable id="patientsTable" widgetVar="patientsTable" value="#{patientController.patients}" var="patient" paginator="true" rows="10" paginatorAlwaysVisible="false" filteredValue="#{patientController.filteredPatients}"
-			 currentPageReportTemplate="({startRecord} de {totalRecords})"
+			 currentPageReportTemplate="({startRecord} de {totalRecords})" sortBy="#{patient.creationDate}" sortOrder="descending"
 			 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="10,25,100,500" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
 
 				<f:facet name="header">
@@ -30,9 +30,6 @@
 				<p:column headerText="#{msg['label.patientRecord']}" filterBy="#{patient.patientRecord}" filterStyle="display: none;" priority="1">
 					<h:outputText value="#{patient.patientRecord}" />
 				</p:column>
-				<p:column headerText="#{msg['label.folderNumber']}" filterBy="#{patient.folderNumber}" filterStyle="display: none;" priority="2">
-					<h:outputText value="#{patient.folderNumber}" />
-				</p:column>
 				<p:column styleClass="text-left" priority="3">
 					<f:facet name="header">
 						<h:outputText value="#{msg['label.healthInsurance']}" />
@@ -42,6 +39,10 @@
 				</p:column>
 				<p:column headerText="#{msg['label.numberOfSessions']}" width="100" priority="2">
 					<h:outputText value="#{patientStats.completedSessions + patientStats.absentSessions}" />
+				</p:column>
+				<p:column headerText="#{msg['label.birthDate']}" sortBy="#{patient.birthDate}" width="160" priority="3">
+					<h:outputText value="#{patient.birthDate}" converter="localDateTimeConverter" />
+					<h:outputText value=" (#{patient.age} #{msg['label.years']})" rendered="#{not empty patient.birthDate}" />
 				</p:column>
 				<p:column headerText="#{msg['label.numberOfCompletedSessions']}" width="100" priority="1">
 					<h:outputText value="#{patientStats.completedSessions eq null ? 0 :patientStats.completedSessions}" />
@@ -80,9 +81,6 @@
 					<f:validateRegex pattern="[0-9]{4,20}" />
 				</p:inputText>
 
-				<p:outputLabel value="#{msg['label.folderNumber']}" for="folderNumber" />
-				<p:inputText id="folderNumber" value="#{patient.folderNumber}" maxlength="30" size="15" />
-
 				<p:outputLabel value="#{msg['label.healthInsurance']}" for="healthInsurance" />
 
 				<p:selectOneMenu id="healthInsurance" value="#{patient.healthInsurance}" required="true" converter="omnifaces.SelectItemsConverter">
@@ -90,14 +88,17 @@
 					<f:selectItems value="#{healthInsuranceController.healthInsurances}" var="healthInsurance" itemValue="#{healthInsurance}" itemLabel="#{healthInsurance.name}"/>
 				</p:selectOneMenu>
 
+				<p:outputLabel value="#{msg['label.birthDate']}" for="patientBirthDate" />
+				<p:calendar id="patientBirthDate" value="#{patient.birthDate}" pattern="dd/MM/yyyy" mask="true" yearRange="c-100:c+15" size="15" showOn="button" navigator="true" converter="localDateTimeConverter" required="true" />
+
+				<p:outputLabel value="#{msg['label.folderNumber']}" for="folderNumber" />
+				<p:inputText id="folderNumber" value="#{patient.folderNumber}" maxlength="30" size="15" />
+
 				<p:outputLabel value="#{msg['label.email']}" for="patientEmail" />
 				<p:inputText id="patientEmail" value="#{patient.email}" maxlength="75" size="50" />
 
 				<p:outputLabel value="#{msg['label.phone']}" for="patientPhone" />
 				<p:inputMask id="patientPhone" value="#{patient.phoneNumber}" mask="(99) ?999999999" maxlength="15" size="15" />
-
-				<p:outputLabel value="#{msg['label.birthDate']}" for="patientBirthDate" />
-				<p:calendar id="patientBirthDate" value="#{patient.birthDate}" pattern="dd/MM/yyyy" mask="true" yearRange="c-100:c+15" size="15" showOn="button" navigator="true" converter="localDateTimeConverter" />
 			</p:panelGrid>
 
 			<p:separator />
@@ -142,7 +143,7 @@
 	</h:form>
 
 	<script type="text/javascript">
-       	$(document).ready(function() {
+       	$().ready(function() {
 			mixpanel.track('Patients page');
 		});
 	</script>

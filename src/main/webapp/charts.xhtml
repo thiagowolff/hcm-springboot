@@ -9,7 +9,7 @@
 
 		function drawCharts() {
 			drawChart('Presenças por mês', '#{chartsController.presencesPerMonth}', 'presencesPerMonthChart', google.visualization.ColumnChart, { colors: ['#3949ab'] });
-			drawChart('Sessões por câmara', '#{chartsController.sessionsPerChamberModel}', 'sessionsPerChamberChart', google.visualization.BarChart, { colors: ['#2f353e'] });
+			drawChart('Sessões por câmara', '#{chartsController.sessionsPerChamberModel}', 'sessionsPerChamberChart', google.visualization.BarChart, { colors: ['#2f353e'], hAxis: { minValue: 0 }});
 			drawChart('Sessões por convênio', '#{chartsController.sessionsPerHealthInsuranceModel}', 'sessionsPerHealthInsuranceChart', google.visualization.PieChart, { legend: { position: 'right' }});
 			drawChart('Sessões por mês', '#{chartsController.monthlySessionsModel}', 'monthlySessionsChart', google.visualization.LineChart);
 		}
@@ -23,6 +23,11 @@
 				sliceVisibilityThreshold: 0.04,
 				pieResidueSliceColor: '#2f353e',
 				pieResidueSliceLabel: "Outros",
+				animation:{
+					startup: true,
+					duration: 1000,
+					easing: 'out'
+				},
 				colors: [ '#d81b60', '#3949ab', '#00897b', '#e53935', '#546e7a', '#5e35b1', '#f06292', '#7986cb', '#4db6ac', '#e57373', '#e0e0e0', '#9575cd' ]
 			};
 

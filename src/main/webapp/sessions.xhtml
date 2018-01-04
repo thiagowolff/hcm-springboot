@@ -8,6 +8,18 @@
 				xmlns:lcf="http://litecode.com.br/functions"
 				xmlns:o="http://omnifaces.org/ui">
 
+	<script>
+		//<![CDATA[
+		var dates = new Array(#{sessionController.scheduledSessionDates});
+
+		function sessionDates(date) {
+			var isoDate = date.getFullYear() + '-' + (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1) + '-' + (date.getDate() < 10 ? '0' : '') + date.getDate();
+			var styleClass = dates.indexOf(isoDate) != -1 ? 'session-day' : '';
+			return [ true,  styleClass]
+		}
+		//]]>
+	</script>
+
 	<p:growl id="growl" widgetVar="growl" showDetail="true" life="10000" escape="false" />
 
 	<div class="content-wrapper">
@@ -176,16 +188,16 @@
 						<div class="container-fluid">
 							<div class="row">
 								<div class="col-sm-6 col-md-3">
-									<p:commandButton title="#{msg['button.start']}" icon="fa fa-play" actionListener="#{sessionController.startSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{chamberSession.running or chamberSession.status eq 'FINISHED'}" oncomplete="mixpanel.track('Start session');"/>
+									<p:commandButton title="#{msg['button.start']}" icon="fa fa-play" actionListener="#{sessionController.startSession(chamberSession)}" process="@this" update=":form:chambersGrid" global="false" disabled="#{chamberSession.running or chamberSession.status eq 'FINISHED'}" oncomplete="mixpanel.track('Start session');" />
 								</div>
 								<div class="col-sm-6 col-md-3">
-									<p:commandButton title="#{msg['button.pause']}" icon="fa fa-pause" actionListener="#{sessionController.pauseSession(chamberSession)}" process=":form:chambersGrid" update="@form" global="false" disabled="#{not chamberSession.running}" oncomplete="mixpanel.track('Pause session');"/>
+									<p:commandButton title="#{msg['button.pause']}" icon="fa fa-pause" actionListener="#{sessionController.pauseSession(chamberSession)}" process="@this" update=":form:chambersGrid" global="false" disabled="#{not chamberSession.running}" oncomplete="mixpanel.track('Pause session');"/>
 								</div>
 								<div class="col-sm-6 col-md-3">
-									<p:commandButton title="#{msg['button.stop']}" icon="fa fa-stop" actionListener="#{sessionController.stopSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'CREATED'}" oncomplete="mixpanel.track('Reset session');"/>
+									<p:commandButton title="#{msg['button.stop']}" icon="fa fa-stop" actionListener="#{sessionController.stopSession(chamberSession)}" process="@this" update=":form:chambersGrid" disabled="#{chamberSession.status eq 'CREATED'}" oncomplete="mixpanel.track('Reset session');"/>
 								</div>
 								<div class="col-sm-6 col-md-3">
-									<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process=":form:chambersGrid" update="@form" disabled="#{chamberSession.status eq 'FINISHED'}" oncomplete="mixpanel.track('Finalize session');" />
+									<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process="@this" update=":form:chambersGrid" disabled="#{chamberSession.status eq 'FINISHED'}" oncomplete="mixpanel.track('Finalize session');" />
 								</div>
 							</div>
 						</div>
@@ -195,12 +207,12 @@
 						<div class="container-fluid">
 							<div class="row">
 								<div class="col-md-4">
-									<p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); mixpanel.track('Edit session');" process=":form:chambersGrid" update=":editSessionForm" global="false">
+									<p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); mixpanel.track('Edit session');" process="@this" update=":editSessionForm" global="false">
 										<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
 									</p:commandButton>
 								</div>
 								<div class="col-md-4">
-									<p:commandButton title="#{msg['button.move']}" icon="fa fa-arrows-alt" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('moveSessionDialog').show(); mixpanel.track('Move session dialog');" process=":form:chambersGrid" update=":moveSessionForm" global="false" disabled="#{chamberSession.running}">
+									<p:commandButton title="#{msg['button.move']}" icon="fa fa-arrows-alt" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('moveSessionDialog').show(); mixpanel.track('Move session dialog');" process="@this" update=":moveSessionForm" global="false" disabled="#{chamberSession.running}">
 										<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
 									</p:commandButton>
 								</div>
@@ -287,11 +299,10 @@
 	</h:form>
 
 	<h:form>
-		<p:remoteCommand name="updateSessions" process="@this" update=":form:chambersGrid" global="false" />
 		<p:remoteCommand name="refreshSessions" oncomplete="onSessionTimeout(this.data)" actionListener="#{sessionController.invalidateSessionCache()}" process="@this" update=":form:chambersGrid :editSessionForm" global="false" />
 	</h:form>
 
-	<script type="text/javascript">
+	<script>
 		//<![CDATA[
 		var loggedUser;
 		var socket;
@@ -380,7 +391,7 @@
 		}
 
 		function onSessionTimeout(data) {
-			var sessionId = decodeURIComponent(data.match(/&sessionId=([^&]*)/)[1]);
+			var sessionId = decodeURIComponent(data.match(/&sessionId=([^&]*)/))[1];
 			var nextEvent = $('.session-status-' + sessionId);
 			var effect = 'pulse';
 
@@ -408,14 +419,6 @@
 			if (widget && session.currentProgress > 0) {
 				widget.setValue(session.currentProgress);
 			}
-		}
-
-		var dates = new Array(#{sessionController.scheduledSessionDates});
-
-		function sessionDates(date) {
-			var isoDate = date.getFullYear() + '-' + (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1) + '-' + (date.getDate() < 10 ? '0' : '') + date.getDate();
-			var styleClass = dates.indexOf(isoDate) != -1 ? 'session-day' : '';
-			return [ true,  styleClass]
 		}
 
 		function resize() {

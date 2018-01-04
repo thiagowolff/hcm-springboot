@@ -4,12 +4,12 @@ import org.omnifaces.util.Faces;
 import org.primefaces.context.RequestContext;
 import org.springframework.stereotype.Component;
 
-import javax.faces.view.ViewScoped;
+import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-@ViewScoped
+@SessionScoped
 @Component
 public class NavigationController implements Serializable {
 	public static final Map<String, String> pageLinkMapping = new HashMap<>();
@@ -20,6 +20,7 @@ public class NavigationController implements Serializable {
 		pageLinkMapping.put("/chambers", "/chambers.xhtml");
 		pageLinkMapping.put("/charts", "/charts.xhtml");
 		pageLinkMapping.put("/users", "/users.xhtml");
+		pageLinkMapping.put("/alarms", "/alarms.xhtml");
 	}
 
 	private String activePage = "/sessions.xhtml";

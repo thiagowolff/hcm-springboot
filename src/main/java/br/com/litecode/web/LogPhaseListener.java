@@ -12,19 +12,28 @@ public class LogPhaseListener implements PhaseListener {
 	private StopWatch stopwatch = new StopWatch();
 
 	public void afterPhase(PhaseEvent event) {
-		stopwatch.stop();
+		if (!log.isDebugEnabled()) {
+			return;
+		}
+
+		if (stopwatch.isRunning()) {
+			stopwatch.stop();
+		}
+
         if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			if (log.isDebugEnabled()) {
-				System.out.println(stopwatch.prettyPrint());
-			}
+			System.out.println(stopwatch.prettyPrint());
 			stopwatch = new StopWatch();
         }
-
-		log.debug("Executed Phase " + event.getPhaseId());
 	}
 
 	public void beforePhase(PhaseEvent event) {
-		stopwatch.start(event.getPhaseId().getName());
+		if (!log.isDebugEnabled()) {
+			return;
+		}
+
+		if (!stopwatch.isRunning()) {
+			stopwatch.start(event.getPhaseId().getName());
+		}
 	}
 
 	public PhaseId getPhaseId() {

@@ -31,6 +31,8 @@
 						<p:menuButton value="#{''}" styleClass="header-menu" icon="fa fa-cogs">
 							<p:menuitem value="#{msg['menu.disableMessages']}" icon="fa #{loggedUser.userSetting.notificationMessages ? 'fa-toggle-on' : 'fa-toggle-off'}" actionListener="#{userController.setUser(loggedUser)}" action="#{userController.toggleNotificationMessages}" update="@form" />
 							<p:menuitem value="#{msg['menu.disableSounds']}" icon="fa #{loggedUser.userSetting.notificationSounds ? 'fa-toggle-on' : 'fa-toggle-off'}" actionListener="#{userController.setUser(loggedUser)}" action="#{userController.toggleNotificationSounds}" update="@form" />
+							<p:separator/>
+							<p:menuitem value="#{msg['menu.alarms']}" url="/alarms" icon="fa fa-bell" onclick="return false" rendered="#{loginController.hasDevRights()}" />
 						</p:menuButton>
 					</li>
 					<li>
@@ -63,7 +65,7 @@
 			<p:remoteCommand name="updateNavigation" process="@this" actionListener="#{navigationController.updateNavigation()}" update=":content"/>
 
 			<script>
-				$(document).ready(function() {
+				$().ready(function() {
 					$('.top-menu button, a.ui-menuitem-link').click(function(event) {
 						event.preventDefault();
 
@@ -75,12 +77,20 @@
 
 						history.pushState(null, null, currentPage);
 						updateNavigation([{name: 'activePage', value: currentPage}]);
+
+						if (currentPage === '/') {
+							refreshSessions();
+						}
 					})
 
 					window.addEventListener('popstate', function(e) {
 						var url = location.href;
 						url = url.substring(url.lastIndexOf('/'), url.length)
 						updateNavigation([{name: 'activePage', value: url}]);
+
+						if (url === '/') {
+							refreshSessions();
+						}
 					});
 				});
 			</script>

@@ -31,7 +31,7 @@ public class AlarmController implements Serializable {
 
 	public Iterable<Alarm> getAlarms() {
 		if (alarms == null) {
-			alarms = alarmRepository.findActiveAlarms();
+			alarms = alarmRepository.findAll();
 		}
 		return alarms;
 	}

@@ -25,6 +25,7 @@ public class Alarm implements Serializable {
 	private boolean active;
 
 	public Alarm() {
+		active = true;
 	}
 
 	@Override

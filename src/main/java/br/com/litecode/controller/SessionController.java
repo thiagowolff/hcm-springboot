@@ -29,6 +29,10 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
@@ -48,6 +52,7 @@ import java.util.stream.Collectors;
 @Component
 @CacheConfig(cacheNames = "session")
 @Slf4j
+@RequestMapping(path = "/sessions")
 public class SessionController implements Serializable {
 	@Autowired
 	private SessionRepository sessionRepository;
@@ -95,6 +100,11 @@ public class SessionController implements Serializable {
 	@Cacheable(key = "{ #chamberId, #sessionDate }", sync = true)
 	public List<Session> getSessions(Integer chamberId, LocalDate sessionDate) {
 		return new CopyOnWriteArrayList(sessionRepository.findSessionsByChamberAndDate(chamberId, sessionDate));
+	}
+
+	@GetMapping("/{chamberId}/{sessionDate}")
+	public @ResponseBody List<Session> getSessions(@PathVariable Integer chamberId, @PathVariable String sessionDate) {
+		return getSessions(chamberId, LocalDate.parse(sessionDate));
 	}
 
 	@Transactional
@@ -331,6 +341,7 @@ public class SessionController implements Serializable {
 			session = new Session();
 			patients = new ArrayList<>();
 			sessionDate = LocalDate.now();
+			sessionTime = LocalTime.parse("09:30");
 		}
 
 		public static SessionData of(Chamber chamber, LocalDate sessionDate, LocalTime sessionTime, Patient... patients) {
