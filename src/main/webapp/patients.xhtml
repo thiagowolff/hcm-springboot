@@ -37,12 +37,12 @@
 					</f:facet>
 					<h:outputText value="#{patient.healthInsurance.name}" />
 				</p:column>
-				<p:column headerText="#{msg['label.numberOfSessions']}" width="100" priority="2">
-					<h:outputText value="#{patientStats.completedSessions + patientStats.absentSessions}" />
-				</p:column>
 				<p:column headerText="#{msg['label.birthDate']}" sortBy="#{patient.birthDate}" width="160" priority="3">
 					<h:outputText value="#{patient.birthDate}" converter="localDateTimeConverter" />
 					<h:outputText value=" (#{patient.age} #{msg['label.years']})" rendered="#{not empty patient.birthDate}" />
+				</p:column>
+				<p:column headerText="#{msg['label.numberOfSessions']}" width="100" priority="2">
+					<h:outputText value="#{patientStats.completedSessions + patientStats.absentSessions}" />
 				</p:column>
 				<p:column headerText="#{msg['label.numberOfCompletedSessions']}" width="100" priority="1">
 					<h:outputText value="#{patientStats.completedSessions eq null ? 0 :patientStats.completedSessions}" />
@@ -72,42 +72,48 @@
 		<p:dialog header="#{patient.patientId eq null ? msg['title.newPatient'] : msg['title.editPatient']}" widgetVar="patientDialog" fitViewport="true" resizable="false" showEffect="fade" modal="true">
 			<p:messages id="dialogMessages" autoUpdate="true" />
 
-			<p:panelGrid id="patientGrid" columns="2">
+			<p:panelGrid id="patientGrid" columns="3">
 				<p:outputLabel value="#{msg['label.name']}" for="patientName" />
 				<p:inputText id="patientName" value="#{patient.name}" required="true" maxlength="150" size="50" />
+				<p:message for="patientName" display="text" />
 
 				<p:outputLabel value="#{msg['label.patientRecord']}" sortBy="#{patient.patientRecord}" for="patientRecord" />
-				<p:inputText id="patientRecord" value="#{patient.patientRecord}" required="true" maxlength="30" size="15">
+				<p:inputText id="patientRecord" value="#{patient.patientRecord}" required="true" maxlength="30" size="15" validatorMessage="#{msg['error.patientRecord']}">
 					<f:validateRegex pattern="[0-9]{4,20}" />
 				</p:inputText>
+				<p:message for="patientRecord" display="text" />
 
 				<p:outputLabel value="#{msg['label.healthInsurance']}" for="healthInsurance" />
-
 				<p:selectOneMenu id="healthInsurance" value="#{patient.healthInsurance}" required="true" converter="omnifaces.SelectItemsConverter">
 					<f:selectItem itemValue="" itemLabel=""/>
 					<f:selectItems value="#{healthInsuranceController.healthInsurances}" var="healthInsurance" itemValue="#{healthInsurance}" itemLabel="#{healthInsurance.name}"/>
 				</p:selectOneMenu>
+				<p:message for="healthInsurance" display="text" />
 
 				<p:outputLabel value="#{msg['label.birthDate']}" for="patientBirthDate" />
 				<p:calendar id="patientBirthDate" value="#{patient.birthDate}" pattern="dd/MM/yyyy" mask="true" yearRange="c-100:c+15" size="15" showOn="button" navigator="true" converter="localDateTimeConverter" required="true" />
+				<p:message for="patientBirthDate" display="text" />
 
 				<p:outputLabel value="#{msg['label.folderNumber']}" for="folderNumber" />
 				<p:inputText id="folderNumber" value="#{patient.folderNumber}" maxlength="30" size="15" />
+				<div></div>
 
 				<p:outputLabel value="#{msg['label.email']}" for="patientEmail" />
 				<p:inputText id="patientEmail" value="#{patient.email}" maxlength="75" size="50" />
+				<div></div>
 
 				<p:outputLabel value="#{msg['label.phone']}" for="patientPhone" />
-				<p:inputMask id="patientPhone" value="#{patient.phoneNumber}" mask="(99) ?999999999" maxlength="15" size="15" />
+				<p:inputMask id="patientPhone" value="#{patient.phoneNumber}" mask="(99) ?9999999999" maxlength="15" size="15" />
+				<div></div>
 			</p:panelGrid>
 
 			<p:separator />
 			<p:commandButton value="#{msg['button.cancel']}" type="button" onclick="PF('patientDialog').hide()" styleClass="btn-danger pull-right" />
-			<p:commandButton value="#{msg['button.save']}" action="#{patientController.savePatient}" process="@form" update=":patientsForm:patientsTable, :patientsForm:messages" oncomplete="if (!args.validationFailed) { PF('patientDialog').hide(); PF('patientsTable').clearFilters(); }" validateClient="true" styleClass="btn-primary pull-right"/>
+			<p:commandButton value="#{msg['button.save']}" action="#{patientController.savePatient}" process="@form" update=":patientsForm:patientsTable, :patientsForm:messages, patientGrid" oncomplete="if (!args.validationFailed) { PF('patientDialog').hide(); PF('patientsTable').clearFilters(); }" validateClient="true" styleClass="btn-primary pull-right"/>
 		</p:dialog>
 	</h:form>
 
-	<lc:confirmDeleteDialog entity="Patient" deleteAction="#{patientController.deletePatient()}" update=":patientsForm:messages, :patientsForm:patientsTable" oncomplete="PF('patientsTable').clearFilters();" />
+	<lc:confirmDeleteDialog entity="Patient" deleteAction="#{patientController.deletePatient()}" update=":patientsForm:messages, :patientsForm:patientsTable, :patientInputForm:patientGrid" oncomplete="PF('patientsTable').clearFilters();" />
 
 	<h:form id="healthInsuranceForm">
 		<p:dialog header="#{msg['title.manageHealthInsurance']}" widgetVar="healthInsuranceDialog" fitViewport="true" resizable="false" showEffect="fade" modal="true" width="40%">

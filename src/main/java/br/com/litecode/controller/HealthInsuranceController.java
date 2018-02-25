@@ -34,7 +34,7 @@ public class HealthInsuranceController implements Serializable {
 
 	public Iterable<HealthInsurance> getHealthInsurances() {
 		if (healthInsurances == null) {
-			healthInsurances = healthInsuranceRepository.findAll();
+			healthInsurances = healthInsuranceRepository.findAllByOrderByNameAsc();
 		}
 		return healthInsurances;
 	}

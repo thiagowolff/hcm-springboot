@@ -266,6 +266,10 @@ button:not([disabled]).ui-button-icon-only span.ui-icon {
 	&.fa-stop { color: @red-700 !important; }
 }
 
+.ui-menuitem-icon {
+	&.fa-toggle-on { color: @green-500 !important; }
+}
+
 th .ui-button-icon-only {
 	right: 0px;
 	position: absolute;
@@ -309,7 +313,20 @@ th .ui-button-icon-only {
 	&-remove_mask { .icon(@icon-info, 36px, @colorO2OffStatus, @colorO2OffStatus); }
 	&-shutdown { .icon(@icon-turn-off, 36px, @colorShuttingDownStatus, @colorShuttingDownStatus); }
 	&-completion { .icon(@icon-done, 36px, @colorFinishedStatus, @colorFinishedStatus); }
-	&-info { .icon(@icon-info, 36px, #ffffff, #ffffff); }
+	&-info { .icon(@icon-info, 36px, #ffffff, #ffffff);	}
+}
+
+.ui-growl-info .ui-growl-item {
+	background-color: @red-600 !important;
+	height: 100px;
+	.ui-growl-message {
+		p {
+			font-size: 12px;
+		}
+		.ui-growl-title {
+			font-size: 14px;
+		}
+	}
 }
 
 .ui-progressbar {

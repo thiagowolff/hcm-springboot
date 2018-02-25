@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
 @Service
@@ -29,29 +31,36 @@ public class AlarmService {
 	@Autowired
 	private TaskScheduler taskScheduler;
 
-	List<ScheduledFuture> scheduledAlarms;
+	Map<Integer, ScheduledFuture> scheduledAlarms;
 
 	@PostConstruct
 	private void init() {
-		scheduledAlarms = new ArrayList<>();
+		scheduledAlarms = new HashMap<>();
 		initializeAlarms();
 	}
 
-	public void initializeAlarms() {
-		List<Alarm> alarms = alarmRepository.findActiveAlarms();
+	public void initializeAlarm(Alarm alarm) {
+		cancelAlarm(alarm);
 
-		cancelAlarms();
+		Trigger trigger = new CronTrigger(alarm.getCronExpression());
+		Runnable task = () -> pushService.publish(PushChannel.NOTIFY,  new NotificationMessage(null, null, alarm.getName(), alarm.getMessage(), null), null);
+		scheduledAlarms.put(alarm.getAlarmId(), taskScheduler.schedule(task, trigger));
 
-		for (Alarm alarm : alarms) {
-			Trigger trigger = new CronTrigger(alarm.getCronExpression());
-			Runnable task = () -> pushService.publish(PushChannel.NOTIFY,  new NotificationMessage(null, null, alarm.getName(), alarm.getMessage(), null), null);
-			scheduledAlarms.add(taskScheduler.schedule(task, trigger));
+		log.info("Alarm {} initialized.", alarm);
+	}
 
-			log.info("Alarm {} initialized.", alarm);
+	public void cancelAlarm(Alarm alarm) {
+		ScheduledFuture scheduledAlarm = scheduledAlarms.get(alarm.getAlarmId());
+		if (scheduledAlarm != null) {
+			scheduledAlarm.cancel(true);
 		}
 	}
 
-	private void cancelAlarms() {
-		scheduledAlarms.forEach(sf -> sf.cancel(true));
+	private void initializeAlarms() {
+		List<Alarm> alarms = alarmRepository.findActiveAlarms();
+
+		for (Alarm alarm : alarms) {
+			initializeAlarm(alarm);
+		}
 	}
 }

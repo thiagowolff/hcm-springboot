@@ -2,6 +2,7 @@ package br.com.litecode.controller;
 
 import br.com.litecode.domain.model.Alarm;
 import br.com.litecode.domain.repository.AlarmRepository;
+import br.com.litecode.service.AlarmService;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,9 @@ import java.io.Serializable;
 public class AlarmController implements Serializable {
 	@Autowired
 	private AlarmRepository alarmRepository;
+
+	@Autowired
+	private AlarmService alarmService;
 
 	@Getter
 	@Setter
@@ -38,6 +42,12 @@ public class AlarmController implements Serializable {
 	
 	public void saveAlarm() {
 		alarmRepository.save(alarm);
+		if (alarm.isActive()) {
+			alarmService.initializeAlarm(alarm);
+		} else {
+			alarmService.cancelAlarm(alarm);
+		}
+
 		alarms = null;
 	}
 	
