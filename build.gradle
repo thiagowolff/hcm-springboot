@@ -150,11 +150,11 @@ task deleteCss {
     }
 }
 
-task deploy(dependsOn: "bootRepackage") {
+task deploy(dependsOn: "build") {
     doLast {
         ssh.run {
             session(remotes.remoteServer) {
-                println("Backing up previous release...")
+                println("[1/5] Backing up previous release")
                 def today = new Date().format('yyyy.MM.dd.HH.mm')
 
                 try {
@@ -163,16 +163,17 @@ task deploy(dependsOn: "bootRepackage") {
                     println "Unable to backup previous release"
                 }
 
-                println("Uploading JAR...")
+                println("[2/5] Uploading JAR")
                 put from: "build/libs/hcm.jar", into: "/opt/hcm/hcm.jar"
 
-                println("Stopping application...")
+                println("[3/5] Stopping application")
                 execute "systemctl daemon-reload"
                 execute "service hcm stop"
 
-                println("Initiating application...")
+                println("[4/5] Initiating application")
                 execute "chmod +x /opt/hcm/hcm.jar"
                 execute "/opt/hcm/hcmStart.sh"
+                println("[4/5] Done!")
             }
         }
     }

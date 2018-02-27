@@ -12,9 +12,9 @@ insert into chamber_event (chamber_id, timeout, event_type) values (1, 80, 'WEAR
 insert into chamber_event (chamber_id, timeout, event_type) values (1, 90, 'SHUTDOWN');
 insert into chamber_event (chamber_id, timeout, event_type) values (1, 100, 'COMPLETION');
 
-insert into patient (patient_id, name, patient_record, active) values (1, 'Patient X', 'X001', 1);
-insert into patient (patient_id, name, patient_record, active) values (2, 'Patient Y', 'Y002', 1);
-insert into patient (patient_id, name, patient_record, active) values (3, 'Patient Z', 'Z003', 1);
+insert into patient (patient_id, name, patient_record, birth_date, gender, active) values (1, 'Patient X', 'X001', date '1980-01-01', 'M', 1);
+insert into patient (patient_id, name, patient_record, birth_date, gender, active) values (2, 'Patient Y', 'Y002', date '1990-01-01', 'M', 1);
+insert into patient (patient_id, name, patient_record, birth_date, gender, active) values (3, 'Patient Z', 'Z003', date '2000-01-01', 'M', 1);
 
 insert into session (session_id, chamber_id, scheduled_time, start_time, end_time, status, execution_metadata, created_on, created_by) values (1, 1, timestamp '2017-01-01 10:00:00', time '10:00:00', time '10:01:10', 'CREATED', null, now(), 1);
 

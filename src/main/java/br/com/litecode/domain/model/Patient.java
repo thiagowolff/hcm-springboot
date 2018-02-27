@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -19,6 +20,8 @@ import static br.com.litecode.util.MessageUtil.getMessage;
 @Getter
 @Setter
 public class Patient {
+	private enum Gender { M, F };
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer patientId;
@@ -29,8 +32,13 @@ public class Patient {
 	private String email;
 	private String phoneNumber;
 	private LocalDate birthDate;
-	private LocalDateTime creationDate;
 	private boolean active;
+
+	@Embedded
+	private AuditLog auditLog;
+
+	@Enumerated(EnumType.STRING)
+	private Gender gender;
 
 	@ManyToOne
 	@JoinColumn(name = "health_insurance_id")
@@ -41,7 +49,6 @@ public class Patient {
 	private Set<PatientSession> patientSessions;
 
 	public Patient() {
-		creationDate = LocalDateTime.now();
 		patientSessions = new TreeSet<>();
 		active = true;
 		name = "";
@@ -63,6 +70,17 @@ public class Patient {
 			return null;
 		}
 		return Period.between(birthDate, LocalDate.now()).getYears();
+	}
+
+	public void audit(User user) {
+		auditLog = new AuditLog();
+		if (patientId == null) {
+			auditLog.setCreatedDate(Instant.now());
+			auditLog.setCreatedBy(user);
+		} else {
+			auditLog.setModifiedDate(Instant.now());
+			auditLog.setModifiedBy(user);
+		}
 	}
 
 	@Override

@@ -21,7 +21,7 @@ import java.util.TreeSet;
 @Setter
 public class Session implements Comparable<Session>, Serializable {
 	public enum SessionStatus { CREATED, COMPRESSING, O2_ON, O2_OFF, SHUTTING_DOWN, FINISHED }
-	public enum TimePeriod { MORNING, AFTERNOON, NIGHT }
+	private enum TimePeriod { MORNING, AFTERNOON, NIGHT }
 
 	private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
 

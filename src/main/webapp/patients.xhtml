@@ -12,7 +12,7 @@
 
 		<div class="content-wrapper">
 			<p:dataTable id="patientsTable" widgetVar="patientsTable" value="#{patientController.patients}" var="patient" paginator="true" rows="10" paginatorAlwaysVisible="false" filteredValue="#{patientController.filteredPatients}"
-			 currentPageReportTemplate="({startRecord} de {totalRecords})" sortBy="#{patient.creationDate}" sortOrder="descending"
+			 currentPageReportTemplate="({startRecord} de {totalRecords})" sortBy="#{patient.auditLog.createdDate}" sortOrder="descending"
 			 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="10,25,100,500" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
 
 				<f:facet name="header">
@@ -41,6 +41,9 @@
 					<h:outputText value="#{patient.birthDate}" converter="localDateTimeConverter" />
 					<h:outputText value=" (#{patient.age} #{msg['label.years']})" rendered="#{not empty patient.birthDate}" />
 				</p:column>
+				<p:column headerText="#{msg['label.gender']}" width="50" priority="3">
+					<h:outputText value="#{patient.gender}" />
+				</p:column>
 				<p:column headerText="#{msg['label.numberOfSessions']}" width="100" priority="2">
 					<h:outputText value="#{patientStats.completedSessions + patientStats.absentSessions}" />
 				</p:column>
@@ -54,8 +57,8 @@
 					<h:outputText value="#{patient.email}" /><br/>
 					<h:outputText value="#{patient.phoneNumber}" />
 				</p:column>
-				<p:column headerText="#{msg['label.creationDate']}" width="120" sortBy="#{patient.creationDate}" priority="4">
-					<h:outputText value="#{patient.creationDate}" converter="localDateTimeConverter" />
+				<p:column headerText="#{msg['label.creationDate']}" width="120" sortBy="#{patient.auditLog.createdDate}" priority="4">
+					<h:outputText value="#{patient.auditLog.createdDate}" converter="localDateTimeConverter" />
 				</p:column>
 				<p:column headerText="#{msg['label.action']}" width="100" style="padding: 1px" priority="3">
 					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" update=":patientInputForm" oncomplete="PF('patientDialog').show();" icon="fa fa-pencil" title="#{msg['button.edit']}" global="false">
@@ -93,6 +96,13 @@
 				<p:outputLabel value="#{msg['label.birthDate']}" for="patientBirthDate" />
 				<p:calendar id="patientBirthDate" value="#{patient.birthDate}" pattern="dd/MM/yyyy" mask="true" yearRange="c-100:c+15" size="15" showOn="button" navigator="true" converter="localDateTimeConverter" required="true" />
 				<p:message for="patientBirthDate" display="text" />
+
+				<p:outputLabel value="#{msg['label.gender']}" for="patientGender" />
+				<p:selectOneRadio id="patientGender" value="#{patient.gender}" required="true">
+					<f:selectItem itemLabel="M" itemValue="M" />
+					<f:selectItem itemLabel="F" itemValue="F" />
+				</p:selectOneRadio>
+				<p:message for="patientGender" display="text" />
 
 				<p:outputLabel value="#{msg['label.folderNumber']}" for="folderNumber" />
 				<p:inputText id="folderNumber" value="#{patient.folderNumber}" maxlength="30" size="15" />

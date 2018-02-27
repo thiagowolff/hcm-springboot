@@ -4,6 +4,7 @@ import br.com.litecode.domain.model.Patient;
 import br.com.litecode.domain.model.Patient.PatientStats;
 import br.com.litecode.domain.model.PatientSession;
 import br.com.litecode.domain.model.Session;
+import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.PatientRepository;
 import br.com.litecode.util.MessageUtil;
 import org.omnifaces.util.Faces;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.faces.view.ViewScoped;
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -70,18 +72,30 @@ public class PatientController implements Serializable {
 	
 	public void deletePatient() {
 		patient.setActive(false);
+		patient.audit(getLoggedUser());
 		patientRepository.save(patient);
 		refresh();
 	}
 
 	public void savePatient() {
 		try {
+			if (patient.getAge() != null && patient.getAge() < 10) {
+				Faces.validationFailed();
+				Messages.addGlobalError(MessageUtil.getMessage("error.patientInvalid"));
+				return;
+			}
+
+			patient.audit(getLoggedUser());
 			patientRepository.save(patient);
 		} catch (DataIntegrityViolationException e) {
 			Faces.validationFailed();
 			Messages.addGlobalError(MessageUtil.getMessage("error.patientRecord"));
 		}
 		refresh();
+	}
+
+	private User getLoggedUser() {
+		return Faces.getSessionAttribute("loggedUser");
 	}
 
 	public Patient getPatient() {
