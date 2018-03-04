@@ -58,7 +58,8 @@
 					<h:outputText value="#{patient.phoneNumber}" />
 				</p:column>
 				<p:column headerText="#{msg['label.creationDate']}" width="120" sortBy="#{patient.auditLog.createdDate}" priority="4">
-					<h:outputText value="#{patient.auditLog.createdDate}" converter="localDateTimeConverter" />
+					<h:outputText id="patientCreationDate" value="#{patient.auditLog.createdDate}" converter="localDateTimeConverter" />
+					<p:tooltip for="#{p:component('patientCreationDate')}" value="#{patient.auditLog}" position="bottom" escape="false" rendered="#{loginController.hasDevRights()}" />
 				</p:column>
 				<p:column headerText="#{msg['label.action']}" width="100" style="padding: 1px" priority="3">
 					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" update=":patientInputForm" oncomplete="PF('patientDialog').show();" icon="fa fa-pencil" title="#{msg['button.edit']}" global="false">

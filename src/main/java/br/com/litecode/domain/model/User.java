@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.Duration;
 import java.time.Instant;
 
 @Entity
@@ -40,6 +41,24 @@ public class User {
     	creationDate = Instant.now();
 		userSetting = new UserSetting();
     }
+
+    public String getLastAccessDuration() {
+		Duration duration = Duration.between(lastAccess, Instant.now());
+
+		long days = duration.toDays();
+		long hours = duration.minusDays(days).toHours();
+		long minutes = duration.minusDays(days).minusHours(hours).toMinutes();
+
+		String lastAccess = minutes + "m";
+		if (hours > 0) {
+			lastAccess = hours + "h " + lastAccess;
+			if (days > 0) {
+				lastAccess = days + "d " + lastAccess;
+			}
+		}
+
+		return lastAccess;
+	}
 
     public String getLastAccessLocationFormatted() {
 		if (lastAccessLocation == null) {

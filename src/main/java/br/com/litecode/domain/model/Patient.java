@@ -73,7 +73,10 @@ public class Patient {
 	}
 
 	public void audit(User user) {
-		auditLog = new AuditLog();
+		if (auditLog == null) {
+			auditLog = new AuditLog();
+		}
+
 		if (patientId == null) {
 			auditLog.setCreatedDate(Instant.now());
 			auditLog.setCreatedBy(user);

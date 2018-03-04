@@ -33,6 +33,7 @@
 						<f:attribute name="pattern" value="dd/MM/yyyy HH:mm:ss" />
 					</h:outputText>
 					<p:tooltip for="#{p:component('userLastAccess')}" value="#{user.lastAccessLocationFormatted}" position="bottom" escape="false" rendered="#{loginController.hasDevRights()}" />
+					<div>(#{user.lastAccessDuration})</div>
 				</p:column>
 				
 				<p:column headerText="#{msg['label.action']}" width="175" priority="4" styleClass="text-left">
