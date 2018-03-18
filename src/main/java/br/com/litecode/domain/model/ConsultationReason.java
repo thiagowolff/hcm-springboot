@@ -3,35 +3,37 @@ package br.com.litecode.domain.model;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
-import java.time.Instant;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 @Entity
 @Getter
 @Setter
-public class HealthInsurance {
+public class ConsultationReason {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer healthInsuranceId;
-	private String name;
+	private Integer consultationReasonId;
+	private String description;
 
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 
-		HealthInsurance that = (HealthInsurance) o;
+		ConsultationReason that = (ConsultationReason) o;
 
-		return healthInsuranceId.equals(that.healthInsuranceId);
+		return consultationReasonId.equals(that.consultationReasonId);
 	}
 
 	@Override
 	public int hashCode() {
-		return healthInsuranceId.hashCode();
+		return consultationReasonId.hashCode();
 	}
 
 	@Override
 	public String toString() {
-		return "[" + healthInsuranceId + "] " + name;
+		return description;
 	}
 }

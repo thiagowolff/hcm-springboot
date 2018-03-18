@@ -32,6 +32,8 @@ public class Patient {
 	private String email;
 	private String phoneNumber;
 	private LocalDate birthDate;
+	private LocalDate consultationDate;
+	private Boolean medicalIndication;
 	private boolean active;
 
 	@Embedded
@@ -43,6 +45,10 @@ public class Patient {
 	@ManyToOne
 	@JoinColumn(name = "health_insurance_id")
 	private HealthInsurance healthInsurance;
+
+	@ManyToOne
+	@JoinColumn(name = "consultation_reason_id")
+	private ConsultationReason consultationReason;
 
 	@OneToMany(mappedBy = "patient")
 	@JsonIgnore

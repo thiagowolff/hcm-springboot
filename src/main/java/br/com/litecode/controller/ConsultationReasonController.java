@@ -1,7 +1,7 @@
 package br.com.litecode.controller;
 
-import br.com.litecode.domain.model.HealthInsurance;
-import br.com.litecode.domain.repository.HealthInsuranceRepository;
+import br.com.litecode.domain.model.ConsultationReason;
+import br.com.litecode.domain.repository.ConsultationReasonRepository;
 import br.com.litecode.util.MessageUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,53 +16,53 @@ import java.io.Serializable;
 
 @ViewScoped
 @Component
-public class HealthInsuranceController implements Serializable {
+public class ConsultationReasonController implements Serializable {
 	@Autowired
-	private HealthInsuranceRepository healthInsuranceRepository;
+	private ConsultationReasonRepository consultationReasonRepository;
 
 	@Autowired
 	private PatientController patientController;
 
 	@Getter
 	@Setter
-	private String healthInsuranceName;
+	private String consultationReasonDescription;
 
-	private Iterable<HealthInsurance> healthInsurances;
+	private Iterable<ConsultationReason> consultationReasons;
 
-	public HealthInsuranceController() {
+	public ConsultationReasonController() {
 	}
 
-	public Iterable<HealthInsurance> getHealthInsurances() {
-		if (healthInsurances == null) {
-			healthInsurances = healthInsuranceRepository.findAllByOrderByNameAsc();
+	public Iterable<ConsultationReason> getConsultationReasons() {
+		if (consultationReasons == null) {
+			consultationReasons = consultationReasonRepository.findAllByOrderByDescriptionAsc();
 		}
-		return healthInsurances;
+		return consultationReasons;
 	}
 
-	public void deleteHealthInsurance(HealthInsurance healthInsurance) {
+	public void deleteConsultationReason(ConsultationReason healthInsurance) {
 		try {
-			healthInsuranceRepository.delete(healthInsurance);
+			consultationReasonRepository.delete(healthInsurance);
 			refresh();
 		} catch (DataIntegrityViolationException e) {
 			Messages.addGlobalError(MessageUtil.getMessage("error.healthInsuranceInUse"));
 		}
 	}
 
-	public void addHealthInsurance() {
-		HealthInsurance healthInsurance = new HealthInsurance();
-		healthInsurance.setName(healthInsuranceName);
-		healthInsuranceRepository.save(healthInsurance);
+	public void addConsultationReason() {
+		ConsultationReason healthInsurance = new ConsultationReason();
+		healthInsurance.setDescription(consultationReasonDescription);
+		consultationReasonRepository.save(healthInsurance);
 		refresh();
 	}
 
 	public void onRowEdit(RowEditEvent event) {
-		healthInsuranceRepository.save((HealthInsurance) event.getObject());
+		consultationReasonRepository.save((ConsultationReason) event.getObject());
 		refresh();
 	}
 
 	public void refresh() {
-		healthInsuranceName = null;
-		healthInsurances = null;
+		consultationReasonDescription = null;
+		consultationReasons = null;
 		patientController.refresh();
 	}
 }

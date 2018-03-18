@@ -26,11 +26,19 @@ public class ChartsController {
 	}
 
 	public String getSessionsPerHealthInsuranceModel() {
-		return loadChartData(chartsRepository::findSessionsPerHealthInsurance, "Câmara", "Sessōes");
+		return loadChartData(chartsRepository::findSessionsPerHealthInsurance, "Plano de saúde", "Sessōes");
 	}
 
-	public String getPresencesPerMonth() {
+	public String getPresencesPerMonthModel() {
 		return loadChartData(chartsRepository::findMonthlyPresences, "Mês", "Presenças");
+	}
+
+	public String getPatientsPerMedicalIndicationModel() {
+		return loadChartData(chartsRepository::findPatientsPerMedicalIndication, "Indicação médica", "Pacientes");
+	}
+
+	public String getPatientsPerConsultationReasonModel() {
+		return loadChartData(chartsRepository::findPatientsPerConsultationReason, "Motivo consulta", "Pacientes");
 	}
 
 	private String loadChartData(Supplier<List<Object[]>> dao, String... headers) {

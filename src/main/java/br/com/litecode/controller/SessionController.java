@@ -73,6 +73,7 @@ public class SessionController implements Serializable {
 	private SessionReportService sessionReportService;
 
 	private Cache sessionCache;
+	private Cache patientCache;
 
 	@Getter @Setter
 	private SessionData sessionData;
@@ -93,7 +94,9 @@ public class SessionController implements Serializable {
 		sessionData = new SessionData();
 		scheduledSessionDates = sessionRepository.findScheduledSessionDates();
 		sessionCache = cacheManager.getCache("session");
+		patientCache = cacheManager.getCache("patient");
 		sessionCache.clear();
+		patientCache.clear();
 	}
 
 	@Transactional(readOnly = true)
@@ -111,9 +114,11 @@ public class SessionController implements Serializable {
 	public void addSession() {
 		int sessionDuration = sessionData.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout();
 		LocalDateTime scheduledTime = sessionData.getSessionDate().atTime(sessionData.getSessionTime());
-		LocalDateTime endTime = scheduledTime.plusSeconds(sessionDuration);
+		LocalTime startTime = scheduledTime.toLocalTime();
+		LocalTime endTime = scheduledTime.plusSeconds(sessionDuration).toLocalTime();
 
-		boolean isScheduled = sessionRepository.isSessionScheduled(sessionData.getChamber().getChamberId(), scheduledTime, endTime);
+		List<Session> chamberSessions = sessionRepository.findSessionsByChamberAndDate(sessionData.getChamber().getChamberId(), scheduledTime.toLocalDate());
+		boolean isScheduled = chamberSessions.stream().anyMatch(session -> session.getStartTime().isBefore(startTime) && session.getEndTime().isAfter(startTime));
 		if (isScheduled) {
 			Messages.addGlobalError(MessageUtil.getMessage("error.sessionAlreadyCreatedForPeriod"));
 			return;
@@ -127,8 +132,8 @@ public class SessionController implements Serializable {
 		Session session = new Session();
 		session.setChamber(sessionData.getChamber());
 		session.setScheduledTime(scheduledTime);
-		session.setStartTime(session.getScheduledTime().toLocalTime());
-		session.setEndTime(endTime.toLocalTime());
+		session.setStartTime(startTime);
+		session.setEndTime(endTime);
 		session.setCreatedBy(getLoggedUser());
 		session.setCreatedOn(Instant.now());
 
@@ -297,6 +302,13 @@ public class SessionController implements Serializable {
 
 	public void invalidateSessionCache() {
 		evictSessionCacheByDate(sessionData.getSessionDate());
+
+		String sessionId = Faces.getRequestParameter("sessionId");
+
+		if (sessionId != null) {
+			patientCache.evict(Arrays.asList(Integer.valueOf(sessionId), sessionData.getSessionDate()));
+		}
+
 		sessionData.reset();
 	}
 

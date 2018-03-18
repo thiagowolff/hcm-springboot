@@ -44,6 +44,18 @@
 				<p:column headerText="#{msg['label.gender']}" width="50" priority="3">
 					<h:outputText value="#{patient.gender}" />
 				</p:column>
+				<p:column headerText="#{msg['label.medicalIndication']}" width="70" priority="3">
+					<h:outputText value="#{patient.medicalIndication ? msg['label.yes'] : msg['label.no']}" rendered="#{patient.medicalIndication ne null}" />
+				</p:column>
+				<p:column width="160" priority="3">
+					<f:facet name="header">
+						<h:outputText value="#{msg['label.consultationDateAndReason']}" />
+						<p:commandButton process="@this" update=":consultationReasonForm" actionListener="#{consultationReasonController.refresh()}" oncomplete="PF('consultationReasonDialog').show(); PF('consultationReasonTable').getPaginator().setPage(0);" icon="fa fa-pencil-square-o" title="#{msg['button.manage']}" global="false" />
+					</f:facet>
+					<h:outputText value="#{patient.consultationDate}" converter="localDateTimeConverter" />
+					<br />
+					<h:outputText value="#{patient.consultationReason}" />
+				</p:column>
 				<p:column headerText="#{msg['label.numberOfSessions']}" width="100" priority="2">
 					<h:outputText value="#{patientStats.completedSessions + patientStats.absentSessions}" />
 				</p:column>
@@ -105,6 +117,24 @@
 				</p:selectOneRadio>
 				<p:message for="patientGender" display="text" />
 
+				<p:outputLabel value="#{msg['label.consultationDate']}" for="patientConsultationDate" />
+				<p:calendar id="patientConsultationDate" value="#{patient.consultationDate}" pattern="dd/MM/yyyy" mask="true" yearRange="c-100:c+15" size="15" showOn="button" navigator="true" converter="localDateTimeConverter" required="true" />
+				<p:message for="patientConsultationDate" display="text" />
+
+				<p:outputLabel value="#{msg['label.consultationReason']}" for="consultationReason" />
+				<p:selectOneMenu id="consultationReason" value="#{patient.consultationReason}" required="true" converter="omnifaces.SelectItemsConverter">
+					<f:selectItem itemValue="" itemLabel=""/>
+					<f:selectItems value="#{consultationReasonController.consultationReasons}" var="consultationReason" itemValue="#{consultationReason}" itemLabel="#{consultationReason.description}"/>
+				</p:selectOneMenu>
+				<p:message for="consultationReason" display="text" />
+
+				<p:outputLabel value="#{msg['label.medicalIndication']}" for="patientGender" />
+				<p:selectOneRadio id="patientMedicalIndication" value="#{patient.medicalIndication}" required="true">
+					<f:selectItem itemLabel="#{msg['label.yes']}" itemValue="#{true}" />
+					<f:selectItem itemLabel="#{msg['label.no']}" itemValue="#{false}" />
+				</p:selectOneRadio>
+				<p:message for="patientMedicalIndication" display="text" />
+
 				<p:outputLabel value="#{msg['label.folderNumber']}" for="folderNumber" />
 				<p:inputText id="folderNumber" value="#{patient.folderNumber}" maxlength="30" size="15" />
 				<div></div>
@@ -148,12 +178,45 @@
 				<p:column headerText="#{msg['label.name']}" sortBy="#{healthInsurance.name}" styleClass="text-left">
 					<p:cellEditor>
 						<f:facet name="output"><h:outputText value="#{healthInsurance.name}" /></f:facet>
-						<f:facet name="input"><p:inputText id="modelInput" value="#{healthInsurance.name}" /></f:facet>
+						<f:facet name="input"><p:inputText value="#{healthInsurance.name}" /></f:facet>
 					</p:cellEditor>
 				</p:column>
 				<p:column headerText="#{msg['label.action']}" width="100">
 					<p:rowEditor />
 					<p:commandButton process="@this" actionListener="#{healthInsuranceController.deleteHealthInsurance(healthInsurance)}" update="healthInsuranceTable, :patientsForm:patientsTable, :healthInsuranceForm:healthInsuranceMessages" icon="fa fa-trash" title="#{msg['button.delete']}" />
+				</p:column>
+			</p:dataTable>
+		</p:dialog>
+	</h:form>
+
+	<h:form id="consultationReasonForm">
+		<p:dialog header="#{msg['title.manageConsultationReason']}" widgetVar="consultationReasonDialog" fitViewport="true" resizable="false" showEffect="fade" modal="true" width="40%">
+			<p:messages id="consultationReasonMessages" />
+
+			<p:panelGrid id="consultationReasonGrid" columns="3">
+				<p:outputLabel value="#{msg['label.consultationReason']}" for="consultationReasonDescription" />
+				<p:inputText id="consultationReasonDescription" value="#{consultationReasonController.consultationReasonDescription}" required="true" maxlength="100" size="40" />
+				<p:commandButton value="#{msg['button.add']}" actionListener="#{consultationReasonController.addConsultationReason}" process="@this, consultationReasonDescription" update="consultationReasonTable" validateClient="true" styleClass="btn-primary" />
+			</p:panelGrid>
+
+			<p:separator />
+
+			<p:dataTable id="consultationReasonTable" widgetVar="consultationReasonTable" value="#{consultationReasonController.consultationReasons}" var="consultationReason" editable="true" paginator="true" rows="8" paginatorAlwaysVisible="false" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
+				<p:ajax event="rowEdit" listener="#{consultationReasonController.onRowEdit}" update="consultationReasonTable, :patientsForm:patientsTable" oncomplete="PF('patientsTable').clearFilters();" />
+
+				<p:column headerText="#{msg['label.id']}" styleClass="small-column">
+					<h:outputText value="#{consultationReason.consultationReasonId}" />
+				</p:column>
+
+				<p:column headerText="#{msg['label.name']}" sortBy="#{consultationReason.description}" styleClass="text-left">
+					<p:cellEditor>
+						<f:facet name="output"><h:outputText value="#{consultationReason.description}" /></f:facet>
+						<f:facet name="input"><p:inputText value="#{consultationReason.description}" /></f:facet>
+					</p:cellEditor>
+				</p:column>
+				<p:column headerText="#{msg['label.action']}" width="100">
+					<p:rowEditor />
+					<p:commandButton process="@this" actionListener="#{consultationReasonController.deleteConsultationReason(consultationReason)}" update="consultationReasonTable, :patientsForm:patientsTable, :consultationReasonForm:consultationReasonMessages" icon="fa fa-trash" title="#{msg['button.delete']}" />
 				</p:column>
 			</p:dataTable>
 		</p:dialog>
