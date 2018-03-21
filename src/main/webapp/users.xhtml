@@ -55,7 +55,7 @@
 	<p:dialog header="#{msg['label.user']}" widgetVar="userDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true" fitViewport="true">
 		<h:form id="userForm">
 			<ui:param name="newUser" value="#{userController.user.userId eq null}" />
-			<p:messages id="userMessages" autoUpdate="true" />
+			<p:messages id="userMessages"><p:autoUpdate /></p:messages>
 			<p:panelGrid id="userGrid" columns="2" styleClass="dialog-content">
 				<p:outputLabel value="#{msg['label.name']}" for="fullName" />
 				<p:inputText id="fullName" value="#{userController.user.name}" maxlength="80" required="true" size="50" />
@@ -87,7 +87,7 @@
 
 	<h:form id="changePasswordForm">
    		<p:dialog header="#{msg['label.password']}" widgetVar="changePasswordDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
-   			<p:messages autoUpdate="true"/>
+			<p:messages><p:autoUpdate /></p:messages>
    			<p:panelGrid id="changePasswordGrid" columns="2" styleClass="dialog-content">
    				<p:outputLabel value="#{msg['label.password']}" for="newPassword" />
    				<p:password id="newPassword" value="#{userController.user.password}" required="true" match="matchNewPassword" requiredMessage="#{msg['error.passwordRequired']}" validatorMessage="#{msg['error.passwordMismatch']}" />

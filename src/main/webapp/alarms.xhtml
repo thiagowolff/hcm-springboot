@@ -39,7 +39,7 @@
 	<p:dialog header="#{msg['label.alarm']}" widgetVar="alarmDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true" fitViewport="true">
 		<h:form id="alarmForm">
 			<ui:param name="newAlarm" value="#{alarmController.alarm.alarmId eq null}" />
-			<p:messages id="alarmMessages" autoUpdate="true" />
+			<p:messages id="alarmMessages"><p:autoUpdate /></p:messages>
 			<p:panelGrid id="alarmGrid" columns="2" styleClass="dialog-content">
 				<p:outputLabel value="#{msg['label.name']}" for="name" />
 				<p:inputText id="name" value="#{alarmController.alarm.name}" maxlength="80" required="true" size="50" />

@@ -52,7 +52,6 @@ import java.util.stream.Collectors;
 @Component
 @CacheConfig(cacheNames = "session")
 @Slf4j
-@RequestMapping(path = "/sessions")
 public class SessionController implements Serializable {
 	@Autowired
 	private SessionRepository sessionRepository;
@@ -102,12 +101,7 @@ public class SessionController implements Serializable {
 	@Transactional(readOnly = true)
 	@Cacheable(key = "{ #chamberId, #sessionDate }", sync = true)
 	public List<Session> getSessions(Integer chamberId, LocalDate sessionDate) {
-		return new CopyOnWriteArrayList(sessionRepository.findSessionsByChamberAndDate(chamberId, sessionDate));
-	}
-
-	@GetMapping("/{chamberId}/{sessionDate}")
-	public @ResponseBody List<Session> getSessions(@PathVariable Integer chamberId, @PathVariable String sessionDate) {
-		return getSessions(chamberId, LocalDate.parse(sessionDate));
+		return sessionRepository.findSessionsByChamberAndDate(chamberId, sessionDate);
 	}
 
 	@Transactional
@@ -118,7 +112,7 @@ public class SessionController implements Serializable {
 		LocalTime endTime = scheduledTime.plusSeconds(sessionDuration).toLocalTime();
 
 		List<Session> chamberSessions = sessionRepository.findSessionsByChamberAndDate(sessionData.getChamber().getChamberId(), scheduledTime.toLocalDate());
-		boolean isScheduled = chamberSessions.stream().anyMatch(session -> session.getStartTime().isBefore(startTime) && session.getEndTime().isAfter(startTime));
+		boolean isScheduled = chamberSessions.stream().anyMatch(session -> !session.getStartTime().isAfter(startTime) && !session.getEndTime().isBefore(startTime));
 		if (isScheduled) {
 			Messages.addGlobalError(MessageUtil.getMessage("error.sessionAlreadyCreatedForPeriod"));
 			return;

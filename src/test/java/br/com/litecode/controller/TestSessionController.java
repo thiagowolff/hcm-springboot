@@ -105,6 +105,22 @@ public class TestSessionController extends BaseControllerTest {
 		assertThat(message.getDetail()).isEqualTo(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", sessionData.getChamber().getCapacity()));
 	}
 
+
+	@Test
+	public void addSessionExistingPeriod() {
+		SessionData sessionData = SessionData.of(chamber, LocalDate.now(), LocalTime.now(), patient);
+		sessionController.setSessionData(sessionData);
+		sessionController.addSession();
+		sessionController.addSession();
+
+		ArgumentCaptor<FacesMessage> facesMessageCaptor = ArgumentCaptor.forClass(FacesMessage.class);
+		verify(facesContext).addMessage(Mockito.nullable(String.class), facesMessageCaptor.capture());
+
+		FacesMessage message = facesMessageCaptor.getValue();
+		assertThat(message.getSeverity()).isEqualTo(FacesMessage.SEVERITY_ERROR);
+		assertThat(message.getDetail()).isEqualTo(MessageUtil.getMessage("error.sessionAlreadyCreatedForPeriod"));
+	}
+
 	@Test
 	public void deleteSession() {
 		Session session = sessionRepository.findOne(1);

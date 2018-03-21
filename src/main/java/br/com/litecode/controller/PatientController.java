@@ -85,6 +85,7 @@ public class PatientController implements Serializable {
 				return;
 			}
 
+			patient.setName(patient.getName().trim());
 			patient.audit(getLoggedUser());
 			patientRepository.save(patient);
 		} catch (DataIntegrityViolationException e) {

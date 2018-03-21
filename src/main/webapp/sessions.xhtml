@@ -41,7 +41,7 @@
 				</p:selectOneMenu>
 
 				<h:panelGroup styleClass="hidden-xs">
-					<p:calendar id="sessionTime" locale="pt" label="#{msg['label.time']}" value="#{sessionController.sessionData.sessionTime}" widgetVar="sessionTime" pattern="HH:mm" size="5" timeOnly="true" timeControlType="select" minHour="6" maxHour="22" stepMinute="10" converter="localDateTimeConverter" required="true" />
+					<p:calendar id="sessionTime" locale="pt" label="#{msg['label.time']}" value="#{sessionController.sessionData.sessionTime}" widgetVar="sessionTime" pattern="HH:mm" size="5" timeOnly="true" timeControlType="slider" minHour="6" maxHour="22" stepMinute="10" converter="localDateTimeConverter" required="true" />
 				</h:panelGroup>
 
 				<p:selectCheckboxMenu id="sessionPatients" widgetVar="sessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionData.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true"  styleClass="hidden-xs">
@@ -60,17 +60,20 @@
 			</p:panelGrid>
 
 			<p:dataGrid id="chambersGrid" var="chamber" value="#{chamberController.chambers}" columns="1" layout="grid">
-				<ui:param name="patientStats" value="#{patientController.getPatientStats(chamberSession, sessionController.sessionData.sessionDate)}" />
-				<p:dataTable id="sessionsTable" value="#{sessionController.getSessions(chamber.chamberId, sessionController.sessionData.sessionDate)}" var="chamberSession" rows="9" emptyMessage="#{msg['message.noSessionsFound']}" sortBy="#{chamberSession.timePeriod}">
+				<ui:param name="chamberSessions" value="#{sessionController.getSessions(chamber.chamberId, sessionController.sessionData.sessionDate)}" />
+
+				<p:dataTable value="#{chamberSessions}" var="chamberSession" rendered="#{empty chamberSessions}" emptyMessage="#{msg['message.noSessionsFound']}">
 					<f:facet name="header">
 						#{chamber.name}
 					</f:facet>
+				</p:dataTable>
 
-					<p:headerRow>
-						<p:column colspan="13">
-							#{lcf:enum(chamberSession.timePeriod)}
-						</p:column>
-					</p:headerRow>
+				<p:dataTable id="sessionsTable" value="#{chamberSessions}" var="chamberSession" rows="#{chamber.capacity}" rendered="#{not empty chamberSessions}">
+					<ui:param name="patientStats" value="#{patientController.getPatientStats(chamberSession, sessionController.sessionData.sessionDate)}" />
+
+					<f:facet name="header">
+						#{chamber.name}
+					</f:facet>
 
 					<p:column headerText="#{msg['label.id']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg" style="width: 3.2em;">
 						<h:outputText id="sessionId" value="#{chamberSession.sessionId}" />
@@ -105,9 +108,9 @@
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.attendance']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-xs" style="vertical-align: top; white-space: nowrap">
-						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
-							<div>
+					<p:column headerText="#{msg['label.attendance']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column patient-stats-#{chamberSession.sessionId} hidden-xs" style="vertical-align: top; white-space: nowrap">
+						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession" varStatus="status">
+							<div class="animate-#{status.index}">
 								#{patientStats[patientSession.patient.patientId].completedSessions}
 							</div>
 						</ui:repeat>
@@ -132,7 +135,7 @@
 						</h:outputText>
 					</p:column>
 
-					<p:column headerText="#{msg['label.startTime']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column">
+					<p:column headerText="#{msg['label.startTime']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-xs">
 						<h:outputText value="#{chamberSession.startTime}" style="color: #007d18;">
 							<f:converter converterId="localDateTimeConverter" />
 							<f:attribute name="pattern" value="HH:mm:ss" />
@@ -159,7 +162,19 @@
 						</div>
 					</p:column>
 
-					<p:column headerText="#{msg['label.endTime']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column">
+					<p:column headerText="#{msg['label.endTime']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-xs">
+						<h:outputText value="#{chamberSession.endTime}" style="color: #b14538;">
+							<f:converter converterId="localDateTimeConverter" />
+							<f:attribute name="pattern" value="HH:mm:ss" />
+						</h:outputText>
+					</p:column>
+
+					<p:column headerText="#{msg['label.startTime']}&lt;br/&gt;#{msg['label.endTime']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-sm hidden-md hidden-lg">
+						<h:outputText value="#{chamberSession.startTime}" style="color: #007d18;">
+							<f:converter converterId="localDateTimeConverter" />
+							<f:attribute name="pattern" value="HH:mm:ss" />
+						</h:outputText>
+						<br />
 						<h:outputText value="#{chamberSession.endTime}" style="color: #b14538;">
 							<f:converter converterId="localDateTimeConverter" />
 							<f:attribute name="pattern" value="HH:mm:ss" />
@@ -223,14 +238,15 @@
 						</div>
 					</p:column>
 				</p:dataTable>
-				<h:outputScript>if (typeof resize === 'function') resize();</h:outputScript>
 			</p:dataGrid>
 		</h:form>
 	</div>
 
 	<h:form id="editSessionForm">
 		<p:dialog header="#{msg['label.session']} #{sessionController.sessionData.session.sessionId}" widgetVar="sessionDialog" width="50%" resizable="false" showEffect="fade" hideEffect="fade" modal="true" dynamic="true">
-			<p:messages id="sessionMessages" autoUpdate="true" />
+			<p:messages id="sessionMessages">
+				<p:autoUpdate />
+			</p:messages>
 			<div class="row ui-fluid" style="padding-bottom: 10px;">
 				<div class="col-md-3 col-sm-6">
 					<p:selectCheckboxMenu id="newSessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionData.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true" style="width: 160px" panelStyle="width: 250px">
@@ -342,16 +358,16 @@
 				register([
 					{
 						route: '/topic/progress', callback: function (data) {
-						var sessionProgress = JSON.parse(data.body);
-						updateTimer(sessionProgress);
-					}
+							var sessionProgress = JSON.parse(data.body);
+							updateTimer(sessionProgress);
+						}
 					},
 					{
 						route: '/topic/notify', callback: function (data) {
-						var message = JSON.parse(data.body);
-						handleMessage(message);
-						refreshSessions([{name: "sessionId", value: message.sessionId}]);
-					}
+							var message = JSON.parse(data.body);
+							handleMessage(message);
+							refreshSessions([{name: "sessionId", value: message.sessionId}, {name: "eventType", value: message.eventType}]);
+						}
 					},
 					{
 						route: '/topic/refresh', callback: function (data) {
@@ -363,15 +379,7 @@
 				]);
 			}
 
-			setTimeout(function () {
-				resize();
-			}, 250);
-
 			mixpanel.track('Sessions page');
-		});
-
-		$(window).resize(function() {
-			resize();
 		});
 
 		function handleMessage(notificationMessage) {
@@ -391,14 +399,32 @@
 		}
 
 		function onSessionTimeout(data) {
-			var sessionId = decodeURIComponent(data.match(/&sessionId=([^&]*)/))[1];
-			var nextEvent = $('.session-status-' + sessionId);
-			var effect = 'pulse';
+			if (!data.match(/&sessionId=([0-9]*)/)) {
+				return;
+			}
 
-			$(nextEvent).addClass(effect);
+			var sessionId = data.match(/&sessionId=([0-9]*)/)[1];
+			var eventType = data.match(/&eventType=([a-z]*)/)[1];
+
+			var nextEvent = $('.session-status-' + sessionId);
+			var nextEventEffect = 'pulse';
+
+			$(nextEvent).addClass(nextEventEffect);
 			setTimeout(function () {
-				$(nextEvent).removeClass(effect);
+				$(nextEvent).removeClass(nextEventEffect);
 			}, 1500);
+
+			if (eventType == 'completion') {
+				var statsEffect = 'bounceIn';
+				var stats = $('.patient-stats-' + sessionId + " div");
+				$(stats).addClass(statsEffect);
+				$(stats).css('color', '#288ae2');
+
+				setTimeout(function () {
+					$(stats).removeClass(statsEffect);
+					$(stats).css('color', '#000000');
+				}, 2000);
+			}
 		}
 
 		function playSound(eventType) {
@@ -419,12 +445,6 @@
 			if (widget && session.currentProgress > 0) {
 				widget.setValue(session.currentProgress);
 			}
-		}
-
-		function resize() {
-			var numberOfColumns = 14;
-			var colspan = numberOfColumns - ($('#form\\:chambersGrid .ui-datatable-tablewrapper th[scope="col"]:hidden').length / 2);
-			$('.ui-rowgroup-header td, .ui-datatable-empty-message td').attr('colspan', colspan);
 		}
 		//]]>
 	</script>

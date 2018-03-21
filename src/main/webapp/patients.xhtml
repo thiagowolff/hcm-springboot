@@ -27,7 +27,7 @@
 				<p:column headerText="#{msg['label.name']}" sortBy="#{patient.name}" filterBy="#{patient.name}" filterStyle="display: none;" styleClass="text-left" priority="1">
 					<h:outputText value="#{patient.name}" />
 				</p:column>
-				<p:column headerText="#{msg['label.patientRecord']}" filterBy="#{patient.patientRecord}" filterStyle="display: none;" priority="1">
+				<p:column headerText="#{msg['label.patientRecord']}" sortBy="#{patient.patientRecord}" filterBy="#{patient.patientRecord}" filterStyle="display: none;" priority="1">
 					<h:outputText value="#{patient.patientRecord}" />
 				</p:column>
 				<p:column styleClass="text-left" priority="3">
@@ -86,7 +86,9 @@
 	<h:form id="patientInputForm">
 		<ui:param name="patient" value="#{patientController.patient}" />
 		<p:dialog header="#{patient.patientId eq null ? msg['title.newPatient'] : msg['title.editPatient']}" widgetVar="patientDialog" fitViewport="true" resizable="false" showEffect="fade" modal="true">
-			<p:messages id="dialogMessages" autoUpdate="true" />
+			<p:messages id="dialogMessages">
+				<p:autoUpdate />
+			</p:messages>
 
 			<p:panelGrid id="patientGrid" columns="3">
 				<p:outputLabel value="#{msg['label.name']}" for="patientName" />
