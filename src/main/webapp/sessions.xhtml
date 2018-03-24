@@ -48,12 +48,12 @@
 					<f:selectItems value="#{patientController.patients}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
 				</p:selectCheckboxMenu>
 
-				<p:commandButton id="addButton" value="#{msg['button.add']}" icon="fa fa-plus"  actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true" styleClass="btn-primary btn-sm hidden-xs" oncomplete="mixpanel.track('Add session');">
+				<p:commandButton id="addButton" value="#{msg['button.add']}" icon="fa fa-plus"  actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true" styleClass="btn-primary btn-sm hidden-xs" oncomplete="track('Add session');">
 					<p:resetInput target="@form" />
 				</p:commandButton>
 
 				<p:commandButton value="#{msg['button.duplicate']}" icon="fa fa-copy" process="@this" actionListener="#{sessionController.initializeDuplicateSessionDates()}" update=":duplicateSessionsForm" oncomplete="PF('duplicateSessionDialog').show()" styleClass="btn-primary btn-sm hidden-xs hidden-sm" />
-				<p:commandButton id="printSession" value="#{msg['button.print']}" icon="fa fa-print" process="@this" ajax="false" immediate="true" actionListener="#{sessionController.generateDailySessionsReport}" onclick="this.form.target = '_blank'; mixpanel.track('Print');" styleClass="btn-primary btn-sm hidden-xs hidden-sm" />
+				<p:commandButton id="printSession" value="#{msg['button.print']}" icon="fa fa-print" process="@this" ajax="false" immediate="true" actionListener="#{sessionController.generateDailySessionsReport}" onclick="this.form.target = '_blank'; track('Print');" styleClass="btn-primary btn-sm hidden-xs hidden-sm" />
 				<p:tooltip for="printSession" value="#{msg['message.dailySessionsReport']}" position="right" escape="false" />
 
 				<p:messages id="messages"/>
@@ -203,16 +203,16 @@
 						<div class="container-fluid">
 							<div class="row">
 								<div class="col-sm-6 col-md-3">
-									<p:commandButton title="#{msg['button.start']}" icon="fa fa-play" actionListener="#{sessionController.startSession(chamberSession)}" process="@this" update=":form:chambersGrid" global="false" disabled="#{chamberSession.running or chamberSession.status eq 'FINISHED'}" oncomplete="mixpanel.track('Start session');" />
+									<p:commandButton title="#{msg['button.start']}" icon="fa fa-play" actionListener="#{sessionController.startSession(chamberSession)}" process="@this" update=":form:chambersGrid" global="false" disabled="#{chamberSession.running or chamberSession.status eq 'FINISHED'}" oncomplete="track('Start session');" />
 								</div>
 								<div class="col-sm-6 col-md-3">
-									<p:commandButton title="#{msg['button.pause']}" icon="fa fa-pause" actionListener="#{sessionController.pauseSession(chamberSession)}" process="@this" update=":form:chambersGrid" global="false" disabled="#{not chamberSession.running}" oncomplete="mixpanel.track('Pause session');"/>
+									<p:commandButton title="#{msg['button.pause']}" icon="fa fa-pause" actionListener="#{sessionController.pauseSession(chamberSession)}" process="@this" update=":form:chambersGrid" global="false" disabled="#{not chamberSession.running}" oncomplete="track('Pause session');"/>
 								</div>
 								<div class="col-sm-6 col-md-3">
-									<p:commandButton title="#{msg['button.stop']}" icon="fa fa-stop" actionListener="#{sessionController.stopSession(chamberSession)}" process="@this" update=":form:chambersGrid" disabled="#{chamberSession.status eq 'CREATED'}" oncomplete="mixpanel.track('Reset session');"/>
+									<p:commandButton title="#{msg['button.stop']}" icon="fa fa-stop" actionListener="#{sessionController.stopSession(chamberSession)}" process="@this" update=":form:chambersGrid" disabled="#{chamberSession.status eq 'CREATED'}" oncomplete="track('Reset session');"/>
 								</div>
 								<div class="col-sm-6 col-md-3">
-									<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process="@this" update=":form:chambersGrid" disabled="#{chamberSession.status eq 'FINISHED'}" oncomplete="mixpanel.track('Finalize session');" />
+									<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process="@this" update=":form:chambersGrid" disabled="#{chamberSession.status eq 'FINISHED'}" oncomplete="track('Finalize session');" />
 								</div>
 							</div>
 						</div>
@@ -222,12 +222,12 @@
 						<div class="container-fluid">
 							<div class="row">
 								<div class="col-md-4">
-									<p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); mixpanel.track('Edit session');" process="@this" update=":editSessionForm" global="false">
+									<p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); track('Edit session');" process="@this" update=":editSessionForm" global="false">
 										<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
 									</p:commandButton>
 								</div>
 								<div class="col-md-4">
-									<p:commandButton title="#{msg['button.move']}" icon="fa fa-arrows-alt" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('moveSessionDialog').show(); mixpanel.track('Move session dialog');" process="@this" update=":moveSessionForm" global="false" disabled="#{chamberSession.running}">
+									<p:commandButton title="#{msg['button.move']}" icon="fa fa-arrows-alt" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('moveSessionDialog').show(); track('Move session dialog');" process="@this" update=":moveSessionForm" global="false" disabled="#{chamberSession.running}">
 										<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
 									</p:commandButton>
 								</div>
@@ -289,7 +289,7 @@
 					</p:selectOneMenu>
 				</div>
 				<div class="col-md-4">
-					<p:commandButton value="#{msg['button.move']}" process="@this, newSessionChamber" update=":form:chambersGrid" actionListener="#{sessionController.switchSessionChamber()}" oncomplete="PF('moveSessionDialog').hide(); mixpanel.track('Move session');" styleClass="btn-primary"/>
+					<p:commandButton value="#{msg['button.move']}" process="@this, newSessionChamber" update=":form:chambersGrid" actionListener="#{sessionController.switchSessionChamber()}" oncomplete="PF('moveSessionDialog').hide(); track('Move session');" styleClass="btn-primary"/>
 				</div>
 			</div>
 		</p:dialog>
@@ -298,7 +298,7 @@
 	<h:form>
 		<p:confirmDialog message="#{msg['confirmation.deleteSession']}" header="#{msg['title.deleteSession']}" severity="alert" widgetVar="confirmDeleteSessionDialog">
 			<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDeleteSessionDialog').hide()" styleClass="btn-primary pull-right"/>
-			<p:commandButton value="#{msg['button.delete']}" process="@this" update=":form:chambersGrid" oncomplete="PF('confirmDeleteSessionDialog').hide(); mixpanel.track('Delete session');" actionListener="#{sessionController.deleteSession(sessionController.sessionData.session)}" styleClass="btn-danger pull-right"/>
+			<p:commandButton value="#{msg['button.delete']}" process="@this" update=":form:chambersGrid" oncomplete="PF('confirmDeleteSessionDialog').hide(); track('Delete session');" actionListener="#{sessionController.deleteSession(sessionController.sessionData.session)}" styleClass="btn-danger pull-right"/>
 		</p:confirmDialog>
 	</h:form>
 
@@ -309,7 +309,7 @@
 				<p:calendar id="previousSessionsDate" value="#{sessionController.fromSessionsDate}" required="true" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" converter="localDateTimeConverter" beforeShowDay="sessionDates" />
 				<p:outputLabel value="#{msg['label.to']}"/>
 				<p:calendar id="newSessionsDate" value="#{sessionController.toSessionsDate}" required="true" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" converter="localDateTimeConverter" beforeShowDay="sessionDates" />
-				<p:commandButton value="#{msg['button.duplicate']}" process="@this, previousSessionsDate, newSessionsDate" update=":form:chambersGrid" actionListener="#{sessionController.duplicateSessions()}" oncomplete="PF('duplicateSessionDialog').hide(); mixpanel.track('Duplicate session');" styleClass="btn-primary"/>
+				<p:commandButton value="#{msg['button.duplicate']}" process="@this, previousSessionsDate, newSessionsDate" update=":form:chambersGrid" actionListener="#{sessionController.duplicateSessions()}" oncomplete="PF('duplicateSessionDialog').hide(); track('Duplicate session');" styleClass="btn-primary"/>
 			</p:panelGrid>
 		</p:dialog>
 	</h:form>
@@ -379,7 +379,7 @@
 				]);
 			}
 
-			mixpanel.track('Sessions page');
+			track('Sessions page');
 		});
 
 		function handleMessage(notificationMessage) {

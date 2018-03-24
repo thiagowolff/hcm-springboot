@@ -25,7 +25,7 @@ public class ConsultationReasonController implements Serializable {
 
 	@Getter
 	@Setter
-	private String consultationReasonDescription;
+	private String consultationReasonName;
 
 	private Iterable<ConsultationReason> consultationReasons;
 
@@ -34,7 +34,7 @@ public class ConsultationReasonController implements Serializable {
 
 	public Iterable<ConsultationReason> getConsultationReasons() {
 		if (consultationReasons == null) {
-			consultationReasons = consultationReasonRepository.findAllByOrderByDescriptionAsc();
+			consultationReasons = consultationReasonRepository.findAllByOrderByNameAsc();
 		}
 		return consultationReasons;
 	}
@@ -49,9 +49,9 @@ public class ConsultationReasonController implements Serializable {
 	}
 
 	public void addConsultationReason() {
-		ConsultationReason healthInsurance = new ConsultationReason();
-		healthInsurance.setDescription(consultationReasonDescription);
-		consultationReasonRepository.save(healthInsurance);
+		ConsultationReason consultationReason = new ConsultationReason();
+		consultationReason.setName(consultationReasonName);
+		consultationReasonRepository.save(consultationReason);
 		refresh();
 	}
 
@@ -61,7 +61,7 @@ public class ConsultationReasonController implements Serializable {
 	}
 
 	public void refresh() {
-		consultationReasonDescription = null;
+		consultationReasonName = null;
 		consultationReasons = null;
 		patientController.refresh();
 	}

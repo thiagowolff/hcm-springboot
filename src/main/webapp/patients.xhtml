@@ -126,7 +126,7 @@
 				<p:outputLabel value="#{msg['label.consultationReason']}" for="consultationReason" />
 				<p:selectOneMenu id="consultationReason" value="#{patient.consultationReason}" required="true" converter="omnifaces.SelectItemsConverter">
 					<f:selectItem itemValue="" itemLabel=""/>
-					<f:selectItems value="#{consultationReasonController.consultationReasons}" var="consultationReason" itemValue="#{consultationReason}" itemLabel="#{consultationReason.description}"/>
+					<f:selectItems value="#{consultationReasonController.consultationReasons}" var="consultationReason" itemValue="#{consultationReason}" itemLabel="#{consultationReason.name}"/>
 				</p:selectOneMenu>
 				<p:message for="consultationReason" display="text" />
 
@@ -196,9 +196,9 @@
 			<p:messages id="consultationReasonMessages" />
 
 			<p:panelGrid id="consultationReasonGrid" columns="3">
-				<p:outputLabel value="#{msg['label.consultationReason']}" for="consultationReasonDescription" />
-				<p:inputText id="consultationReasonDescription" value="#{consultationReasonController.consultationReasonDescription}" required="true" maxlength="100" size="40" />
-				<p:commandButton value="#{msg['button.add']}" actionListener="#{consultationReasonController.addConsultationReason}" process="@this, consultationReasonDescription" update="consultationReasonTable" validateClient="true" styleClass="btn-primary" />
+				<p:outputLabel value="#{msg['label.consultationReason']}" for="consultationReasonName" />
+				<p:inputText id="consultationReasonName" value="#{consultationReasonController.consultationReasonName}" required="true" maxlength="100" size="40" />
+				<p:commandButton value="#{msg['button.add']}" actionListener="#{consultationReasonController.addConsultationReason}" process="@this, consultationReasonName" update="consultationReasonTable" validateClient="true" styleClass="btn-primary" />
 			</p:panelGrid>
 
 			<p:separator />
@@ -210,10 +210,10 @@
 					<h:outputText value="#{consultationReason.consultationReasonId}" />
 				</p:column>
 
-				<p:column headerText="#{msg['label.name']}" sortBy="#{consultationReason.description}" styleClass="text-left">
+				<p:column headerText="#{msg['label.name']}" sortBy="#{consultationReason.name}" styleClass="text-left">
 					<p:cellEditor>
-						<f:facet name="output"><h:outputText value="#{consultationReason.description}" /></f:facet>
-						<f:facet name="input"><p:inputText value="#{consultationReason.description}" /></f:facet>
+						<f:facet name="output"><h:outputText value="#{consultationReason.name}" /></f:facet>
+						<f:facet name="input"><p:inputText value="#{consultationReason.name}" /></f:facet>
 					</p:cellEditor>
 				</p:column>
 				<p:column headerText="#{msg['label.action']}" width="100">
@@ -226,7 +226,7 @@
 
 	<script type="text/javascript">
        	$().ready(function() {
-			mixpanel.track('Patients page');
+			track('Patients page');
 		});
 	</script>
 </ui:composition>

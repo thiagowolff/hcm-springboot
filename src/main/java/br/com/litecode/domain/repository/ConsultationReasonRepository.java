@@ -6,5 +6,5 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface ConsultationReasonRepository extends CrudRepository<ConsultationReason, Integer> {
-	List<ConsultationReason> findAllByOrderByDescriptionAsc();
+	List<ConsultationReason> findAllByOrderByNameAsc();
 }

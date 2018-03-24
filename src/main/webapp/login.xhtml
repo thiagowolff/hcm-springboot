@@ -42,7 +42,7 @@
 						</div>
 						<div class="row">
 							<div class="login-input col-xs-#{isDev ? '3' : '12' }">
-								<p:commandButton id="loginButton" value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" onclick="mixpanel.track('Sign-in', { username: $('#username').val()});" style="width: 100%;" />
+								<p:commandButton id="loginButton" value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" onclick="track('Sign-in', { username: $('#username').val()});" style="width: 100%;" />
 							</div>
 							<div class="login-input login-button col-xs-3">
 								<p:commandButton value="USER" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}" styleClass="btn-success">
@@ -73,7 +73,7 @@
 		</div>
 		<script>
 			$().ready(function() {
-				mixpanel.track('Login page');
+				track('Login page');
 
 				var timeZone = new Date().getTimezoneOffset() / 60 * -1;
 				setClientTimeZone([{ name: 'clientTimeZone', value: timeZone }]);

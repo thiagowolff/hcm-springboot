@@ -15,7 +15,7 @@ public class ConsultationReason {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer consultationReasonId;
-	private String description;
+	private String name;
 
 	@Override
 	public boolean equals(Object o) {
@@ -34,6 +34,6 @@ public class ConsultationReason {
 
 	@Override
 	public String toString() {
-		return description;
+		return name;
 	}
 }

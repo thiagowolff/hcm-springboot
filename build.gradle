@@ -150,7 +150,7 @@ task deleteCss {
     }
 }
 
-task deploy(dependsOn: "build") {
+task deploy {
     doLast {
         ssh.run {
             session(remotes.remoteServer) {
@@ -187,6 +187,7 @@ compileJava {
 
 processResources.dependsOn "updateVersion"
 jar.dependsOn = [ "compileLess", "minifyCss" ]
+deploy.dependsOn = [ "build", "test" ]
 
 jar.into('META-INF/resources') {
     from('src/main/webapp')

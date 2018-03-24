@@ -23,6 +23,6 @@ public interface ChartsRepository extends Repository<Session, Serializable> {
 	@Query(value = "select case when medical_indication = 1 then 'Sim' else case when medical_indication = 0 then 'Não' else 'N/D' end end, count(*) from patient group by medical_indication", nativeQuery = true)
 	List<Object[]> findPatientsPerMedicalIndication();
 
-	@Query(value = "select ifnull(description, 'N/D'), count(*) from patient left join consultation_reason using (consultation_reason_id) group by consultation_reason_id", nativeQuery = true)
+	@Query(value = "select ifnull(cr.name, 'N/D'), count(*) from patient left join consultation_reason cr using (consultation_reason_id) group by consultation_reason_id", nativeQuery = true)
 	List<Object[]> findPatientsPerConsultationReason();
 }
