@@ -1,5 +1,6 @@
 package br.com.litecode.domain.model;
 
+import br.com.litecode.util.TextUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,6 +37,6 @@ public class PatientSession implements Comparable<PatientSession>, Serializable 
 
 	@Override
 	public int compareTo(PatientSession patientSession) {
-		return patient.getName().compareTo(patientSession.getPatient().getName());
+		return TextUtil.normalizeText(patient.getName()).compareTo(TextUtil.normalizeText(patientSession.getPatient().getName()));
 	}
 }

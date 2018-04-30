@@ -19,18 +19,20 @@
 						<p:button id="patientsMenuButton" pt:url="/patients" icon="fa fa-id-badge" styleClass="btn-flat" onclick="return false" />
 						<p:tooltip for="patientsMenuButton" value="#{msg['menu.patients']}" position="bottom"/>
 					</li>
+					<ui:fragment rendered="#{loginController.hasAdminRights()}">
 					<li>
 						<p:button id="chambersMenuButton" pt:url="/chambers" icon="fa fa-server" onclick="return false" rendered="#{loginController.hasAdminRights()}" />
 						<p:tooltip for="chambersMenuButton" value="#{msg['menu.chambers']}" position="bottom"/>
 					</li>
+					</ui:fragment>
 					<li>
 						<p:button id="statisticsMenuButton" pt:url="/charts" icon="fa fa-bar-chart" styleClass="btn-flat" onclick="return false" />
 						<p:tooltip for="statisticsMenuButton" value="#{msg['menu.statistics']}" position="bottom"/>
 					</li>
 					<li>
 						<p:menuButton value="#{''}" styleClass="header-menu" icon="fa fa-cogs">
-							<p:menuitem value="#{msg['menu.disableMessages']}" icon="fa #{loggedUser.userSetting.notificationMessages ? 'fa-toggle-on' : 'fa-toggle-off'}" actionListener="#{userController.setUser(loggedUser)}" action="#{userController.toggleNotificationMessages}" update="@form" />
-							<p:menuitem value="#{msg['menu.disableSounds']}" icon="fa #{loggedUser.userSetting.notificationSounds ? 'fa-toggle-on' : 'fa-toggle-off'}" actionListener="#{userController.setUser(loggedUser)}" action="#{userController.toggleNotificationSounds}" update="@form" />
+							<p:menuitem value="#{msg['menu.disableMessages']}" icon="fa #{loggedUser.userSettings.notificationMessages ? 'fa-toggle-on' : 'fa-toggle-off'}" actionListener="#{userController.setUser(loggedUser)}" action="#{userController.toggleNotificationMessages}" update="@form" />
+							<p:menuitem value="#{msg['menu.disableSounds']}" icon="fa #{loggedUser.userSettings.notificationSounds ? 'fa-toggle-on' : 'fa-toggle-off'}" actionListener="#{userController.setUser(loggedUser)}" action="#{userController.toggleNotificationSounds}" update="@form" />
 							<p:separator/>
 							<p:menuitem value="#{msg['menu.alarms']}" url="/alarms" icon="fa fa-bell" onclick="return false" rendered="#{loginController.hasDevRights()}" />
 						</p:menuButton>
@@ -76,7 +78,6 @@
 							return;
 						}
 
-
 						if (currentPage === '/users') {
 							refreshUsers();
 						}
@@ -84,9 +85,9 @@
 						history.pushState(null, null, currentPage);
 						updateNavigation([{name: 'activePage', value: currentPage}]);
 
-						if (currentPage === '/') {
-							refreshSessions();
-						}
+//						if (currentPage === '/') {
+//							refreshSessions();
+//						}
 					})
 
 					window.addEventListener('popstate', function(e) {

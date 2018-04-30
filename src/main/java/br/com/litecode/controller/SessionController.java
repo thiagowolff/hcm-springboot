@@ -29,10 +29,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
@@ -45,7 +41,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @SessionScoped
@@ -128,15 +123,15 @@ public class SessionController implements Serializable {
 		session.setScheduledTime(scheduledTime);
 		session.setStartTime(startTime);
 		session.setEndTime(endTime);
-		session.setCreatedBy(getLoggedUser());
+		session.setCreatedBy(User.getLoggedUser());
 		session.setCreatedOn(Instant.now());
 
 		sessionData.getPatients().forEach(session::addPatient);
 		sessionRepository.save(session);
 		invalidateSessionCache();
 
-		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name(), getLoggedUser().getUserSetting());
-		pushService.publish(PushChannel.NOTIFY, notificationMessage, getLoggedUser());
+		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name(), User.getLoggedUser().getUserSettings());
+		pushService.publish(PushChannel.NOTIFY, notificationMessage, User.getLoggedUser());
 	}
 
 	@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }")
@@ -198,8 +193,8 @@ public class SessionController implements Serializable {
 		sessionTimer.stopSession(session);
 		sessionRepository.delete(session);
 
-		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.DELETE_SESSION.name(), getLoggedUser().getUserSetting());
-		pushService.publish(PushChannel.NOTIFY,  notificationMessage, getLoggedUser());
+		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.DELETE_SESSION.name(), User.getLoggedUser() != null ? User.getLoggedUser().getUserSettings() : null);
+		pushService.publish(PushChannel.NOTIFY,  notificationMessage, User.getLoggedUser());
 	}
 
 	@PushRefresh
@@ -249,7 +244,7 @@ public class SessionController implements Serializable {
 			session.setScheduledTime(sessionTime);
 			session.setStartTime(sessionTime.toLocalTime());
 			session.setEndTime(sessionTime.plusSeconds(sessionDuration).toLocalTime());
-			session.setCreatedBy(getLoggedUser());
+			session.setCreatedBy(User.getLoggedUser());
 			session.setCreatedOn(Instant.now());
 			fromSession.getPatientSessions().forEach(ps -> session.addPatient(ps.getPatient()));
 			sessionRepository.save(session);
@@ -327,10 +322,6 @@ public class SessionController implements Serializable {
 	public String getScheduledSessionDates() {
 		Set<LocalDate> sessionDates = scheduledSessionDates.stream().map(LocalDateTime::toLocalDate).collect(Collectors.toSet());
 		return sessionDates.stream().map(date -> "'" + date + "'").collect(Collectors.joining(","));
-	}
-
-	private User getLoggedUser() {
-		return Faces.getSessionAttribute("loggedUser");
 	}
 
 	@Getter

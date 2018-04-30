@@ -12,8 +12,8 @@
 			drawChart('Sessões por câmara', '#{chartsController.sessionsPerChamberModel}', 'sessionsPerChamberChart', google.visualization.BarChart, { colors: ['#2f353e'], hAxis: { minValue: 0 }});
 			drawChart('Sessões por convênio', '#{chartsController.sessionsPerHealthInsuranceModel}', 'sessionsPerHealthInsuranceChart', google.visualization.PieChart, { legend: { position: 'right' }});
 			drawChart('Sessões por mês', '#{chartsController.monthlySessionsModel}', 'monthlySessionsChart', google.visualization.LineChart);
-			drawChart('Pacientes por indicação médica', '#{chartsController.patientsPerMedicalIndicationModel}', 'patientsPerMedicalIndicationChart', google.visualization.PieChart, { sliceVisibilityThreshold: 0.0, pieHole: 0.4, colors: ['#1e88e5', '#e53935', '#43a047'], legend: { position: 'right' } });
-			drawChart('Pacientes por motivos consulta', '#{chartsController.patientsPerConsultationReasonModel}', 'patientsPerConsultationReasonChart', google.visualization.ColumnChart, { colors: ['#546e7a'] });
+			drawChart('Pacientes por indicação médica', '#{chartsController.patientsPerMedicalIndicationModel}', 'patientsPerMedicalIndicationChart', google.visualization.PieChart, { sliceVisibilityThreshold: 0.0, pieHole: 0.4, colors: ['#e53935', '#3949ab', '#43a047'], legend: { position: 'right' } });
+			drawChart('Pacientes por motivos consulta', '#{chartsController.patientsPerConsultationReasonModel}', 'patientsPerConsultationReasonChart', google.visualization.ColumnChart, { colors: ['#00897b'] });
 		}
 
 		function drawChart(title, dataArray, elementId, chartType, additionalOptions) {

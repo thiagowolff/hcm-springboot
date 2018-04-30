@@ -44,7 +44,7 @@ public class ConsultationReasonController implements Serializable {
 			consultationReasonRepository.delete(healthInsurance);
 			refresh();
 		} catch (DataIntegrityViolationException e) {
-			Messages.addGlobalError(MessageUtil.getMessage("error.healthInsuranceInUse"));
+			Messages.addGlobalError(MessageUtil.getMessage("error.registerInUse"));
 		}
 	}
 

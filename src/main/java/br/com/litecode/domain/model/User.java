@@ -5,7 +5,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.Setter;
+import org.omnifaces.util.Faces;
 
+import javax.faces.context.FacesContext;
 import javax.persistence.*;
 import java.time.Duration;
 import java.time.Instant;
@@ -34,13 +36,20 @@ public class User {
 	private String timeZone;
 
 	@Embedded
-	private UserSetting userSetting;
+	private UserSettings userSettings;
 	
     public User() {
     	active = true;
     	creationDate = Instant.now();
-		userSetting = new UserSetting();
+		userSettings = new UserSettings();
     }
+
+	public static User getLoggedUser() {
+    	if (FacesContext.getCurrentInstance() == null) {
+    		return null;
+		}
+		return Faces.getSessionAttribute("loggedUser");
+	}
 
     public String getLastAccessDuration() {
 		Duration duration = Duration.between(lastAccess, Instant.now());

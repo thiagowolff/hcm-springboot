@@ -44,9 +44,11 @@
 					<p:calendar id="sessionTime" locale="pt" label="#{msg['label.time']}" value="#{sessionController.sessionData.sessionTime}" widgetVar="sessionTime" pattern="HH:mm" size="5" timeOnly="true" timeControlType="slider" minHour="6" maxHour="22" stepMinute="10" converter="localDateTimeConverter" required="true" />
 				</h:panelGroup>
 
-				<p:selectCheckboxMenu id="sessionPatients" widgetVar="sessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionData.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true"  styleClass="hidden-xs">
-					<f:selectItems value="#{patientController.patients}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
-				</p:selectCheckboxMenu>
+				<o:cache key="patientsCache">
+					<p:selectCheckboxMenu id="sessionPatients" widgetVar="sessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionData.patients}" dynamic="true" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true"  styleClass="hidden-xs">
+						<f:selectItems value="#{patientController.patients}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
+					</p:selectCheckboxMenu>
+				</o:cache>
 
 				<p:commandButton id="addButton" value="#{msg['button.add']}" icon="fa fa-plus"  actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true" styleClass="btn-primary btn-sm hidden-xs" oncomplete="track('Add session');">
 					<p:resetInput target="@form" />
@@ -316,6 +318,7 @@
 
 	<h:form>
 		<p:remoteCommand name="refreshSessions" oncomplete="onSessionTimeout(this.data)" actionListener="#{sessionController.invalidateSessionCache()}" process="@this" update=":form:chambersGrid :editSessionForm" global="false" />
+		<p:remoteCommand name="fetchUserSettings" oncomplete="getUserSettings(this.data)" actionListener="#{sessionController.invalidateSessionCache()}" process="@this" global="false" />
 	</h:form>
 
 	<script>
@@ -323,6 +326,7 @@
 		var loggedUser;
 		var socket;
 		var stompClient;
+
 
 		function initWebsocket() {
 			if (socket && stompClient) {
@@ -383,7 +387,7 @@
 		});
 
 		function handleMessage(notificationMessage) {
-			if (!notificationMessage.userSetting || notificationMessage.userSetting.notificationMessages) {
+			if (!notificationMessage.userSettings || notificationMessage.userSettings.notificationMessages) {
 				var facesMessage = {
 					summary: notificationMessage.messageSummary,
 					detail: notificationMessage.messageDetail,
@@ -393,7 +397,7 @@
 				PF('growl').show([facesMessage]);
 			}
 
-			if (notificationMessage.userSetting && notificationMessage.userSetting.notificationSounds) {
+			if (notificationMessage.userSettings && notificationMessage.userSettings.notificationSounds) {
 				playSound(notificationMessage.eventType);
 			}
 		}

@@ -8,6 +8,7 @@ import org.apache.shiro.util.ThreadContext;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.omnifaces.component.output.cache.CacheFactory;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -32,7 +33,7 @@ import static org.mockito.Mockito.when;
 @PowerMockRunnerDelegate(SpringRunner.class)
 @DataJpaTest
 @ComponentScan(basePackages = "br.com.litecode")
-@PrepareForTest({ FacesContext.class })
+@PrepareForTest({ FacesContext.class, CacheFactory.class })
 public abstract class BaseControllerTest {
 
     @Mock
@@ -63,5 +64,8 @@ public abstract class BaseControllerTest {
         sessionMap.put("loggedUser", loggedUser);
 
         when(facesContext.getExternalContext().getSessionMap()).thenReturn(sessionMap);
+
+        PowerMockito.mockStatic(CacheFactory.class);
+        when(CacheFactory.getCache(facesContext, "session")).thenReturn(null);
     }
 }

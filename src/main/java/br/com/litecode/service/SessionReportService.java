@@ -96,7 +96,6 @@ public class SessionReportService {
 				new TableCell("label.patientSessionPresent", Element.ALIGN_CENTER),
 				new TableCell("label.healthInsurance", Element.ALIGN_LEFT),
 				new TableCell("label.patientRecord", Element.ALIGN_CENTER),
-				new TableCell("label.folderNumber", Element.ALIGN_CENTER),
 				new TableCell("label.attendance", Element.ALIGN_CENTER)
 		};
 
@@ -142,7 +141,7 @@ public class SessionReportService {
 		TableCell[] patientHeaders = getPatientHeaders();
 
 		PdfPTable table = new PdfPTable(patientHeaders.length);
-		table.setWidths(new int[] { 3, 1, 1, 1, 1, 1 });
+		table.setWidths(new int[] { 3, 1, 1, 1, 1 });
 
 		for (TableCell patientHeader : patientHeaders) {
 			table.addCell(createCell(patientHeader));
@@ -154,7 +153,7 @@ public class SessionReportService {
 	private PdfPCell createPatientsTable(int rowIndex, Session session, LocalDate sessionDate) throws DocumentException {
 		TableCell[] patientHeaders = getPatientHeaders();
 		PdfPTable table = new PdfPTable(patientHeaders.length);
-		table.setWidths(new int[] { 3, 1, 1, 1, 1, 1 });
+		table.setWidths(new int[] { 3, 1, 1, 1, 1 });
 
 		Map<Integer, PatientStats> patientStats = patientRepository.findPatienStats(session.getSessionId(), sessionDate.plusDays(1).atStartOfDay()).stream().collect(Collectors.toMap(PatientStats::getPatientId, Function.identity()));
 
@@ -168,7 +167,6 @@ public class SessionReportService {
 			table.addCell(createCell(new TableCell(rowIndex, () -> patientSession.isAbsent() ? "" : "x", Element.ALIGN_CENTER)));
 			table.addCell(createCell(new TableCell(rowIndex, patientSession.getPatient().getHealthInsurance()::getName, Element.ALIGN_LEFT)));
 			table.addCell(createCell(new TableCell(rowIndex, patientSession.getPatient()::getPatientRecord, Element.ALIGN_CENTER)));
-			table.addCell(createCell(new TableCell(rowIndex, patientSession.getPatient()::getFolderNumber, Element.ALIGN_CENTER)));
 
 			int completedSessions = patientStats.get(patientSession.getPatient().getPatientId()).getCompletedSessions();
 			table.addCell(createCell(new TableCell(rowIndex, () -> String.valueOf(completedSessions), Element.ALIGN_CENTER)));

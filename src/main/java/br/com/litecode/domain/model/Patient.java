@@ -28,13 +28,13 @@ public class Patient {
 
 	private String name;
 	private String patientRecord;
-	private String folderNumber;
 	private String email;
 	private String phoneNumber;
 	private LocalDate birthDate;
 	private LocalDate consultationDate;
 	private Boolean medicalIndication;
 	private boolean active;
+	private String remarks;
 
 	@Embedded
 	private AuditLog auditLog;
@@ -49,6 +49,10 @@ public class Patient {
 	@ManyToOne
 	@JoinColumn(name = "consultation_reason_id")
 	private ConsultationReason consultationReason;
+
+	@ManyToOne
+	@JoinColumn(name = "physician_assistant_id")
+	private PhysicianAssistant physicianAssistant;
 
 	@OneToMany(mappedBy = "patient")
 	@JsonIgnore
@@ -67,8 +71,7 @@ public class Patient {
 
 	public String getRecordInfo() {
 		String record = Strings.isNullOrEmpty(patientRecord) ? null : String.format("%s: %s", getMessage("label.patientRecord"), patientRecord.trim());
-		String folder = Strings.isNullOrEmpty(folderNumber) ? null : String.format("%s: %s", getMessage("label.folderNumber"), folderNumber.trim());
-		return Joiner.on(" | ").skipNulls().join(record, folder);
+		return record;
 	}
 
 	public Integer getAge() {
@@ -117,6 +120,7 @@ public class Patient {
 		Integer getPatientId();
 		int getCompletedSessions();
 		int getAbsentSessions();
+		LocalDateTime getInitialSessionDate();
 	}
 
 	public static PatientStats getEmptyPatientStats(Integer patientId) {
@@ -134,6 +138,11 @@ public class Patient {
 			@Override
 			public int getAbsentSessions() {
 				return 0;
+			}
+
+			@Override
+			public LocalDateTime getInitialSessionDate() {
+				return null;
 			}
 		};
 	}

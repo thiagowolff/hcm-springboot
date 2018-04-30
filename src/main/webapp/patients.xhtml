@@ -26,8 +26,12 @@
 
 				<p:column headerText="#{msg['label.name']}" sortBy="#{patient.name}" filterBy="#{patient.name}" filterStyle="display: none;" styleClass="text-left" priority="1">
 					<h:outputText value="#{patient.name}" />
+					<ui:fragment rendered="#{not empty patient.remarks}">
+						<i class="patient-info-#{patient.patientId} fa fa-info-circle hidden-xs" style="margin-left: 2px;"></i>
+						<p:tooltip for="@(.patient-info-#{patient.patientId})" value="#{patient.remarks}" position="bottom" escape="false" />
+					</ui:fragment>
 				</p:column>
-				<p:column headerText="#{msg['label.patientRecord']}" sortBy="#{patient.patientRecord}" filterBy="#{patient.patientRecord}" filterStyle="display: none;" priority="1">
+				<p:column headerText="#{msg['label.patientRecord']}" sortBy="#{patient.patientRecord}" filterBy="#{patient.patientRecord}" width="100" filterStyle="display: none;" priority="1">
 					<h:outputText value="#{patient.patientRecord}" />
 				</p:column>
 				<p:column styleClass="text-left" priority="3">
@@ -56,24 +60,35 @@
 					<br />
 					<h:outputText value="#{patient.consultationReason}" />
 				</p:column>
-				<p:column headerText="#{msg['label.numberOfSessions']}" width="100" priority="2">
+				<p:column styleClass="text-left" priority="3">
+					<f:facet name="header">
+						<h:outputText value="#{msg['label.physicianAssistant']}" />
+						<p:commandButton process="@this" update=":physicianAssistantForm" actionListener="#{physicianAssistantController.refresh()}" oncomplete="PF('physicianAssistantDialog').show(); PF('physicianAssistantTable').getPaginator().setPage(0);" icon="fa fa-pencil-square-o" title="#{msg['button.manage']}" global="false" />
+					</f:facet>
+					<h:outputText value="#{patient.physicianAssistant.name}" />
+				</p:column>
+				<p:column headerText="#{msg['label.numberOfSessions']}" width="80" priority="2">
 					<h:outputText value="#{patientStats.completedSessions + patientStats.absentSessions}" />
 				</p:column>
-				<p:column headerText="#{msg['label.numberOfCompletedSessions']}" width="100" priority="1">
-					<h:outputText value="#{patientStats.completedSessions eq null ? 0 :patientStats.completedSessions}" />
+				<p:column headerText="#{msg['label.numberOfCompletedSessions']}" width="80" priority="1">
+					<h:outputText value="#{patientStats.completedSessions eq null ? 0 :patientStats.completedSessions}" style="color: #007d18;" />
 				</p:column>
-				<p:column headerText="#{msg['label.numberOfAbsentSessions']}" width="100" priority="3">
-					<h:outputText value="#{patientStats.absentSessions eq null ? 0 : patientStats.absentSessions}" />
+				<p:column headerText="#{msg['label.numberOfAbsentSessions']}" width="80" priority="3">
+					<h:outputText value="#{patientStats.absentSessions eq null ? 0 : patientStats.absentSessions}" style="color: #b14538;" />
 				</p:column>
-				<p:column headerText="#{msg['label.contact']}" priority="3" styleClass="text-left">
+				<p:column headerText="#{msg['label.initialSessionDate']}" width="100" priority="3">
+					<h:outputText value="#{patientStats.initialSessionDate}" converter="localDateTimeConverter" />
+				</p:column>
+				<p:column headerText="#{msg['label.contact']}" priority="4" styleClass="text-left">
 					<h:outputText value="#{patient.email}" /><br/>
 					<h:outputText value="#{patient.phoneNumber}" />
 				</p:column>
-				<p:column headerText="#{msg['label.creationDate']}" width="120" sortBy="#{patient.auditLog.createdDate}" priority="4">
+				<p:column headerText="#{msg['label.creationDate']}" width="100" sortBy="#{patient.auditLog.createdDate}" priority="4">
 					<h:outputText id="patientCreationDate" value="#{patient.auditLog.createdDate}" converter="localDateTimeConverter" />
 					<p:tooltip for="#{p:component('patientCreationDate')}" value="#{patient.auditLog}" position="bottom" escape="false" rendered="#{loginController.hasDevRights()}" />
 				</p:column>
-				<p:column headerText="#{msg['label.action']}" width="100" style="padding: 1px" priority="3">
+				<p:column headerText="#{msg['label.action']}" width="140" style="padding: 1px" priority="3">
+					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" onclick="PF('confirmDeletePatientDialog').show();" icon="fa fa-check-square-o" title="#{msg['button.finishTreatment']}" rendered="false" />
 					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" update=":patientInputForm" oncomplete="PF('patientDialog').show();" icon="fa fa-pencil" title="#{msg['button.edit']}" global="false">
 						<p:resetInput target=":patientInputForm:patientGrid" />
 					</p:commandButton>
@@ -130,16 +145,19 @@
 				</p:selectOneMenu>
 				<p:message for="consultationReason" display="text" />
 
-				<p:outputLabel value="#{msg['label.medicalIndication']}" for="patientGender" />
+				<p:outputLabel value="#{msg['label.medicalIndication']}" for="patientMedicalIndication" />
 				<p:selectOneRadio id="patientMedicalIndication" value="#{patient.medicalIndication}" required="true">
 					<f:selectItem itemLabel="#{msg['label.yes']}" itemValue="#{true}" />
 					<f:selectItem itemLabel="#{msg['label.no']}" itemValue="#{false}" />
 				</p:selectOneRadio>
 				<p:message for="patientMedicalIndication" display="text" />
 
-				<p:outputLabel value="#{msg['label.folderNumber']}" for="folderNumber" />
-				<p:inputText id="folderNumber" value="#{patient.folderNumber}" maxlength="30" size="15" />
-				<div></div>
+				<p:outputLabel value="#{msg['label.physicianAssistant']}" for="physicianAssistant" />
+				<p:selectOneMenu id="physicianAssistant" value="#{patient.physicianAssistant}" required="false" converter="omnifaces.SelectItemsConverter">
+					<f:selectItem itemValue="" itemLabel=""/>
+					<f:selectItems value="#{physicianAssistantController.physicianAssistants}" var="physicianAssistant" itemValue="#{physicianAssistant}" itemLabel="#{physicianAssistant.name}"/>
+				</p:selectOneMenu>
+				<p:message for="physicianAssistant" display="text" />
 
 				<p:outputLabel value="#{msg['label.email']}" for="patientEmail" />
 				<p:inputText id="patientEmail" value="#{patient.email}" maxlength="75" size="50" />
@@ -147,6 +165,10 @@
 
 				<p:outputLabel value="#{msg['label.phone']}" for="patientPhone" />
 				<p:inputMask id="patientPhone" value="#{patient.phoneNumber}" mask="(99) ?9999999999" maxlength="15" size="15" />
+				<div></div>
+
+				<p:outputLabel value="#{msg['label.remarks']}" for="remarks" />
+				<p:inputTextarea id="remarks" value="#{patient.remarks}" rows="4" style="width: 100%;" />
 				<div></div>
 			</p:panelGrid>
 
@@ -219,6 +241,39 @@
 				<p:column headerText="#{msg['label.action']}" width="100">
 					<p:rowEditor />
 					<p:commandButton process="@this" actionListener="#{consultationReasonController.deleteConsultationReason(consultationReason)}" update="consultationReasonTable, :patientsForm:patientsTable, :consultationReasonForm:consultationReasonMessages" icon="fa fa-trash" title="#{msg['button.delete']}" />
+				</p:column>
+			</p:dataTable>
+		</p:dialog>
+	</h:form>
+
+	<h:form id="physicianAssistantForm">
+		<p:dialog header="#{msg['title.managePhysicianAssistant']}" widgetVar="physicianAssistantDialog" fitViewport="true" resizable="false" showEffect="fade" modal="true" width="40%">
+			<p:messages id="physicianAssistantMessages" />
+
+			<p:panelGrid id="physicianAssistantGrid" columns="3">
+				<p:outputLabel value="#{msg['label.physicianAssistant']}" for="physicianAssistantName" />
+				<p:inputText id="physicianAssistantName" value="#{physicianAssistantController.physicianAssistantName}" required="true" maxlength="100" size="40" />
+				<p:commandButton value="#{msg['button.add']}" actionListener="#{physicianAssistantController.addPhysicianAssistant}" process="@this, physicianAssistantName" update="physicianAssistantTable" validateClient="true" styleClass="btn-primary" />
+			</p:panelGrid>
+
+			<p:separator />
+
+			<p:dataTable id="physicianAssistantTable" widgetVar="physicianAssistantTable" value="#{physicianAssistantController.physicianAssistants}" var="physicianAssistant" editable="true" paginator="true" rows="8" paginatorAlwaysVisible="false" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
+				<p:ajax event="rowEdit" listener="#{physicianAssistantController.onRowEdit}" update="physicianAssistantTable, :patientsForm:patientsTable" oncomplete="PF('patientsTable').clearFilters();" />
+
+				<p:column headerText="#{msg['label.id']}" styleClass="small-column">
+					<h:outputText value="#{physicianAssistant.physicianAssistantId}" />
+				</p:column>
+
+				<p:column headerText="#{msg['label.name']}" sortBy="#{physicianAssistant.name}" styleClass="text-left">
+					<p:cellEditor>
+						<f:facet name="output"><h:outputText value="#{physicianAssistant.name}" /></f:facet>
+						<f:facet name="input"><p:inputText value="#{physicianAssistant.name}" /></f:facet>
+					</p:cellEditor>
+				</p:column>
+				<p:column headerText="#{msg['label.action']}" width="100">
+					<p:rowEditor />
+					<p:commandButton process="@this" actionListener="#{physicianAssistantController.deletePhysicianAssistant(physicianAssistant)}" update="physicianAssistantTable, :patientsForm:patientsTable, :physicianAssistantForm:physicianAssistantMessages" icon="fa fa-trash" title="#{msg['button.delete']}" />
 				</p:column>
 			</p:dataTable>
 		</p:dialog>

@@ -44,7 +44,7 @@ public class HealthInsuranceController implements Serializable {
 			healthInsuranceRepository.delete(healthInsurance);
 			refresh();
 		} catch (DataIntegrityViolationException e) {
-			Messages.addGlobalError(MessageUtil.getMessage("error.healthInsuranceInUse"));
+			Messages.addGlobalError(MessageUtil.getMessage("error.registerInUse"));
 		}
 	}
 

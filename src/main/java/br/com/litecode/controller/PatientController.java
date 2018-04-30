@@ -7,6 +7,8 @@ import br.com.litecode.domain.model.Session;
 import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.PatientRepository;
 import br.com.litecode.util.MessageUtil;
+import org.omnifaces.component.output.cache.Cache;
+import org.omnifaces.component.output.cache.CacheFactory;
 import org.omnifaces.util.Faces;
 import org.omnifaces.util.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +74,7 @@ public class PatientController implements Serializable {
 	
 	public void deletePatient() {
 		patient.setActive(false);
-		patient.audit(getLoggedUser());
+		patient.audit(User.getLoggedUser());
 		patientRepository.save(patient);
 		refresh();
 	}
@@ -86,17 +88,13 @@ public class PatientController implements Serializable {
 			}
 
 			patient.setName(patient.getName().trim());
-			patient.audit(getLoggedUser());
+			patient.audit(User.getLoggedUser());
 			patientRepository.save(patient);
 		} catch (DataIntegrityViolationException e) {
 			Faces.validationFailed();
 			Messages.addGlobalError(MessageUtil.getMessage("error.patientRecord"));
 		}
 		refresh();
-	}
-
-	private User getLoggedUser() {
-		return Faces.getSessionAttribute("loggedUser");
 	}
 
 	public Patient getPatient() {
@@ -109,6 +107,10 @@ public class PatientController implements Serializable {
 
 	public void refresh() {
 		this.patients = null;
+		Cache cache = CacheFactory.getCache(Faces.getContext(), "session");
+		if (cache != null) {
+			cache.remove("patientsCache");
+		}
 	}
 
 	public void newPatient() {

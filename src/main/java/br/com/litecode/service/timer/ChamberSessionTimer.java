@@ -2,27 +2,18 @@ package br.com.litecode.service.timer;
 
 import br.com.litecode.domain.model.*;
 import br.com.litecode.domain.model.Session.SessionStatus;
-import br.com.litecode.domain.repository.AlarmRepository;
 import br.com.litecode.domain.repository.SessionRepository;
 import br.com.litecode.domain.repository.UserRepository;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushService;
 import br.com.litecode.service.push.message.NotificationMessage;
 import br.com.litecode.service.push.message.ProgressMessage;
-import br.com.litecode.util.JmxUtil;
-import com.google.common.base.Splitter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.time.LocalTime;
-import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -70,8 +61,8 @@ public class ChamberSessionTimer implements SessionTimer {
 		}
 
 		User user = userRepository.findUserByUsername(session.getExecutionMetadata().getStartedBy());
-		UserSetting userSetting = user != null ? user.getUserSetting() : null;
-		pushService.publish(PushChannel.NOTIFY, NotificationMessage.create(session, chamberEvent.toString(), userSetting), user);
+		UserSettings userSettings = user != null ? user.getUserSettings() : null;
+		pushService.publish(PushChannel.NOTIFY, NotificationMessage.create(session, chamberEvent.toString(), userSettings), user);
 	}
 
 	@Override
