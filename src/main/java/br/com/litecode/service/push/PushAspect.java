@@ -19,7 +19,7 @@ public class PushAspect {
 
 	@After(value = "execution(* br.com.litecode..controller..*(..)) && @annotation(push))")
 	public void pushRefresh(JoinPoint joinPoint, PushRefresh push) {
-		User loggedUser = Faces.getSessionAttribute("loggedUser");
+		User loggedUser = User.getLoggedUser();
 		pushService.publish(PushChannel.REFRESH, "", loggedUser);
 
 		log.info("[{}] {}", loggedUser.getUsername(), joinPoint.getSignature().getName());

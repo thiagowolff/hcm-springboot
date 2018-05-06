@@ -43,7 +43,7 @@ public class AlarmService {
 		cancelAlarm(alarm);
 
 		Trigger trigger = new CronTrigger(alarm.getCronExpression());
-		Runnable task = () -> pushService.publish(PushChannel.NOTIFY,  new NotificationMessage(null, null, alarm.getName(), alarm.getMessage(), null), null);
+		Runnable task = () -> pushService.publish(PushChannel.NOTIFY,  new NotificationMessage(null, null, alarm.getName(), alarm.getMessage()), null);
 		scheduledAlarms.put(alarm.getAlarmId(), taskScheduler.schedule(task, trigger));
 
 		log.info("Alarm {} initialized.", alarm);

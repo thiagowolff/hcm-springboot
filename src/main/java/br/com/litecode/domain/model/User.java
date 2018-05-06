@@ -11,6 +11,7 @@ import javax.faces.context.FacesContext;
 import javax.persistence.*;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 
 @Entity
 @Getter
@@ -52,6 +53,10 @@ public class User {
 	}
 
     public String getLastAccessDuration() {
+    	if (lastAccess == null) {
+    		return "nunca acessou";
+		}
+
 		Duration duration = Duration.between(lastAccess, Instant.now());
 
 		long days = duration.toDays();

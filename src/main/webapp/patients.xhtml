@@ -8,7 +8,13 @@
 	<h:form id="patientsForm">
 		<p:growl id="messages" severity="info"/>
 
-		<lc:headerPanel title="#{msg['title.patients']}" addButtonAction="#{patientController.newPatient()}" update=":patientInputForm" oncomplete="PF('patientDialog').show()" />
+		<lc:headerPanel title="#{msg['title.patients']}" addButtonAction="#{patientController.newPatient()}" update=":patientInputForm" oncomplete="PF('patientDialog').show()">
+			<ul style="font-size: 12px;" class="hidden-xs">
+				<li><p:commandLink value="#{msg['title.manageHealthInsurance']}" process="@this" update=":healthInsuranceForm" actionListener="#{healthInsuranceController.refresh()}" oncomplete="PF('healthInsuranceDialog').show(); PF('healthInsuranceTable').getPaginator().setPage(0);" global="false" onclick="track('Manage health insurance', { 'source': 'link' })"/></li>
+				<li><p:commandLink value="#{msg['title.manageConsultationReason']}" process="@this" update=":consultationReasonForm" actionListener="#{consultationReasonController.refresh()}" oncomplete="PF('consultationReasonDialog').show(); PF('consultationReasonTable').getPaginator().setPage(0);" global="false" onclick="track('Manage consultation reason', { 'source': 'link' })" /></li>
+				<li><p:commandLink value="#{msg['title.managePhysicianAssistant']}" process="@this" update=":physicianAssistantForm" actionListener="#{physicianAssistantController.refresh()}" oncomplete="PF('physicianAssistantDialog').show(); PF('physicianAssistantTable').getPaginator().setPage(0);" global="false" onclick="track('Manage physician assistant', { 'source': 'link' })" /></li>
+			</ul>
+		</lc:headerPanel>
 
 		<div class="content-wrapper">
 			<p:dataTable id="patientsTable" widgetVar="patientsTable" value="#{patientController.patients}" var="patient" paginator="true" rows="10" paginatorAlwaysVisible="false" filteredValue="#{patientController.filteredPatients}"
@@ -37,7 +43,7 @@
 				<p:column styleClass="text-left" priority="3">
 					<f:facet name="header">
 						<h:outputText value="#{msg['label.healthInsurance']}" />
-						<p:commandButton process="@this" update=":healthInsuranceForm" actionListener="#{healthInsuranceController.refresh()}" oncomplete="PF('healthInsuranceDialog').show(); PF('healthInsuranceTable').getPaginator().setPage(0);" icon="fa fa-pencil-square-o" title="#{msg['button.manage']}" global="false" />
+						<p:commandButton process="@this" update=":healthInsuranceForm" actionListener="#{healthInsuranceController.refresh()}" oncomplete="PF('healthInsuranceDialog').show(); PF('healthInsuranceTable').getPaginator().setPage(0);" icon="fa fa-plus-square-o" title="#{msg['button.manage']}" global="false" onclick="track('Manage health insurance', { 'source': 'icon'})" />
 					</f:facet>
 					<h:outputText value="#{patient.healthInsurance.name}" />
 				</p:column>
@@ -54,7 +60,7 @@
 				<p:column width="160" priority="3">
 					<f:facet name="header">
 						<h:outputText value="#{msg['label.consultationDateAndReason']}" />
-						<p:commandButton process="@this" update=":consultationReasonForm" actionListener="#{consultationReasonController.refresh()}" oncomplete="PF('consultationReasonDialog').show(); PF('consultationReasonTable').getPaginator().setPage(0);" icon="fa fa-pencil-square-o" title="#{msg['button.manage']}" global="false" />
+						<p:commandButton process="@this" update=":consultationReasonForm" actionListener="#{consultationReasonController.refresh()}" oncomplete="PF('consultationReasonDialog').show(); PF('consultationReasonTable').getPaginator().setPage(0);" icon="fa fa-plus-square-o" title="#{msg['button.manage']}" global="false" onclick="track('Manage consultation reason', { 'source': 'icon'})" />
 					</f:facet>
 					<h:outputText value="#{patient.consultationDate}" converter="localDateTimeConverter" />
 					<br />
@@ -63,7 +69,7 @@
 				<p:column styleClass="text-left" priority="3">
 					<f:facet name="header">
 						<h:outputText value="#{msg['label.physicianAssistant']}" />
-						<p:commandButton process="@this" update=":physicianAssistantForm" actionListener="#{physicianAssistantController.refresh()}" oncomplete="PF('physicianAssistantDialog').show(); PF('physicianAssistantTable').getPaginator().setPage(0);" icon="fa fa-pencil-square-o" title="#{msg['button.manage']}" global="false" />
+						<p:commandButton process="@this" update=":physicianAssistantForm" actionListener="#{physicianAssistantController.refresh()}" oncomplete="PF('physicianAssistantDialog').show(); PF('physicianAssistantTable').getPaginator().setPage(0);" icon="fa fa-plus-square-o" title="#{msg['button.manage']}" global="false" onclick="track('Manage physician assistant', { 'source': 'icon'})" />
 					</f:facet>
 					<h:outputText value="#{patient.physicianAssistant.name}" />
 				</p:column>

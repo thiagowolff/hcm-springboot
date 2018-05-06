@@ -22,6 +22,7 @@
 					</div>
 
 					<ui:param name="isDev" value="#{facesContext.application.projectStage eq 'Development'}" />
+
 					<div class="row login-inner-panel">
 						<div class="login-error-message">
 							<p:messages />
@@ -42,18 +43,18 @@
 						</div>
 						<div class="row">
 							<div class="login-input col-xs-#{isDev ? '3' : '12' }">
-								<p:commandButton id="loginButton" value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" onclick="track('Sign-in', { username: $('#username').val()});" style="width: 100%;" />
+								<p:commandButton id="loginButton" value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" onclick="onLogin()" style="width: 100%;" />
 							</div>
 							<div class="login-input login-button col-xs-3">
 								<p:commandButton value="USER" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}" styleClass="btn-success">
 									<f:setPropertyActionListener value="user" target="#{loginController.username}" />
-									<f:setPropertyActionListener value="123" target="#{loginController.password}" />
+									<f:setPropertyActionListener value="user" target="#{loginController.password}" />
 								</p:commandButton>
 							</div>
 							<div class="login-input login-button col-xs-3">
 								<p:commandButton value="ADMIN" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}" styleClass="btn-success">
 									<f:setPropertyActionListener value="admin" target="#{loginController.username}" />
-									<f:setPropertyActionListener value="123" target="#{loginController.password}" />
+									<f:setPropertyActionListener value="admin" target="#{loginController.password}" />
 								</p:commandButton>
 							</div>
 							<div class="login-input login-button col-xs-3">
@@ -78,6 +79,20 @@
 				var timeZone = new Date().getTimezoneOffset() / 60 * -1;
 				setClientTimeZone([{ name: 'clientTimeZone', value: timeZone }]);
 			});
+
+			function onLogin() {
+				if (mixpanel === 'undefined') {
+					return;
+				}
+
+				var username = $('#username').val();
+				mixpanel.track('Sign-in', { 'username': username},
+					function() {
+						if (typeof mixpanel !== 'undefined') {
+							mixpanel.register({'username': username});
+						}
+					});
+			}
 		</script>
 	</h:body>
 </f:view>

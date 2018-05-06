@@ -13,6 +13,7 @@ import br.com.litecode.service.push.message.NotificationMessage;
 import br.com.litecode.service.timer.SessionTimer;
 import br.com.litecode.util.MessageUtil;
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 import com.itextpdf.text.DocumentException;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.omnifaces.util.Faces;
 import org.omnifaces.util.Messages;
+import org.primefaces.PrimeFaces;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -130,7 +132,7 @@ public class SessionController implements Serializable {
 		sessionRepository.save(session);
 		invalidateSessionCache();
 
-		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name(), User.getLoggedUser().getUserSettings());
+		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name());
 		pushService.publish(PushChannel.NOTIFY, notificationMessage, User.getLoggedUser());
 	}
 
@@ -193,7 +195,7 @@ public class SessionController implements Serializable {
 		sessionTimer.stopSession(session);
 		sessionRepository.delete(session);
 
-		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.DELETE_SESSION.name(), User.getLoggedUser() != null ? User.getLoggedUser().getUserSettings() : null);
+		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.DELETE_SESSION.name());
 		pushService.publish(PushChannel.NOTIFY,  notificationMessage, User.getLoggedUser());
 	}
 
@@ -322,6 +324,16 @@ public class SessionController implements Serializable {
 	public String getScheduledSessionDates() {
 		Set<LocalDate> sessionDates = scheduledSessionDates.stream().map(LocalDateTime::toLocalDate).collect(Collectors.toSet());
 		return sessionDates.stream().map(date -> "'" + date + "'").collect(Collectors.joining(","));
+	}
+
+	public void getUserSettings() {
+		if (User.getLoggedUser() == null) {
+			PrimeFaces.current().ajax().addCallbackParam("userSettings", null);
+			return;
+		}
+
+		UserSettings userSettings = User.getLoggedUser().getUserSettings();
+		PrimeFaces.current().ajax().addCallbackParam("userSettings", new Gson().toJson(userSettings));
 	}
 
 	@Getter

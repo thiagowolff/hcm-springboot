@@ -318,7 +318,7 @@
 
 	<h:form>
 		<p:remoteCommand name="refreshSessions" oncomplete="onSessionTimeout(this.data)" actionListener="#{sessionController.invalidateSessionCache()}" process="@this" update=":form:chambersGrid :editSessionForm" global="false" />
-		<p:remoteCommand name="fetchUserSettings" oncomplete="getUserSettings(this.data)" actionListener="#{sessionController.invalidateSessionCache()}" process="@this" global="false" />
+		<p:remoteCommand name="fetchUserSettings" oncomplete="getUserSettingsCallback(xhr, status, args)" actionListener="#{sessionController.getUserSettings()}" process="@this" global="false" />
 	</h:form>
 
 	<script>
@@ -387,18 +387,24 @@
 		});
 
 		function handleMessage(notificationMessage) {
-			if (!notificationMessage.userSettings || notificationMessage.userSettings.notificationMessages) {
-				var facesMessage = {
-					summary: notificationMessage.messageSummary,
-					detail: notificationMessage.messageDetail,
-					severity: notificationMessage.eventType || 'info'
-				};
+			fetchUserSettings();
 
-				PF('growl').show([facesMessage]);
-			}
+			window.getUserSettingsCallback = function(xhr, status, args) {
+				var userSettings = JSON.parse(args.userSettings);
 
-			if (notificationMessage.userSettings && notificationMessage.userSettings.notificationSounds) {
-				playSound(notificationMessage.eventType);
+				if (!userSettings || userSettings.notificationMessages) {
+					var facesMessage = {
+						summary: notificationMessage.messageSummary,
+						detail: notificationMessage.messageDetail,
+						severity: notificationMessage.eventType || 'info'
+					};
+
+					PF('growl').show([facesMessage]);
+				}
+
+				if (userSettings && userSettings.notificationSounds) {
+					playSound(notificationMessage.eventType);
+				}
 			}
 		}
 
