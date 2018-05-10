@@ -11,7 +11,6 @@ import javax.faces.context.FacesContext;
 import javax.persistence.*;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Optional;
 
 @Entity
 @Getter

@@ -1,19 +1,15 @@
 package br.com.litecode.domain.model;
 
-import com.google.common.base.Joiner;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.Embeddable;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
-import javax.persistence.criteria.CriteriaBuilder;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 @Embeddable
 @Getter

@@ -3,13 +3,7 @@ package br.com.litecode.controller;
 import br.com.litecode.domain.model.HealthInsurance;
 import br.com.litecode.domain.repository.HealthInsuranceRepository;
 import br.com.litecode.domain.repository.PatientDataRepository;
-import br.com.litecode.util.MessageUtil;
-import lombok.Getter;
-import lombok.Setter;
-import org.omnifaces.util.Messages;
-import org.primefaces.event.RowEditEvent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import javax.faces.view.ViewScoped;

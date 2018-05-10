@@ -1,7 +1,9 @@
 package br.com.litecode.service.timer;
 
-import br.com.litecode.domain.model.*;
+import br.com.litecode.domain.model.ChamberEvent;
+import br.com.litecode.domain.model.Session;
 import br.com.litecode.domain.model.Session.SessionStatus;
+import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.SessionRepository;
 import br.com.litecode.domain.repository.UserRepository;
 import br.com.litecode.service.push.PushChannel;

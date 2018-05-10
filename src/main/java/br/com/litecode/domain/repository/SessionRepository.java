@@ -4,10 +4,8 @@ import br.com.litecode.domain.model.Session;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
-import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 public interface SessionRepository extends CrudRepository<Session, Integer> {

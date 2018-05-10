@@ -2,11 +2,9 @@ package br.com.litecode.service.push;
 
 import br.com.litecode.domain.model.User;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
-import org.omnifaces.util.Faces;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

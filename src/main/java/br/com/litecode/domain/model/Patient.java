@@ -1,8 +1,6 @@
 package br.com.litecode.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.base.Joiner;
-import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,8 +11,6 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.Set;
 import java.util.TreeSet;
-
-import static br.com.litecode.util.MessageUtil.getMessage;
 
 @Entity
 @Getter

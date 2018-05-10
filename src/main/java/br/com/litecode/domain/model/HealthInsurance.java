@@ -3,8 +3,7 @@ package br.com.litecode.domain.model;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
-import java.time.Instant;
+import javax.persistence.Entity;
 
 @Entity
 @Getter

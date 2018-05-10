@@ -1,6 +1,5 @@
 package br.com.litecode.domain.model;
 
-import br.com.litecode.service.push.message.NotificationMessage;
 import lombok.Getter;
 import lombok.Setter;
 

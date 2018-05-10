@@ -20,7 +20,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import javax.el.ELException;
 import javax.faces.application.ViewExpiredException;
 import javax.faces.webapp.FacesServlet;
-import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import java.text.MessageFormat;

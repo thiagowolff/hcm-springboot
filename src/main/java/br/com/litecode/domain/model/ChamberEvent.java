@@ -1,6 +1,5 @@
 package br.com.litecode.domain.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,7 +9,6 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-import static br.com.litecode.domain.model.Session.SessionStatus;
 import static java.time.temporal.ChronoUnit.SECONDS;
 
 @Entity

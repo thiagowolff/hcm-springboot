@@ -3,13 +3,11 @@ package br.com.litecode.security;
 import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.UserRepository;
 import br.com.litecode.service.push.PushRefresh;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.SessionScoped;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.util.Map;
