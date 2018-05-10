@@ -17,13 +17,13 @@ public interface ChartsRepository extends Repository<Session, Serializable> {
 	@Query(value = "select name, count(*) from session join chamber using (chamber_id) group by name", nativeQuery = true)
 	List<Object[]> findSessionsPerChamber();
 
-	@Query(value = "select ifnull(hs.name, 'N/D'), count(*) from patient_session join patient using (patient_id) left join health_insurance hs using (health_insurance_id) group by hs.name order by count(*) desc", nativeQuery = true)
+	@Query(value = "select ifnull(hs.name, 'N/D'), count(*) from patient_session join patient using (patient_id) left join patient_data hs on patient_data_id = health_insurance_id group by hs.name order by count(*) desc", nativeQuery = true)
 	List<Object[]> findSessionsPerHealthInsurance();
 
 	@Query(value = "select case when medical_indication = 1 then 'Sim' else case when medical_indication = 0 then 'Não' else 'N/D' end end, count(*) from patient group by medical_indication", nativeQuery = true)
 	List<Object[]> findPatientsPerMedicalIndication();
 
-	@Query(value = "select ifnull(cr.name, 'N/D'), count(*) from patient left join consultation_reason cr using (consultation_reason_id) group by consultation_reason_id order by count(*) desc", nativeQuery = true)
+	@Query(value = "select ifnull(cr.name, 'N/D'), count(*) from patient left join patient_data cr on patient_data_id = consultation_reason_id group by consultation_reason_id order by count(*) desc", nativeQuery = true)
 	List<Object[]> findPatientsPerConsultationReason();
 
 	@Query(value = "select date_format(created_date, '%Y-%m'), count(*) from patient where created_date >= '2017-01-01' group by date_format(created_date, '%Y-%m') order by 1", nativeQuery = true)

@@ -2,6 +2,7 @@ package br.com.litecode.controller;
 
 import br.com.litecode.domain.model.HealthInsurance;
 import br.com.litecode.domain.repository.HealthInsuranceRepository;
+import br.com.litecode.domain.repository.PatientDataRepository;
 import br.com.litecode.util.MessageUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,53 +17,17 @@ import java.io.Serializable;
 
 @ViewScoped
 @Component
-public class HealthInsuranceController implements Serializable {
+public class HealthInsuranceController extends PatientDataController<HealthInsurance> implements Serializable {
 	@Autowired
 	private HealthInsuranceRepository healthInsuranceRepository;
 
-	@Autowired
-	private PatientController patientController;
-
-	@Getter
-	@Setter
-	private String healthInsuranceName;
-
-	private Iterable<HealthInsurance> healthInsurances;
-
-	public HealthInsuranceController() {
+	@Override
+	protected PatientDataRepository<HealthInsurance> getRepository() {
+		return healthInsuranceRepository;
 	}
 
-	public Iterable<HealthInsurance> getHealthInsurances() {
-		if (healthInsurances == null) {
-			healthInsurances = healthInsuranceRepository.findAllByOrderByNameAsc();
-		}
-		return healthInsurances;
-	}
-
-	public void deleteHealthInsurance(HealthInsurance healthInsurance) {
-		try {
-			healthInsuranceRepository.delete(healthInsurance);
-			refresh();
-		} catch (DataIntegrityViolationException e) {
-			Messages.addGlobalError(MessageUtil.getMessage("error.registerInUse"));
-		}
-	}
-
-	public void addHealthInsurance() {
-		HealthInsurance healthInsurance = new HealthInsurance();
-		healthInsurance.setName(healthInsuranceName);
-		healthInsuranceRepository.save(healthInsurance);
-		refresh();
-	}
-
-	public void onRowEdit(RowEditEvent event) {
-		healthInsuranceRepository.save((HealthInsurance) event.getObject());
-		refresh();
-	}
-
-	public void refresh() {
-		healthInsuranceName = null;
-		healthInsurances = null;
-		patientController.refresh();
+	@Override
+	protected HealthInsurance createPatientData() {
+		return new HealthInsurance();
 	}
 }

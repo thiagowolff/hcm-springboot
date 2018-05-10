@@ -11,10 +11,10 @@ import javax.persistence.Id;
 @Entity
 @Getter
 @Setter
-public class PhysicianAssistant extends PatientData {
+public class PatientStatus extends PatientData {
 //	@Id
 //	@GeneratedValue(strategy = GenerationType.IDENTITY)
-//	private Integer physicianAssistantId;
+//	private Integer patientStatusId;
 //	private String name;
 //
 //	@Override
@@ -22,18 +22,18 @@ public class PhysicianAssistant extends PatientData {
 //		if (this == o) return true;
 //		if (o == null || getClass() != o.getClass()) return false;
 //
-//		PhysicianAssistant that = (PhysicianAssistant) o;
+//		PatientStatus that = (PatientStatus) o;
 //
-//		return physicianAssistantId.equals(that.physicianAssistantId);
+//		return patientStatusId.equals(that.patientStatusId);
 //	}
 //
 //	@Override
 //	public int hashCode() {
-//		return physicianAssistantId.hashCode();
+//		return patientStatusId.hashCode();
 //	}
 //
 //	@Override
 //	public String toString() {
-//		return "[" + physicianAssistantId + "] " + name;
+//		return "[" + patientStatusId + "] " + name;
 //	}
 }

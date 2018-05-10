@@ -32,6 +32,7 @@ public class Patient {
 	private String phoneNumber;
 	private LocalDate birthDate;
 	private LocalDate consultationDate;
+	private LocalDate finalSessionDate;
 	private Boolean medicalIndication;
 	private boolean active;
 	private String remarks;
@@ -54,6 +55,10 @@ public class Patient {
 	@JoinColumn(name = "physician_assistant_id")
 	private PhysicianAssistant physicianAssistant;
 
+	@ManyToOne
+	@JoinColumn(name = "patient_status_id")
+	private PatientStatus patientStatus;
+
 	@OneToMany(mappedBy = "patient")
 	@JsonIgnore
 	private Set<PatientSession> patientSessions;
@@ -70,7 +75,7 @@ public class Patient {
 	}
 
 	public String getRecordInfo() {
-		return consultationReason == null ? null : String.format("%s: %s", consultationReason.getName());
+		return consultationReason == null ? null : consultationReason.getName();
 	}
 
 	public Integer getAge() {

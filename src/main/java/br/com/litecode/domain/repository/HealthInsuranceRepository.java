@@ -5,6 +5,5 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface HealthInsuranceRepository extends CrudRepository<HealthInsurance, Integer> {
-	List<HealthInsurance> findAllByOrderByNameAsc();
+public interface HealthInsuranceRepository extends PatientDataRepository<HealthInsurance> {
 }
