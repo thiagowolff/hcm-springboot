@@ -20,7 +20,7 @@ import static br.com.litecode.util.MessageUtil.getMessage;
 @Getter
 @Setter
 public class Patient {
-	private enum Gender { M, F };
+	public enum Gender { M, F };
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -70,8 +70,7 @@ public class Patient {
 	}
 
 	public String getRecordInfo() {
-		String record = Strings.isNullOrEmpty(patientRecord) ? null : String.format("%s: %s", getMessage("label.patientRecord"), patientRecord.trim());
-		return record;
+		return consultationReason == null ? null : String.format("%s: %s", consultationReason.getName());
 	}
 
 	public Integer getAge() {

@@ -27,7 +27,7 @@
 					<div class="row">
 						<ui:repeat value="#{chamber.chamberEvents}" var="event">
 							<div class="col-md-3">
-								<h:outputText value="#{lcf:enum(event.eventType)}" />
+								<h:outputText value="#{event.eventType.description}" />
 							</div>
 							<div class="col-md-9">
 								<h:outputText value="#{event.duration}" />

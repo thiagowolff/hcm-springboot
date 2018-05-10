@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.hibernate.annotations.SortNatural;
 
 import javax.persistence.*;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,8 +25,12 @@ public class Chamber {
 	@SortNatural
 	private List<ChamberEvent> chamberEvents;
 
-	public ChamberEvent getChamberEvent(ChamberEvent.EventType eventType) {
-		Optional<ChamberEvent> chamberEvent = chamberEvents.stream().filter(event -> event.getEventType() == eventType).findFirst();
+	public ChamberEvent getFinalEvent() {
+		return chamberEvents.stream().max(Comparator.comparingInt(ChamberEvent::getTimeout)).get();
+	}
+
+	public ChamberEvent getChamberEvent(EventType eventType) {
+		Optional<ChamberEvent> chamberEvent = chamberEvents.stream().filter(event -> event.getEventType().equals(eventType)).findFirst();
 		if (chamberEvent.isPresent()) {
 			return chamberEvent.get();
 		}

@@ -154,7 +154,7 @@
 							</ui:repeat>
 						</div>
 						<div>
-							<h:outputText value="#{lcf:enum(chamberSession.nextChamberEvent.eventType)}" rendered="#{chamberSession.nextChamberEvent ne null}" />
+							<h:outputText value="#{chamberSession.nextChamberEvent.eventType.description}" rendered="#{chamberSession.nextChamberEvent ne null}" />
 						</div>
 						<div>
 						<h:outputText value="#{chamberSession.nextChamberEventTime}" rendered="#{chamberSession.nextChamberEvent ne null}">

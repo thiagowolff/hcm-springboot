@@ -25,4 +25,7 @@ public interface ChartsRepository extends Repository<Session, Serializable> {
 
 	@Query(value = "select ifnull(cr.name, 'N/D'), count(*) from patient left join consultation_reason cr using (consultation_reason_id) group by consultation_reason_id order by count(*) desc", nativeQuery = true)
 	List<Object[]> findPatientsPerConsultationReason();
+
+	@Query(value = "select date_format(created_date, '%Y-%m'), count(*) from patient where created_date >= '2017-01-01' group by date_format(created_date, '%Y-%m') order by 1", nativeQuery = true)
+	List<Object[]> findMonthlyNewPatients();
 }

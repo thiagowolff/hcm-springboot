@@ -3,17 +3,26 @@
 				xmlns:f="http://xmlns.jcp.org/jsf/core"
 				xmlns:h="http://xmlns.jcp.org/jsf/html"
 				xmlns:p="http://primefaces.org/ui"
+				xmlns:o="http://omnifaces.org/ui"
 				xmlns:lc="http://xmlns.jcp.org/jsf/composite/components">
 
 	<h:form id="patientsForm">
 		<p:growl id="messages" severity="info"/>
 
 		<lc:headerPanel title="#{msg['title.patients']}" addButtonAction="#{patientController.newPatient()}" update=":patientInputForm" oncomplete="PF('patientDialog').show()">
-			<ul style="font-size: 12px;" class="hidden-xs">
-				<li><p:commandLink value="#{msg['title.manageHealthInsurance']}" process="@this" update=":healthInsuranceForm" actionListener="#{healthInsuranceController.refresh()}" oncomplete="PF('healthInsuranceDialog').show(); PF('healthInsuranceTable').getPaginator().setPage(0);" global="false" onclick="track('Manage health insurance', { 'source': 'link' })"/></li>
-				<li><p:commandLink value="#{msg['title.manageConsultationReason']}" process="@this" update=":consultationReasonForm" actionListener="#{consultationReasonController.refresh()}" oncomplete="PF('consultationReasonDialog').show(); PF('consultationReasonTable').getPaginator().setPage(0);" global="false" onclick="track('Manage consultation reason', { 'source': 'link' })" /></li>
-				<li><p:commandLink value="#{msg['title.managePhysicianAssistant']}" process="@this" update=":physicianAssistantForm" actionListener="#{physicianAssistantController.refresh()}" oncomplete="PF('physicianAssistantDialog').show(); PF('physicianAssistantTable').getPaginator().setPage(0);" global="false" onclick="track('Manage physician assistant', { 'source': 'link' })" /></li>
-			</ul>
+			<div class="container-fluid hidden-xs">
+				<div class="col-lg-2">
+					<span style="font-size: 12px; font-weight: bold;">#{msg['label.action']}</span>
+					<ul style="font-size: 12px;">
+						<li><p:commandLink value="#{msg['title.manageHealthInsurance']}" process="@this" update=":healthInsuranceForm" actionListener="#{healthInsuranceController.refresh()}" oncomplete="PF('healthInsuranceDialog').show(); PF('healthInsuranceTable').getPaginator().setPage(0);" global="false" onclick="track('Manage health insurance', { 'source': 'link' })"/></li>
+						<li><p:commandLink value="#{msg['title.manageConsultationReason']}" process="@this" update=":consultationReasonForm" actionListener="#{consultationReasonController.refresh()}" oncomplete="PF('consultationReasonDialog').show(); PF('consultationReasonTable').getPaginator().setPage(0);" global="false" onclick="track('Manage consultation reason', { 'source': 'link' })" /></li>
+						<li><p:commandLink value="#{msg['title.managePhysicianAssistant']}" process="@this" update=":physicianAssistantForm" actionListener="#{physicianAssistantController.refresh()}" oncomplete="PF('physicianAssistantDialog').show(); PF('physicianAssistantTable').getPaginator().setPage(0);" global="false" onclick="track('Manage physician assistant', { 'source': 'link' })" /></li>
+					</ul>
+				</div>
+				<div class="col-lg-10 hidden-md">
+					<div id="newPatientsPerMonthChart" class="chart" style="height: 110px;"></div>
+				</div>
+			</div>
 		</lc:headerPanel>
 
 		<div class="content-wrapper">
@@ -289,5 +298,11 @@
        	$().ready(function() {
 			track('Patients page');
 		});
+
+		function drawCharts() {
+			drawChart('Novos pacientes por mês', '#{chartsController.monthlyNewPatients}', 'newPatientsPerMonthChart', google.visualization.LineChart, { colors: ['#3949ab'], fontName: 'Source Sans Pro', fontSize: 12, chartArea: { left: 0, top: 20} });
+		}
 	</script>
+
+	<h:outputScript library="js" name="charts.js" />
 </ui:composition>

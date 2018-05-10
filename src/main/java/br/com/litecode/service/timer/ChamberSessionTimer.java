@@ -61,7 +61,7 @@ public class ChamberSessionTimer implements SessionTimer {
 		}
 
 		User user = userRepository.findUserByUsername(session.getExecutionMetadata().getStartedBy());
-		pushService.publish(PushChannel.NOTIFY, NotificationMessage.create(session, chamberEvent.toString()), user);
+		pushService.publish(PushChannel.NOTIFY, NotificationMessage.create(session, chamberEvent.getEventType()), user);
 	}
 
 	@Override

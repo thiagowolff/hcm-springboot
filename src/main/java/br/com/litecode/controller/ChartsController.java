@@ -41,6 +41,10 @@ public class ChartsController {
 		return loadChartData(chartsRepository::findPatientsPerConsultationReason, "Motivo consulta", "Pacientes");
 	}
 
+	public String getMonthlyNewPatients() {
+		return loadChartData(chartsRepository::findMonthlyNewPatients, "Mês", "Pacientes");
+	}
+
 	private String loadChartData(Supplier<List<Object[]>> dao, String... headers) {
 		List<Object[]> results = dao.get();
 

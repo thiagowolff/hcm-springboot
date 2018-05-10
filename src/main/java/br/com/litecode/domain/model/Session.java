@@ -1,6 +1,5 @@
 package br.com.litecode.domain.model;
 
-import br.com.litecode.domain.model.ChamberEvent.EventType;
 import br.com.litecode.domain.repository.ContextDataConverter;
 import com.google.common.base.Joiner;
 import lombok.Getter;
@@ -149,7 +148,7 @@ public class Session implements Comparable<Session>, Serializable {
 	}
 
 	public int getDuration() {
-		return chamber.getChamberEvent(EventType.COMPLETION).getTimeout();
+		return chamber.getFinalEvent().getTimeout();
 	}
 
 	public TimePeriod getTimePeriod() {
@@ -179,7 +178,7 @@ public class Session implements Comparable<Session>, Serializable {
 
 	public ChamberEvent getCurrentChamberEvent() {
 		if (status == SessionStatus.FINISHED) {
-			return chamber.getChamberEvent(EventType.COMPLETION);
+			return chamber.getFinalEvent();
 		}
 		return executionMetadata.getCurrentEvent();
 	}
@@ -192,7 +191,7 @@ public class Session implements Comparable<Session>, Serializable {
 			}
 		}
 
-		return chamber.getChamberEvent(EventType.START.next());
+		return chamber.getChamberEvents().get(1);
 	}
 
 	public LocalTime getNextChamberEventTime() {

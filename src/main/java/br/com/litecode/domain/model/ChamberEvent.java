@@ -17,32 +17,15 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 @Getter
 @Setter
 public class ChamberEvent implements Comparable<ChamberEvent>, Serializable {
-	@AllArgsConstructor
-	@Getter
-	public enum EventType {
-		START(SessionStatus.COMPRESSING),
-		WEAR_MASK(SessionStatus.O2_ON),
-		REMOVE_MASK(SessionStatus.O2_OFF),
-		SHUTDOWN(SessionStatus.SHUTTING_DOWN),
-		COMPLETION(SessionStatus.FINISHED);
-
-		private SessionStatus sessionStatus;
-
-		private static final EventType[] values = values();
-
-		public EventType next() {
-			return values[(this.ordinal() + 1) % values.length];
-		}
-	}
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer eventId;
 
-	private Integer timeout;
-
-	@Enumerated(value = EnumType.STRING)
+	@ManyToOne
+	@JoinColumn(name = "event_type_id", nullable = false)
 	private EventType eventType;
+
+	private Integer timeout;
 
 	public String getDuration() {
 		Duration duration = Duration.of(timeout, SECONDS);

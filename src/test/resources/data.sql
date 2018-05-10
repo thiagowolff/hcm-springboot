@@ -3,14 +3,20 @@ insert into user (user_id, username, password, name, role, active, notification_
 insert into chamber (chamber_id, name, capacity) values (1, 'Câmara I', 9);
 insert into chamber (chamber_id, name, capacity) values (2, 'Câmara II', 9);
 
-insert into chamber_event (chamber_id, timeout, event_type) values (1, 0,' START');
-insert into chamber_event (chamber_id, timeout, event_type) values (1, 10, 'WEAR_MASK');
-insert into chamber_event (chamber_id, timeout, event_type) values (1, 20, 'REMOVE_MASK');
-insert into chamber_event (chamber_id, timeout, event_type) values (1, 40, 'WEAR_MASK');
-insert into chamber_event (chamber_id, timeout, event_type) values (1, 60, 'REMOVE_MASK');
-insert into chamber_event (chamber_id, timeout, event_type) values (1, 80, 'WEAR_MASK');
-insert into chamber_event (chamber_id, timeout, event_type) values (1, 90, 'SHUTDOWN');
-insert into chamber_event (chamber_id, timeout, event_type) values (1, 100, 'COMPLETION');
+insert into event_type(event_type_id, event_type_code, description, session_status) values (1, 'START', 'Início', 'COMPRESSING');
+insert into event_type(event_type_id, event_type_code, description, session_status) values (2, 'WEAR_MASK', 'Colocar máscaras', 'O2_ON');
+insert into event_type(event_type_id, event_type_code, description, session_status) values (3, 'REMOVE_MASK', 'Retirar máscaras', 'O2_OFF');
+insert into event_type(event_type_id, event_type_code, description, session_status) values (4, 'SHUTDOWN', 'Descompressão', 'SHUTTING_DOWN');
+insert into event_type(event_type_id, event_type_code, description, session_status) values (5, 'COMPLETION', 'Término', 'FINISHED');
+
+insert into chamber_event (chamber_id, timeout, event_type_id) values (1, 0, 1);
+insert into chamber_event (chamber_id, timeout, event_type_id) values (1, 10, 2);
+insert into chamber_event (chamber_id, timeout, event_type_id) values (1, 20, 3);
+insert into chamber_event (chamber_id, timeout, event_type_id) values (1, 40, 2);
+insert into chamber_event (chamber_id, timeout, event_type_id) values (1, 60, 3);
+insert into chamber_event (chamber_id, timeout, event_type_id) values (1, 80, 2);
+insert into chamber_event (chamber_id, timeout, event_type_id) values (1, 90, 4);
+insert into chamber_event (chamber_id, timeout, event_type_id) values (1, 100, 5);
 
 insert into patient (patient_id, name, patient_record, birth_date, gender, active) values (1, 'Patient X', 'X001', date '1980-01-01', 'M', 1);
 insert into patient (patient_id, name, patient_record, birth_date, gender, active) values (2, 'Patient Y', 'Y002', date '1990-01-01', 'M', 1);

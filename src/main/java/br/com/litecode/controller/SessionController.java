@@ -1,7 +1,6 @@
 package br.com.litecode.controller;
 
 import br.com.litecode.domain.model.*;
-import br.com.litecode.domain.model.ChamberEvent.EventType;
 import br.com.litecode.domain.model.Session.SessionStatus;
 import br.com.litecode.domain.repository.ChamberRepository;
 import br.com.litecode.domain.repository.SessionRepository;
@@ -83,7 +82,6 @@ public class SessionController implements Serializable {
 	private List<LocalDateTime> scheduledSessionDates;
 
 	private enum ChamberPayloadStatus { AVAILABLE, OCCUPIED, ABSENT }
-	private enum SessionOperationType { CREATE_SESSION, DELETE_SESSION }
 
 	@PostConstruct
 	private void init() {
@@ -103,7 +101,7 @@ public class SessionController implements Serializable {
 
 	@Transactional
 	public void addSession() {
-		int sessionDuration = sessionData.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout();
+		int sessionDuration = sessionData.getChamber().getFinalEvent().getTimeout();
 		LocalDateTime scheduledTime = sessionData.getSessionDate().atTime(sessionData.getSessionTime());
 		LocalTime startTime = scheduledTime.toLocalTime();
 		LocalTime endTime = scheduledTime.plusSeconds(sessionDuration).toLocalTime();
@@ -132,7 +130,7 @@ public class SessionController implements Serializable {
 		sessionRepository.save(session);
 		invalidateSessionCache();
 
-		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.CREATE_SESSION.name());
+		NotificationMessage notificationMessage = NotificationMessage.create(session, new EventType("create_session"));
 		pushService.publish(PushChannel.NOTIFY, notificationMessage, User.getLoggedUser());
 	}
 
@@ -168,7 +166,7 @@ public class SessionController implements Serializable {
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionTimer.stopSession(session);
 
-		ChamberEvent completionEvent = session.getChamber().getChamberEvent(EventType.COMPLETION);
+		ChamberEvent completionEvent = session.getChamber().getFinalEvent();
 		session.setStartTime(session.getScheduledTime().toLocalTime());
 		session.setEndTime(session.getScheduledTime().plus(completionEvent.getTimeout(), ChronoUnit.SECONDS).toLocalTime());
 		session.setStatus(SessionStatus.FINISHED);
@@ -195,7 +193,7 @@ public class SessionController implements Serializable {
 		sessionTimer.stopSession(session);
 		sessionRepository.delete(session);
 
-		NotificationMessage notificationMessage = NotificationMessage.create(session, SessionOperationType.DELETE_SESSION.name());
+		NotificationMessage notificationMessage = NotificationMessage.create(session, new EventType("delete_session"));
 		pushService.publish(PushChannel.NOTIFY,  notificationMessage, User.getLoggedUser());
 	}
 
@@ -239,7 +237,7 @@ public class SessionController implements Serializable {
 		for (Session fromSession : fromSessions) {
 			LocalTime time = fromSession.getScheduledTime().toLocalTime();
 			LocalDateTime sessionTime = toSessionsDate.atTime(time);
-			int sessionDuration = fromSession.getChamber().getChamberEvent(EventType.COMPLETION).getTimeout();
+			int sessionDuration = fromSession.getDuration();
 
 			Session session = new Session();
 			session.setChamber(fromSession.getChamber());
