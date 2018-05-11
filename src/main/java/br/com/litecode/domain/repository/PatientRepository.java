@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PatientRepository extends PagingAndSortingRepository<Patient, Integer> {
-	@Query("select p from Patient p where active = true order by name")
+	@Query("select p from Patient p where active = true order by p.auditLog.createdDate desc, p.name")
 	List<Patient> findActivePatients();
 
 	@Query(value = "select ps.patient.patientId as patientId, " +

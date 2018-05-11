@@ -43,7 +43,7 @@ public class PatientController implements Serializable {
 
 	@Transactional
 	public List<Patient> getPatients() {
-		if (patients == null) {
+ 		if (patients == null) {
 			patients = patientRepository.findActivePatients();
 		}
 		return patients;
@@ -93,6 +93,12 @@ public class PatientController implements Serializable {
 			Faces.validationFailed();
 			Messages.addGlobalError(MessageUtil.getMessage("error.patientRecord"));
 		}
+		refresh();
+	}
+
+	public void finishTreatment() {
+		patient.setFinalSessionDate(LocalDate.now());
+		patientRepository.save(patient);
 		refresh();
 	}
 

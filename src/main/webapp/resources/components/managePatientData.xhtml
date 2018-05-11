@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:composite="http://xmlns.jcp.org/jsf/composite"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html"
+	  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	  xmlns:of="http://omnifaces.org/functions"
+	  xmlns:f="http://xmlns.jcp.org/jsf/core"
+	  xmlns:p="http://primefaces.org/ui">
+
+<composite:interface>
+	<composite:attribute name="messagePrefix" />
+	<composite:attribute name="controller" />
+	<composite:attribute name="update" />
+</composite:interface>
+
+<composite:implementation>
+	<h:form id="#{of:concat(cc.attrs.messagePrefix, 'Form')}">
+		<p:dialog header="#{msg['title.manage']} #{msg[of:concat('label.', cc.attrs.messagePrefix)].toLowerCase()}" widgetVar="#{of:concat(cc.attrs.messagePrefix, 'Dialog')}" onShow="PF('patientDataTable').getPaginator().setPage(0);" fitViewport="true" resizable="false" showEffect="fade" modal="true" width="40%">
+			<p:messages id="patientDataMessages" />
+
+			<p:panelGrid columns="3">
+				<p:outputLabel value="#{msg[of:concat('label.', cc.attrs.messagePrefix)]}" for="patientDataName" />
+				<p:inputText id="patientDataName" value="#{cc.attrs.controller.name}" required="true" maxlength="100" size="40" />
+				<p:commandButton value="#{msg['button.add']}" actionListener="#{cc.attrs.controller.addPatientData}" process="@this, patientDataName" update="patientDataTable" validateClient="true" styleClass="btn-primary" />
+			</p:panelGrid>
+
+			<p:separator />
+
+			<p:dataTable id="patientDataTable" widgetVar="patientDataTable" value="#{cc.attrs.controller.patientData}" var="item" editable="true" paginator="true" rows="8" paginatorAlwaysVisible="false" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
+				<p:ajax event="rowEdit" listener="#{cc.attrs.controller.onRowEdit}" update="patientDataTable, #{cc.attrs.update}" oncomplete="PF('patientDataTable').clearFilters();" />
+
+				<p:column headerText="#{msg['label.id']}" styleClass="small-column">
+					<h:outputText value="#{item.patientDataId}" />
+				</p:column>
+
+				<p:column headerText="#{msg['label.name']}" sortBy="#{item.name}" styleClass="text-left">
+					<p:cellEditor>
+						<f:facet name="output"><h:outputText value="#{item.name}" /></f:facet>
+						<f:facet name="input"><p:inputText value="#{item.name}" /></f:facet>
+					</p:cellEditor>
+				</p:column>
+				<p:column headerText="#{msg['label.action']}" width="100">
+					<p:rowEditor />
+					<p:commandButton process="@this" actionListener="#{cc.attrs.controller.deletePatientData(item)}" update="patientDataTable, @form:patientDataMessages, #{cc.attrs.update}" icon="fa fa-trash" title="#{msg['button.delete']}" />
+				</p:column>
+			</p:dataTable>
+		</p:dialog>
+	</h:form>
+</composite:implementation>
+</html>
