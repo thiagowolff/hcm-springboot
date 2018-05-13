@@ -25,7 +25,7 @@
 			<div class="header">
 				<o:cache>
 					<div class="header-left animate-0 fadeIn">
-						<h:graphicImage id="logo" alt="#{msg['title.appTitle']}" value="/resources/images/logo.png" />
+						<h:link onclick="updateNavigation([{name: 'activePage', value: '/'}]); history.pushState(null, null, '/'); return false;"><h:graphicImage id="logo" alt="#{msg['title.appTitle']}" value="/resources/images/logo.png" /></h:link>
 					</div>
 					<div class="app-title hidden-xs animate-1 zoomInRight">
 						<h:outputText value="#{msg['title.appTitle']}" />
@@ -48,8 +48,7 @@
 		<footer class="footer hidden-xs">
 			<p:link styleClass="animate-1 fadeIn text-primary" style="position: absolute; left: 15px; z-index: 2;" onclick="PF('helpDialog').show(); return false;"><i class="fa fa-question-circle" /> #{msg['title.help']}</p:link>
 			<div class="animate-1 fadeIn">
-				<span>#{msg['title.poweredBy']} &#8211;</span>
-				<span class="animate-3 fadeIn" style="#{loginController.newVersion ? 'color: green' : ''}">#{version['version']} (#{version['versionUpdatedOn']} #{version['versionDate']})</span>
+				<span class="animate-3 fadeIn" style="#{loginController.newVersion ? 'color: green' : ''}">v#{version['version']} (#{version['versionUpdatedOn']} #{version['versionDate']})</span>
 			</div>
 		</footer>
 

@@ -264,7 +264,7 @@ div.timer-progress-cell {
 button:not([disabled]).ui-button-icon-only span.ui-icon {
 	&.fa-play { color: @green-500 !important; }
 	&.fa-stop { color: @red-700 !important; }
-	&.fa-stop-circle-o { color: @orange-700 !important; }
+	&.fa-stop-circle-o { color: @deepOrange-600 !important; }
 }
 
 .ui-menuitem-icon {
@@ -421,6 +421,24 @@ th .ui-button-icon-only {
 	&.dev { color: @green-500;	}
 	&.admin { color: @deepOrange-500; }
 	&.user { color: @grey-600; }
+}
+
+.patient-session-warning {
+	background: @amber-200;
+	border: 1px solid @amber-600;
+	color: @brown-700;
+	float: right;
+	font-size: 80%;
+	padding: 1px 3px;
+	border-radius: 4px;
+	position: absolute;
+	right: 4px;
+}
+
+.code {
+	background: transparent;
+	font-family: monospace;
+	font-size: 90%;
 }
 
 @media screen and (max-width: 640px) {

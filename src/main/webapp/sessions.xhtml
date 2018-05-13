@@ -44,13 +44,11 @@
 					<p:calendar id="sessionTime" locale="pt" label="#{msg['label.time']}" value="#{sessionController.sessionData.sessionTime}" widgetVar="sessionTime" pattern="HH:mm" size="5" timeOnly="true" timeControlType="slider" minHour="6" maxHour="22" stepMinute="10" converter="localDateTimeConverter" required="true" />
 				</h:panelGroup>
 
-				<o:cache key="patientsCache">
-					<p:selectCheckboxMenu id="sessionPatients" widgetVar="sessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionData.patients}" dynamic="true" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true"  styleClass="hidden-xs">
-						<f:selectItems value="#{patientController.patients}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
-					</p:selectCheckboxMenu>
-				</o:cache>
+				<p:selectCheckboxMenu id="sessionPatients" widgetVar="sessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionData.patients}" dynamic="true" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true"  styleClass="hidden-xs">
+					<f:selectItems value="#{patientController.patients}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
+				</p:selectCheckboxMenu>
 
-				<p:commandButton id="addButton" value="#{msg['button.add']}" icon="fa fa-plus"  actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true" styleClass="btn-primary btn-sm hidden-xs" oncomplete="track('Add session');">
+				<p:commandButton id="addButton" value="#{msg['button.add']}" icon="fa fa-plus" actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true" styleClass="btn-primary btn-sm hidden-xs" oncomplete="track('Add session');">
 					<p:resetInput target="@form" />
 				</p:commandButton>
 
@@ -80,13 +78,13 @@
 					<p:column headerText="#{msg['label.id']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg" style="width: 3.2em;">
 						<h:outputText id="sessionId" value="#{chamberSession.sessionId}" />
 						<h:panelGroup rendered="#{loginController.hasAdminRights() and not empty chamberSession.sessionInfo}">
-							<i class="session-info-#{chamberSession.sessionId} fa fa-info-circle hidden-xs"></i>
+							<i class="session-info-#{chamberSession.sessionId} fa fa-info-circle hidden-xs" />
 							<p:tooltip for="@(.session-info-#{chamberSession.sessionId})" value="#{chamberSession.sessionInfo}" position="bottom" escape="false" styleClass="hidden-xs" />
 						</h:panelGroup>
 					</p:column>
 
 					<p:column headerText="#{msg['label.patients']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column hidden-sm hidden-md hidden-lg">
-						<i class="session-#{chamberSession.sessionId} fa fa-info-circle"></i>
+						<i class="session-#{chamberSession.sessionId} fa fa-info-circle" />
 						<p:tooltip for="@(.session-#{chamberSession.sessionId})" value="#{chamberSession.patientNames}" position="bottom" escape="false" showEvent="touchstart" hideEvent="touchend" hideDelay="1000" />
 					</p:column>
 
@@ -98,6 +96,8 @@
 										value="#{patientSession.patient.name}"
 										style="#{patientSession.absent ? 'color: #b14538' : chamberSession.running ? 'color: #007d18' : ''}" />
 								<p:tooltip for="@(.patient-#{patientSession.patientSessionId})" value="#{patientSession.patient.recordInfo}" position="right"/>
+								<ui:param name="warning" value="#{patientController.getWarning(patientSession.patient, patientStats[patientSession.patient.patientId])}" />
+								<h:outputText value="#{warning}" styleClass="patient-session-warning" rendered="#{not empty warning}" />
 							</div>
 						</ui:repeat>
 					</p:column>

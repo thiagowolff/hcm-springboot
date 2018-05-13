@@ -6,13 +6,15 @@ import br.com.litecode.domain.model.PatientSession;
 import br.com.litecode.domain.model.Session;
 import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.PatientRepository;
+import br.com.litecode.service.AlarmService;
 import br.com.litecode.util.MessageUtil;
-import org.omnifaces.component.output.cache.Cache;
-import org.omnifaces.component.output.cache.CacheFactory;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import org.omnifaces.util.Faces;
 import org.omnifaces.util.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
@@ -32,6 +34,9 @@ import java.util.stream.Collectors;
 public class PatientController implements Serializable {
 	@Autowired
 	private PatientRepository patientRepository;
+
+	@Autowired
+	private AlarmService alarmService;
 
 	private Patient patient;
 	private List<Patient> patients;
@@ -78,6 +83,7 @@ public class PatientController implements Serializable {
 		refresh();
 	}
 
+	@CacheEvict(cacheNames = "patient", allEntries = true)
 	public void savePatient() {
 		try {
 			if (patient.getAge() != null && patient.getAge() < 10) {
@@ -102,6 +108,21 @@ public class PatientController implements Serializable {
 		refresh();
 	}
 
+	@Cacheable(key = "{ #patientStats.patientId, #patientStats.completedSessions }")
+	public String getWarning(Patient patient, PatientStats patientStats) {
+		if (patientStats == null) {
+			return "";
+		}
+
+		Object result = alarmService.evaluateScripts(ImmutableMap.of("patient", patient,"patientStats", patientStats));
+
+		if (result != null) {
+			return result.toString();
+		}
+
+		return "";
+	}
+
 	public Patient getPatient() {
 		return patient;
 	}
@@ -112,10 +133,6 @@ public class PatientController implements Serializable {
 
 	public void refresh() {
 		this.patients = null;
-		Cache cache = CacheFactory.getCache(Faces.getContext(), "session");
-		if (cache != null) {
-			cache.remove("patientsCache");
-		}
 	}
 
 	public void newPatient() {

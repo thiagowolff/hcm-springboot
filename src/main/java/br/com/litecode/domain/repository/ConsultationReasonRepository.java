@@ -1,6 +1,6 @@
 package br.com.litecode.domain.repository;
 
-import br.com.litecode.domain.model.ConsultationReason;
+import br.com.litecode.domain.model.PatientData;
 
-public interface ConsultationReasonRepository extends PatientDataRepository<ConsultationReason> {
+public interface ConsultationReasonRepository extends PatientDataRepository<PatientData.ConsultationReason> {
 }

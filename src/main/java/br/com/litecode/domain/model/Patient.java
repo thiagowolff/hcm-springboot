@@ -41,19 +41,19 @@ public class Patient {
 
 	@ManyToOne
 	@JoinColumn(name = "health_insurance_id")
-	private HealthInsurance healthInsurance;
+	private PatientData.HealthInsurance healthInsurance;
 
 	@ManyToOne
 	@JoinColumn(name = "consultation_reason_id")
-	private ConsultationReason consultationReason;
+	private PatientData.ConsultationReason consultationReason;
 
 	@ManyToOne
 	@JoinColumn(name = "physician_assistant_id")
-	private PhysicianAssistant physicianAssistant;
+	private PatientData.PhysicianAssistant physicianAssistant;
 
 	@ManyToOne
 	@JoinColumn(name = "patient_status_id")
-	private PatientStatus patientStatus;
+	private PatientData.PatientStatus patientStatus;
 
 	@OneToMany(mappedBy = "patient")
 	@JsonIgnore

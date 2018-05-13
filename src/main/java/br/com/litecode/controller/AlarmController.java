@@ -6,6 +6,8 @@ import br.com.litecode.service.AlarmService;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -39,13 +41,17 @@ public class AlarmController implements Serializable {
 		}
 		return alarms;
 	}
-	
+
+	@CacheEvict(cacheNames = "patient", allEntries = true)
 	public void saveAlarm() {
 		alarmRepository.save(alarm);
-		if (alarm.isActive()) {
-			alarmService.initializeAlarm(alarm);
-		} else {
-			alarmService.cancelAlarm(alarm);
+
+		if (alarm.getAlarmType() == Alarm.AlarmType.CRON) {
+			if (alarm.isActive()) {
+				alarmService.initializeAlarm(alarm);
+			} else {
+				alarmService.cancelAlarm(alarm);
+			}
 		}
 
 		alarms = null;

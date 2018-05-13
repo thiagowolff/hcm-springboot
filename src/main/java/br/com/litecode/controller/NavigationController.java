@@ -1,7 +1,7 @@
 package br.com.litecode.controller;
 
 import org.omnifaces.util.Faces;
-import org.primefaces.context.RequestContext;
+import org.primefaces.PrimeFaces;
 import org.springframework.stereotype.Component;
 
 import javax.enterprise.context.SessionScoped;
@@ -36,7 +36,7 @@ public class NavigationController implements Serializable {
 		activePage = pageLink;
 
 		if (update != null) {
-			RequestContext.getCurrentInstance().update(update);
+			PrimeFaces.current().ajax().update(update);
 		}
 	}
 

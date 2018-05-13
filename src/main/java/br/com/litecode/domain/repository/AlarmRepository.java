@@ -7,6 +7,9 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface AlarmRepository extends CrudRepository<Alarm, Integer> {
-	@Query("select a from Alarm a where active = true")
-	List<Alarm> findActiveAlarms();
+	@Query("select a from Alarm a where alarmType = 'CRON' and active = true")
+	List<Alarm> findActiveCronAlarms();
+
+	@Query("select a from Alarm a where alarmType = 'SCRIPT' and active = true")
+	List<Alarm> findActiveScriptAlarms();
 }

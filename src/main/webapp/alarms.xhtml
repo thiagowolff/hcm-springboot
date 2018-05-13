@@ -15,14 +15,17 @@
 				<p:column headerText="#{msg['label.id']}" priority="2" width="50">
 					#{alarm.alarmId}
 				</p:column>
-				<p:column headerText="#{msg['label.name']}" styleClass="text-left large-column" priority="1">
+				<p:column headerText="#{msg['label.type']}" width="60" priority="1">
+					#{alarm.alarmType}
+				</p:column>
+				<p:column headerText="#{msg['label.name']}" styleClass="text-left medium-column" priority="1">
 					#{alarm.name}
 				</p:column>
 				<p:column headerText="#{msg['label.message']}" styleClass="text-left large-column" priority="2">
 					<h:outputText value="#{alarm.message}" />
 				</p:column>
-				<p:column headerText="#{msg['label.cronExpression']}" styleClass="small-column" priority="1">
-					#{alarm.cronExpression}
+				<p:column headerText="#{msg['label.expression']}" styleClass="text-left large-column" priority="1">
+					<div class="code">#{alarm.expression}</div>
 				</p:column>
 				<p:column headerText="#{msg['label.active']}" styleClass="small-column" priority="1">
 					<i class="fa #{alarm.active ? 'fa-check' : 'fa-times'}" style="color: #{alarm.active ? '#4caf50' : '#f44336'}" />
@@ -36,7 +39,9 @@
 		</div>
 	</h:form>
 
-	<p:dialog header="#{msg['label.alarm']}" widgetVar="alarmDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true" fitViewport="true">
+	<o:importConstants type="br.com.litecode.domain.model.Alarm.AlarmType" />
+
+	<p:dialog header="#{msg['label.alarm']}" widgetVar="alarmDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true" fitViewport="true" onShow="loadEditor();">
 		<h:form id="alarmForm">
 			<ui:param name="newAlarm" value="#{alarmController.alarm.alarmId eq null}" />
 			<p:messages id="alarmMessages"><p:autoUpdate /></p:messages>
@@ -44,8 +49,21 @@
 				<p:outputLabel value="#{msg['label.name']}" for="name" />
 				<p:inputText id="name" value="#{alarmController.alarm.name}" maxlength="80" required="true" size="50" />
 
-				<p:outputLabel value="#{msg['label.cronExpression']}" for="cronExpression" />
-				<p:inputText id="cronExpression" value="#{alarmController.alarm.cronExpression}" maxlength="80" required="true" size="50" />
+				<p:outputLabel value="#{msg['label.type']}" for="alarmType" />
+				<p:selectOneMenu id="alarmType" value="#{alarmController.alarm.alarmType}" required="true" converter="omnifaces.SelectItemsConverter">
+					<p:ajax process="@this" event="change" update="alarmGrid" oncomplete="loadEditor();" />
+					<f:selectItem itemLabel="#{AlarmType.CRON}" itemValue="#{AlarmType.CRON}" />
+					<f:selectItem itemLabel="#{AlarmType.SCRIPT}" itemValue="#{AlarmType.SCRIPT}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel value="#{msg['label.expression']}" for="cronExpression" rendered="#{alarmController.alarm.alarmType eq 'CRON'}" />
+				<p:inputText id="cronExpression" value="#{alarmController.alarm.expression}" required="true" size="50" rendered="#{alarmController.alarm.alarmType eq 'CRON'}" />
+
+				<p:outputLabel value="#{msg['label.expression']}" for="scriptExpression" rendered="#{alarmController.alarm.alarmType eq 'SCRIPT'}" />
+				<h:panelGroup id="scriptEditor" layout="block" style="height: 100px;" rendered="#{alarmController.alarm.alarmType eq 'SCRIPT'}" />
+
+				<p:inputTextarea id="scriptExpression" value="#{alarmController.alarm.expression}" required="true" style="display: none;" />
+				<div />
 
 				<p:outputLabel value="#{msg['label.message']}" for="message" />
 				<p:inputText id="message" value="#{alarmController.alarm.message}" maxlength="80" required="true" size="50" />
@@ -65,6 +83,23 @@
 	<script>
 		$().ready(function() {
 			track('Alarms page');
+			ace.config.set("workerPath", "/resources/js");
 		})
+
+		function loadEditor() {
+			if (!$('#alarmForm\\:scriptEditor').length) {
+				return;
+			}
+
+			var editor = ace.edit('alarmForm:scriptEditor');
+			editor.setTheme("ace/theme/eclipse");
+			editor.session.setMode("ace/mode/javascript");
+
+			var textarea = $('textarea[name="alarmForm:scriptExpression"]');
+			editor.getSession().setValue(textarea.val());
+			editor.getSession().on("change", function () {
+				textarea.val(editor.getSession().getValue());
+			});
+		}
 	</script>
 </ui:composition>

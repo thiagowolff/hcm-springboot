@@ -15,7 +15,7 @@
 
 <composite:implementation>
 	<h:form id="#{of:concat(cc.attrs.messagePrefix, 'Form')}">
-		<p:dialog header="#{msg['title.manage']} #{msg[of:concat('label.', cc.attrs.messagePrefix)].toLowerCase()}" widgetVar="#{of:concat(cc.attrs.messagePrefix, 'Dialog')}" onShow="PF('patientDataTable').getPaginator().setPage(0);" fitViewport="true" resizable="false" showEffect="fade" modal="true" width="40%">
+		<p:dialog header="#{msg['title.manage']} #{msg[of:concat('label.', cc.attrs.messagePrefix)].toLowerCase()}" widgetVar="#{of:concat(cc.attrs.messagePrefix, 'Dialog')}" onShow="PF('patientDataTable').getPaginator().setPage(0); PF('patientDataTable').clearFilters();" fitViewport="true" resizable="false" showEffect="fade" modal="true" width="40%">
 			<p:messages id="patientDataMessages" />
 
 			<p:panelGrid columns="3">
@@ -26,22 +26,29 @@
 
 			<p:separator />
 
-			<p:dataTable id="patientDataTable" widgetVar="patientDataTable" value="#{cc.attrs.controller.patientData}" var="item" editable="true" paginator="true" rows="8" paginatorAlwaysVisible="false" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
+			<p:dataTable id="patientDataTable" widgetVar="patientDataTable" value="#{cc.attrs.controller.patientData}" var="dataItem" editable="true" paginator="true" rows="8" paginatorAlwaysVisible="false" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}" filteredValue="#{cc.attrs.controller.filteredPatientData}">
 				<p:ajax event="rowEdit" listener="#{cc.attrs.controller.onRowEdit}" update="patientDataTable, #{cc.attrs.update}" oncomplete="PF('patientDataTable').clearFilters();" />
 
+				<f:facet name="header">
+					<p:outputPanel style="text-align: right;">
+						<p:inputText id="globalFilter" onkeyup="PF('patientDataTable').filter()" />
+						<i class="global-filter fa fa-search" />
+					</p:outputPanel>
+				</f:facet>
+
 				<p:column headerText="#{msg['label.id']}" styleClass="small-column">
-					<h:outputText value="#{item.patientDataId}" />
+					<h:outputText value="#{dataItem.patientDataId}" />
 				</p:column>
 
-				<p:column headerText="#{msg['label.name']}" sortBy="#{item.name}" styleClass="text-left">
+				<p:column headerText="#{msg['label.name']}" sortBy="#{dataItem.name}" filterBy="#{dataItem.name}" filterStyle="display: none;" styleClass="text-left">
 					<p:cellEditor>
-						<f:facet name="output"><h:outputText value="#{item.name}" /></f:facet>
-						<f:facet name="input"><p:inputText value="#{item.name}" /></f:facet>
+						<f:facet name="output"><h:outputText value="#{dataItem.name}" /></f:facet>
+						<f:facet name="input"><p:inputText value="#{dataItem.name}" /></f:facet>
 					</p:cellEditor>
 				</p:column>
 				<p:column headerText="#{msg['label.action']}" width="100">
 					<p:rowEditor />
-					<p:commandButton process="@this" actionListener="#{cc.attrs.controller.deletePatientData(item)}" update="patientDataTable, @form:patientDataMessages, #{cc.attrs.update}" icon="fa fa-trash" title="#{msg['button.delete']}" />
+					<p:commandButton process="@this" actionListener="#{cc.attrs.controller.deletePatientData(dataItem)}" update="patientDataTable, @form:patientDataMessages, #{cc.attrs.update}" icon="fa fa-trash" title="#{msg['button.delete']}" />
 				</p:column>
 			</p:dataTable>
 		</p:dialog>

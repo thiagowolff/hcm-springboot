@@ -1,6 +1,6 @@
 package br.com.litecode.domain.repository;
 
-import br.com.litecode.domain.model.PatientStatus;
+import br.com.litecode.domain.model.PatientData;
 
-public interface PatientStatusRepository extends PatientDataRepository<PatientStatus> {
+public interface PatientStatusRepository extends PatientDataRepository<PatientData.PatientStatus> {
 }

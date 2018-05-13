@@ -35,4 +35,24 @@ public abstract class PatientData {
 	public String toString() {
 		return "[" + patientDataId + "] " + name;
 	}
+
+	@Entity
+	@DiscriminatorValue("HealthInsurance")
+	public static class HealthInsurance extends PatientData {
+	}
+
+	@Entity
+	@DiscriminatorValue("PhysicianAssistant")
+	public static class PhysicianAssistant extends PatientData {
+	}
+
+	@Entity
+	@DiscriminatorValue("PatientStatus")
+	public static class PatientStatus extends PatientData {
+	}
+
+	@Entity
+	@DiscriminatorValue("ConsultationReason")
+	public static class ConsultationReason extends PatientData {
+	}
 }

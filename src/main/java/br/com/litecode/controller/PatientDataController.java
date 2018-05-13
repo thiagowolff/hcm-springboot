@@ -12,15 +12,15 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 @Component
+@Getter
+@Setter
 public abstract class PatientDataController<T extends PatientData> {
 	@Autowired
 	protected PatientController patientController;
 
-	@Getter
-	@Setter
 	private String name;
-
 	private Iterable<T> patientData;
+	private Iterable<T> filteredPatientData;
 
 	protected abstract PatientDataRepository<T> getRepository();
 	protected abstract T createPatientData();

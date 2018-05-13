@@ -1,5 +1,6 @@
 package br.com.litecode.domain.model;
 
+import br.com.litecode.domain.model.Patient.PatientStats;
 import br.com.litecode.util.TextUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
@@ -22,7 +23,6 @@ public class PatientSession implements Comparable<PatientSession>, Serializable 
 
 	@ManyToOne
 	@JoinColumn(name = "session_id", nullable = false)
-	@JsonIgnore
 	private Session session;
 
 	private boolean absent;

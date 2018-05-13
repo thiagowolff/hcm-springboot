@@ -19,7 +19,7 @@ public class ChamberEvent implements Comparable<ChamberEvent>, Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer eventId;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "event_type_id", nullable = false)
 	private EventType eventType;
 

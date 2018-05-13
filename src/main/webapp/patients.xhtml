@@ -207,7 +207,7 @@
 					</p:selectOneMenu>
 				</div>
 				<div class="col-md-3">
-					<p:commandButton value="#{msg['button.finish']}" process="@this, patienTreatmentStatus" update=":patientsForm:patientsTable" actionListener="#{patientController.finishTreatment}" oncomplete="PF('finishTreatmentDialog').hide(); track('Finish treatment');" styleClass="btn-primary"/>
+					<p:commandButton value="#{msg['button.finalize']}" process="@this, patienTreatmentStatus" update=":patientsForm:patientsTable" actionListener="#{patientController.finishTreatment}" oncomplete="PF('finishTreatmentDialog').hide(); track('Finish treatment');" styleClass="btn-primary"/>
 				</div>
 			</div>
 		</p:dialog>
