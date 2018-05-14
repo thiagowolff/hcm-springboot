@@ -390,7 +390,7 @@
 			fetchUserSettings();
 
 			window.getUserSettingsCallback = function(xhr, status, args) {
-				var userSettings = JSON.parse(args.userSettings);
+				var userSettings = args.userSettings ? JSON.parse(args.userSettings) : null;
 
 				if (!userSettings || userSettings.notificationMessages) {
 					var facesMessage = {
@@ -398,7 +398,6 @@
 						detail: notificationMessage.messageDetail,
 						severity: notificationMessage.eventType || 'info'
 					};
-
 					PF('growl').show([facesMessage]);
 				}
 

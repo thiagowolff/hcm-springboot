@@ -62,8 +62,8 @@
 				<p:outputLabel value="#{msg['label.expression']}" for="scriptExpression" rendered="#{alarmController.alarm.alarmType eq 'SCRIPT'}" />
 				<h:panelGroup id="scriptEditor" layout="block" style="height: 100px;" rendered="#{alarmController.alarm.alarmType eq 'SCRIPT'}" />
 
-				<p:inputTextarea id="scriptExpression" value="#{alarmController.alarm.expression}" required="true" style="display: none;" />
-				<div />
+				<p:inputTextarea id="scriptExpression" value="#{alarmController.alarm.expression}" required="true" rendered="#{alarmController.alarm.alarmType eq 'SCRIPT'}" style="display: none;" />
+				<h:panelGroup layout="block" rendered="#{alarmController.alarm.alarmType eq 'SCRIPT'}" />
 
 				<p:outputLabel value="#{msg['label.message']}" for="message" />
 				<p:inputText id="message" value="#{alarmController.alarm.message}" maxlength="80" required="true" size="50" />

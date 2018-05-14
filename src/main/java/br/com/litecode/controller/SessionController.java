@@ -11,6 +11,7 @@ import br.com.litecode.service.push.PushService;
 import br.com.litecode.service.push.message.NotificationMessage;
 import br.com.litecode.service.timer.SessionTimer;
 import br.com.litecode.util.MessageUtil;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.itextpdf.text.DocumentException;
@@ -294,7 +295,7 @@ public class SessionController implements Serializable {
 
 		String sessionId = Faces.getRequestParameter("sessionId");
 
-		if (sessionId != null) {
+		if (!Strings.isNullOrEmpty(sessionId)) {
 			patientCache.evict(Arrays.asList(Integer.valueOf(sessionId), sessionData.getSessionDate()));
 		}
 
