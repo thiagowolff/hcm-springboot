@@ -1,5 +1,6 @@
 package br.com.litecode.domain.model;
 
+import br.com.litecode.domain.model.PatientData.PatientStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
@@ -53,7 +54,7 @@ public class Patient {
 
 	@ManyToOne
 	@JoinColumn(name = "patient_status_id")
-	private PatientData.PatientStatus patientStatus;
+	private PatientStatus patientStatus;
 
 	@OneToMany(mappedBy = "patient")
 	@JsonIgnore

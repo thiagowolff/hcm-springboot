@@ -106,6 +106,7 @@
 				</p:column>
 				<p:column headerText="#{msg['label.action']}" width="140" style="padding: 1px" priority="3">
 					<p:commandButton process="@this" update=":finishTreatmentForm:patienTreatmentStatus" actionListener="#{patientController.setPatient(patient)}" onclick="PF('finishTreatmentDialog').show();" icon="fa fa-stop-circle-o" title="#{msg['button.finishTreatment']}" rendered="#{patient.finalSessionDate eq null}" />
+					<p:commandButton process="@this" update="patientsTable" actionListener="#{patientController.restartTreatment(patient)}" icon="fa fa-undo" title="#{msg['button.restartTreatment']}" rendered="#{patient.finalSessionDate ne null and loginController.hasAdminRights()}" />
 					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" update=":patientInputForm" oncomplete="PF('patientDialog').show();" icon="fa fa-pencil" title="#{msg['button.edit']}" global="false">
 						<p:resetInput target=":patientInputForm:patientGrid" />
 					</p:commandButton>

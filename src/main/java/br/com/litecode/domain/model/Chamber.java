@@ -1,5 +1,6 @@
 package br.com.litecode.domain.model;
 
+import javafx.collections.transformation.SortedList;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SortNatural;
@@ -22,7 +23,7 @@ public class Chamber {
 
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "chamber_id")
-	@SortNatural
+	@OrderBy("timeout")
 	private List<ChamberEvent> chamberEvents;
 
 	public ChamberEvent getFinalEvent() {

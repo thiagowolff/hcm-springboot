@@ -31,7 +31,7 @@
 						<p:calendar id="sessionDate" locale="pt" widgetVar="sessionDate" value="#{sessionController.sessionData.sessionDate}" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" beforeShowDay="sessionDates" converter="localDateTimeConverter">
 							<p:ajax event="dateSelect" process="@this" update="chambersGrid"/>
 						</p:calendar>
-						<p:commandLink value="#{msg['label.today']}" actionListener="#{sessionController.sessionData.today()}" styleClass="today" process="@this" update="chambersGrid, sessionDate" />
+						<p:commandLink value="#{msg['label.today']}" actionListener="#{sessionController.sessionData.today()}" styleClass="today" process="@this" update="chambersGrid, sessionDate" oncomplete="track('Today\'s sessions');" />
 					</h:panelGroup>
 					<p:commandButton icon="fa fa-arrow-right" actionListener="#{sessionController.nextSessionDate()}" process="@this" update="chambersGrid, sessionDate" style="margin-left: -18px;" />
 				</h:panelGroup>
@@ -45,7 +45,7 @@
 				</h:panelGroup>
 
 				<p:selectCheckboxMenu id="sessionPatients" widgetVar="sessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionData.patients}" dynamic="true" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true"  styleClass="hidden-xs">
-					<f:selectItems value="#{patientController.patients}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
+					<f:selectItems value="#{patientController.availablePatients}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name} #{patient.patientStatus ne null ? of:format1('({0})', patient.patientStatus.name) : ''}"/>
 				</p:selectCheckboxMenu>
 
 				<p:commandButton id="addButton" value="#{msg['button.add']}" icon="fa fa-plus" actionListener="#{sessionController.addSession()}" process="@this, sessionDate, sessionChamber, sessionTime, sessionPatients" update="chambersGrid, messages, sessionPatients" validateClient="true" styleClass="btn-primary btn-sm hidden-xs" oncomplete="track('Add session');">

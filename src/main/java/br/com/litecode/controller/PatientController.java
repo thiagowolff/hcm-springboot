@@ -54,6 +54,10 @@ public class PatientController implements Serializable {
 		return patients;
 	}
 
+	public List<Patient> getAvailablePatients() {
+		return patientRepository.findAvailablePatients();
+	}
+
 	@Cacheable(key = "{ #session.sessionId, #date }", sync = true)
 	public Map<Integer, PatientStats> getPatientStats(Session session, LocalDate date) {
 		List<PatientStats> stats = patientRepository.findPatienStats(session.getSessionId(), date.plusDays(1).atStartOfDay());
@@ -104,6 +108,13 @@ public class PatientController implements Serializable {
 
 	public void finishTreatment() {
 		patient.setFinalSessionDate(LocalDate.now());
+		patientRepository.save(patient);
+		refresh();
+	}
+
+	public void restartTreatment(Patient patient) {
+		patient.setFinalSessionDate(null);
+		patient.setPatientStatus(null);
 		patientRepository.save(patient);
 		refresh();
 	}

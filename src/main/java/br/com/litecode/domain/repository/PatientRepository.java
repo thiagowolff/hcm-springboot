@@ -12,6 +12,9 @@ public interface PatientRepository extends PagingAndSortingRepository<Patient, I
 	@Query("select p from Patient p where active = true order by p.auditLog.createdDate desc, p.name")
 	List<Patient> findActivePatients();
 
+	@Query("select p from Patient p where active = true order by case when p.finalSessionDate is null then '' else p.name end,  p.name, p.auditLog.createdDate desc")
+	List<Patient> findAvailablePatients();
+
 	@Query(value = "select ps.patient.patientId as patientId, " +
 			"sum(case when ps.session.status = 'FINISHED' and ps.absent = false then 1 else 0 end) as completedSessions, " +
 			"sum(case when ps.session.status = 'FINISHED' and ps.absent = true then 1 else 0 end) as absentSessions, " +
@@ -28,6 +31,6 @@ public interface PatientRepository extends PagingAndSortingRepository<Patient, I
 			"group by ps.patient.patientId")
 	PatientStats findPatienStats(Integer patientId);
 
-	@Query("select p from Patient p where p not in (select p from Patient p join p.patientSessions ps where ps.session.sessionId = :sessionId) order by p.name, p.patientId")
+	@Query("select p from Patient p where p not in (select p from Patient p join p.patientSessions ps where ps.session.sessionId = :sessionId) order by case when p.finalSessionDate is null then '' else p.name end, p.name, p.patientId")
 	List<Patient> findPatientsNotInSession(Integer sessionId);
 }
