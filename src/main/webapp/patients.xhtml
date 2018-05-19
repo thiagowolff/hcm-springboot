@@ -104,13 +104,15 @@
 					<h:outputText value="#{patient.patientStatus.name}" rendered="#{patient.finalSessionDate ne null}" />
 					<h:outputText value="#{msg['label.inTreatment']}" style="color: #1976d2;" rendered="#{patient.finalSessionDate eq null}" />
 				</p:column>
-				<p:column headerText="#{msg['label.action']}" width="140" style="padding: 1px" priority="3">
+				<p:column headerText="#{msg['label.action']}" width="180" style="padding: 1px" priority="3">
 					<p:commandButton process="@this" update=":finishTreatmentForm:patienTreatmentStatus" actionListener="#{patientController.setPatient(patient)}" onclick="PF('finishTreatmentDialog').show();" icon="fa fa-stop-circle-o" title="#{msg['button.finishTreatment']}" rendered="#{patient.finalSessionDate eq null}" />
-					<p:commandButton process="@this" update="patientsTable" actionListener="#{patientController.restartTreatment(patient)}" icon="fa fa-undo" title="#{msg['button.restartTreatment']}" rendered="#{patient.finalSessionDate ne null and loginController.hasAdminRights()}" />
-					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" update=":patientInputForm" oncomplete="PF('patientDialog').show();" icon="fa fa-pencil" title="#{msg['button.edit']}" global="false">
+					<p:commandButton process="@this" update="patientsTable" actionListener="#{patientController.restartTreatment(patient)}" icon="fa fa-undo" title="#{msg['button.restartTreatment']}" oncomplete="track('Restart treatment')" rendered="#{patient.finalSessionDate ne null and loginController.hasAdminRights()}" />
+					<p:commandButton process="@this" update=":attendanceChartForm:chartGrid" actionListener="#{patientController.setAttendanceChartData(chartsController.getPatientAttendance(patient.patientId))}" onclick="PF('attendanceChartDialog').show();" oncomplete="loadChart(); track('Patient attendance chart')" icon="fa fa-calendar" title="#{msg['button.patientAttendance']}" />
+
+					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" update=":patientInputForm" oncomplete="PF('patientDialog').show(); track('Edit patient');" icon="fa fa-pencil" title="#{msg['button.edit']}" global="false">
 						<p:resetInput target=":patientInputForm:patientGrid" />
 					</p:commandButton>
-					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" onclick="PF('confirmDeletePatientDialog').show();" icon="fa fa-trash" title="#{msg['button.delete']}" rendered="#{loginController.hasAdminRights()}" />
+					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" onclick="PF('confirmDeletePatientDialog').show();" oncomplete="track('Delete patient');" icon="fa fa-trash" title="#{msg['button.delete']}" rendered="#{loginController.hasAdminRights()}" />
 				</p:column>
 			</p:dataTable>
 		</div>
@@ -214,6 +216,72 @@
 		</p:dialog>
 	</h:form>
 
+	<h:form id="attendanceChartForm">
+		<p:dialog header="#{msg['title.patientAttendance']}" widgetVar="attendanceChartDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true" width="960">
+			<h:panelGroup id="chartGrid" layout="block">
+				<h:outputScript>
+					//<![CDATA[
+					function loadChart() {
+						if (typeof google == 'undefined') {
+							return;
+						}
+
+						var chartData = '#{patientController.attendanceChartData}';
+
+						if (!chartData) {
+							var noDataMessage = $("<p>Nenhuma sessão realizada para este paciente.</p>");;
+							noDataMessage.appendTo($('#patientAttendanceChart'));
+							return;
+						}
+
+						var yearSet = new Set();
+						var dataArray = JSON.parse(chartData);
+						for (i = 0; i < dataArray.length; ++i) {
+							var date = new Date(dataArray[i][0]);
+							dataArray[i][0] = date;
+							yearSet.add(date.getFullYear());
+
+							dataArray[i][2] = dataArray[i][1] == 0 ? 'Não compareceu' : 'Presente';
+							dataArray[i][2] = dataArray[i][0].toLocaleDateString("pt-BR") + '<span style="font-size: 18px; padding: 10px; white-space: nowrap;">' + dataArray[i][2] + '</span>';
+						}
+
+						var height = 175 * yearSet.size;
+						$('#patientAttendanceChart').height(height);
+
+						var options = {
+							tooltip: { isHtml: true },
+							width: 900,
+							height: height,
+							calendar: {
+								daysOfWeek: 'DSTQQSS'
+							},
+							noDataPattern: {
+								backgroundColor: '#ffffff',
+								color: '#e3f2fd'
+							},
+							colorAxis: {
+								minValue: 0,
+								maxValue: 1,
+								colors: [ '#ef5350', '#66bb6a' ]
+							}
+						};
+
+						var dataTable = new google.visualization.DataTable();
+						dataTable.addColumn({type: 'date', id: 'Data'});
+						dataTable.addColumn({type: 'number', id: 'Presença'});
+						dataTable.addColumn({type: 'string', role: 'tooltip', 'p': {'html': true}});
+
+						dataTable.addRows(dataArray);
+						var chart = new google.visualization.Calendar(document.getElementById('patientAttendanceChart'));
+						chart.draw(dataTable, options);
+					}
+					//]]>
+				</h:outputScript>
+				<div id="patientAttendanceChart"></div>
+			</h:panelGroup>
+		</p:dialog>
+	</h:form>
+
 	<lc:confirmDeleteDialog entity="Patient" deleteAction="#{patientController.deletePatient()}" update=":patientsForm:messages, :patientsForm:patientsTable, :patientInputForm:patientGrid" oncomplete="PF('patientsTable').clearFilters();" />
 
 	<lc:managePatientData messagePrefix="healthInsurance" controller="#{healthInsuranceController}" id="healthInsuranceComponent" update=":patientsForm:patientsTable" />
@@ -221,7 +289,7 @@
 	<lc:managePatientData messagePrefix="physicianAssistant" controller="#{physicianAssistantController}" id="physicianAssistantComponent" update=":patientsForm:patientsTable" />
 	<lc:managePatientData messagePrefix="consultationReason" controller="#{consultationReasonController}" id="consultationReasonComponent" update=":patientsForm:patientsTable" ></lc:managePatientData>
 
-	<script type="text/javascript">
+	<script>
        	$().ready(function() {
 			track('Patients page');
 		});

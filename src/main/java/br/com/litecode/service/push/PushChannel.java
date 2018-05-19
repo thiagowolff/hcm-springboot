@@ -8,5 +8,6 @@ import lombok.Getter;
 public enum PushChannel {
 	REFRESH,
 	PROGRESS,
-	NOTIFY
+	NOTIFY,
+	UPDATE
 }

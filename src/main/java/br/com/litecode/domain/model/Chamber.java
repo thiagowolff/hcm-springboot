@@ -26,7 +26,11 @@ public class Chamber {
 	@OrderBy("timeout")
 	private List<ChamberEvent> chamberEvents;
 
-	public ChamberEvent getFinalEvent() {
+	public ChamberEvent getFirstEvent() {
+		return chamberEvents.stream().min(Comparator.comparingInt(ChamberEvent::getTimeout)).get();
+	}
+
+	public ChamberEvent getLastEvent() {
 		return chamberEvents.stream().max(Comparator.comparingInt(ChamberEvent::getTimeout)).get();
 	}
 

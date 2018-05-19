@@ -13,7 +13,6 @@ import br.com.litecode.service.timer.SessionTimer;
 import br.com.litecode.util.MessageUtil;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 import com.itextpdf.text.DocumentException;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.omnifaces.util.Faces;
 import org.omnifaces.util.Messages;
-import org.primefaces.PrimeFaces;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -102,7 +100,7 @@ public class SessionController implements Serializable {
 
 	@Transactional
 	public void addSession() {
-		int sessionDuration = sessionData.getChamber().getFinalEvent().getTimeout();
+		int sessionDuration = sessionData.getChamber().getLastEvent().getTimeout();
 		LocalDateTime scheduledTime = sessionData.getSessionDate().atTime(sessionData.getSessionTime());
 		LocalTime startTime = scheduledTime.toLocalTime();
 		LocalTime endTime = scheduledTime.plusSeconds(sessionDuration).toLocalTime();
@@ -167,7 +165,7 @@ public class SessionController implements Serializable {
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionTimer.stopSession(session);
 
-		ChamberEvent completionEvent = session.getChamber().getFinalEvent();
+		ChamberEvent completionEvent = session.getChamber().getLastEvent();
 		session.setStartTime(session.getScheduledTime().toLocalTime());
 		session.setEndTime(session.getScheduledTime().plus(completionEvent.getTimeout(), ChronoUnit.SECONDS).toLocalTime());
 		session.setStatus(SessionStatus.FINISHED);
@@ -323,16 +321,6 @@ public class SessionController implements Serializable {
 	public String getScheduledSessionDates() {
 		Set<LocalDate> sessionDates = scheduledSessionDates.stream().map(LocalDateTime::toLocalDate).collect(Collectors.toSet());
 		return sessionDates.stream().map(date -> "'" + date + "'").collect(Collectors.joining(","));
-	}
-
-	public void getUserSettings() {
-		if (User.getLoggedUser() == null) {
-			PrimeFaces.current().ajax().addCallbackParam("userSettings", null);
-			return;
-		}
-
-		UserSettings userSettings = User.getLoggedUser().getUserSettings();
-		PrimeFaces.current().ajax().addCallbackParam("userSettings", new Gson().toJson(userSettings));
 	}
 
 	@Getter

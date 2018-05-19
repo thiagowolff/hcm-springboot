@@ -1,15 +1,18 @@
 package br.com.litecode.controller;
 
 import br.com.litecode.domain.model.User;
+import br.com.litecode.domain.model.UserSettings;
 import br.com.litecode.domain.repository.UserRepository;
 import br.com.litecode.security.UserSessionTracker;
 import br.com.litecode.service.MailService;
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.omnifaces.util.Messages;
+import org.primefaces.PrimeFaces;
 import org.primefaces.context.RequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -106,6 +109,20 @@ public class UserController implements Serializable {
 	public void killUserSession(User user) {
 		userSessionTracker.killUserSession(user);
 		users = null;
+	}
+
+	public void getUserSettings() {
+		if (User.getLoggedUser() == null) {
+			PrimeFaces.current().ajax().addCallbackParam("userSettings", null);
+			return;
+		}
+
+		UserSettings userSettings = User.getLoggedUser().getUserSettings();
+		PrimeFaces.current().ajax().addCallbackParam("userSettings", new Gson().toJson(userSettings));
+	}
+
+	public int getOnlineUsers() {
+		return userSessionTracker.getOnlineUsers();
 	}
 
 	public void sendHelpMessageEmail() {

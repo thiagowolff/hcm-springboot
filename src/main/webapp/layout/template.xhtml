@@ -39,6 +39,7 @@
 				<div class="container">
 					<div class="inner-container">
 						<h:panelGroup id="content" layout="block">
+							<p:growl id="growl" widgetVar="growl" showDetail="true" life="10000" escape="false" />
 							<ui:include src="#{navigationController.activePage}" />
 						</h:panelGroup>
 					</div>
@@ -50,6 +51,7 @@
 			<div class="animate-1 fadeIn">
 				<span class="animate-3 fadeIn" style="#{loginController.newVersion ? 'color: green' : ''}">v#{version['version']} (#{version['versionUpdatedOn']} #{version['versionDate']})</span>
 			</div>
+			<h:panelGroup id="onlineUsers" layout="block" styleClass="text-primary text-center" style="position: relative; top: -15px;">usuários online: #{userController.onlineUsers}</h:panelGroup>
 		</footer>
 
 		<p:dialog header="#{msg['title.help']}" widgetVar="helpDialog" width="50%" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
@@ -68,11 +70,13 @@
 		</h:form>
 
 		<script>
+			//<![CDATA[
 			$().ready(function() {
 				var url = location.href;
 				url = url.substring(url.lastIndexOf('/'), url.length);
 				refreshNavigation([{name: 'activePage', value: url}, {name: 'update', value: 'content'}]);
 			});
+			//]]>
 		</script>
 	</h:body>
 </f:view>

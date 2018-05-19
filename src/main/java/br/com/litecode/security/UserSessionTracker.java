@@ -2,7 +2,8 @@ package br.com.litecode.security;
 
 import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.UserRepository;
-import br.com.litecode.service.push.PushRefresh;
+import br.com.litecode.service.push.PushChannel;
+import br.com.litecode.service.push.PushService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,9 @@ public class UserSessionTracker implements Serializable {
 	@Autowired
 	private UserRepository userRepository;
 
+	@Autowired
+	private PushService pushService;
+
 	private Map<User, HttpSession> userSessions;
 
 	@PostConstruct
@@ -33,14 +37,23 @@ public class UserSessionTracker implements Serializable {
 
 	public void addUserSession(User user, HttpSession session) {
 		userSessions.put(user, session);
+		pushService.publish(PushChannel.UPDATE, "", null);
+	}
+
+	public void removeUserSession(User user) {
+		userSessions.remove(user);
+		pushService.publish(PushChannel.UPDATE, "", null);
+	}
+
+	public int getOnlineUsers() {
+		return userSessions.size();
 	}
 	
-	@PushRefresh
 	public synchronized void killUserSession(User user) {
 		HttpSession userSession = userSessions.get(user);
 		user.setSessionId(null);
 		userRepository.save(user);
-		userSessions.remove(user);
+		removeUserSession(user);
 		userSession.invalidate();
 	}
 }

@@ -10,6 +10,8 @@ import br.com.litecode.service.AlarmService;
 import br.com.litecode.util.MessageUtil;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import lombok.Getter;
+import lombok.Setter;
 import org.omnifaces.util.Faces;
 import org.omnifaces.util.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 
 @ViewScoped
 @Component
+
 @CacheConfig(cacheNames = "patient")
 public class PatientController implements Serializable {
 	@Autowired
@@ -38,9 +41,16 @@ public class PatientController implements Serializable {
 	@Autowired
 	private AlarmService alarmService;
 
+	@Getter	@Setter
 	private Patient patient;
-	private List<Patient> patients;
+
+	@Getter	@Setter
 	private List<Patient> filteredPatients;
+
+	@Getter @Setter
+	private String attendanceChartData;
+
+	private List<Patient> patients;
 
 	public PatientController() {
 		patient = new Patient();
@@ -134,27 +144,11 @@ public class PatientController implements Serializable {
 		return "";
 	}
 
-	public Patient getPatient() {
-		return patient;
-	}
-
-	public void setPatient(Patient patient) {
-		this.patient = patient;
-	}
-
 	public void refresh() {
 		this.patients = null;
 	}
 
 	public void newPatient() {
 		patient = new Patient();
-	}
-
-	public List<Patient> getFilteredPatients() {
-		return filteredPatients;
-	}
-
-	public void setFilteredPatients(List<Patient> filteredPatients) {
-		this.filteredPatients = filteredPatients;
 	}
 }

@@ -20,8 +20,6 @@
 		//]]>
 	</script>
 
-	<p:growl id="growl" widgetVar="growl" showDetail="true" life="10000" escape="false" />
-
 	<div class="content-wrapper">
 		<h:form id="form">
 			<p:panelGrid columns="9" layout="grid" styleClass="session-toolbar">
@@ -75,7 +73,7 @@
 						#{chamber.name}
 					</f:facet>
 
-					<p:column headerText="#{msg['label.id']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg" style="width: 3.2em;">
+					<p:column headerText="#{msg['label.id']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column" style="width: 3.2em;">
 						<h:outputText id="sessionId" value="#{chamberSession.sessionId}" />
 						<h:panelGroup rendered="#{loginController.hasAdminRights() and not empty chamberSession.sessionInfo}">
 							<i class="session-info-#{chamberSession.sessionId} fa fa-info-circle hidden-xs" />
@@ -83,12 +81,7 @@
 						</h:panelGroup>
 					</p:column>
 
-					<p:column headerText="#{msg['label.patients']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column hidden-sm hidden-md hidden-lg">
-						<i class="session-#{chamberSession.sessionId} fa fa-info-circle" />
-						<p:tooltip for="@(.session-#{chamberSession.sessionId})" value="#{chamberSession.patientNames}" position="bottom" escape="false" showEvent="touchstart" hideEvent="touchend" hideDelay="1000" />
-					</p:column>
-
-					<p:column headerText="#{msg['label.patients']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg large-column hidden-xs" style="vertical-align: top;">
+					<p:column headerText="#{msg['label.patients']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg large-column" style="vertical-align: top;">
 						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
 							<div class="long-text text-left">
 								<h:outputText
@@ -317,8 +310,9 @@
 	</h:form>
 
 	<h:form>
-		<p:remoteCommand name="refreshSessions" oncomplete="onSessionTimeout(this.data)" actionListener="#{sessionController.invalidateSessionCache()}" process="@this" update=":form:chambersGrid :editSessionForm" global="false" />
-		<p:remoteCommand name="fetchUserSettings" oncomplete="getUserSettingsCallback(xhr, status, args)" actionListener="#{sessionController.getUserSettings()}" process="@this" global="false" />
+		<p:remoteCommand name="refreshSessions" oncomplete="onSessionTimeout(this.data)" actionListener="#{sessionController.invalidateSessionCache()}" process="@this" update=":form:chambersGrid :editSessionForm, :onlineUsers" global="false" />
+		<p:remoteCommand name="fetchUserSettings" oncomplete="getUserSettingsCallback(xhr, status, args)" actionListener="#{userController.getUserSettings()}" process="@this" global="false" />
+		<p:remoteCommand name="updateOnlineUsers" process="@this" update="onlineUsers" global="false" />
 	</h:form>
 
 	<script>
@@ -326,7 +320,6 @@
 		var loggedUser;
 		var socket;
 		var stompClient;
-
 
 		function initWebsocket() {
 			if (socket && stompClient) {
@@ -340,7 +333,7 @@
 			console.log("Websocket initialized!")
 		}
 
-		function register(registrations) {
+		function register(registrations, onClose) {
 			stompClient.connect({}, function(frame) {
 				loggedUser = frame.headers['user-name'];
 				registrations.forEach(function (registration) {
@@ -349,10 +342,7 @@
 				});
 			});
 
-			socket.onclose = function() {
-				refreshSessions();
-				stompClient.disconnect();
-			}
+			socket.onclose = onClose;
 		}
 
 		$().ready(function() {
@@ -375,12 +365,20 @@
 					},
 					{
 						route: '/topic/refresh', callback: function (data) {
-						if (data.headers['user-name'] != loggedUser) {
-							refreshSessions();
+							if (data.headers['user-name'] != loggedUser) {
+								refreshSessions();
+							}
+						}
+					},
+					{
+						route: '/topic/update', callback: function (data) {
+							updateOnlineUsers();
 						}
 					}
-					}
-				]);
+				], function() {
+					refreshSessions();
+					stompClient.disconnect();
+				});
 			}
 
 			track('Sessions page');

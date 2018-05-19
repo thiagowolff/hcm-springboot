@@ -15,43 +15,43 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 @Getter
 @Setter
 public class ChamberEvent implements Comparable<ChamberEvent>, Serializable {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer eventId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer eventId;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "event_type_id", nullable = false)
-	private EventType eventType;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "event_type_id", nullable = false)
+    private EventType eventType;
 
-	private Integer timeout;
+    private Integer timeout;
 
-	public String getDuration() {
-		Duration duration = Duration.of(timeout, SECONDS);
-		return LocalTime.MIDNIGHT.plus(duration).format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-	}
+    public String getDuration() {
+        Duration duration = Duration.of(timeout, SECONDS);
+        return LocalTime.MIDNIGHT.plus(duration).format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+    }
 
-	@Override
-	public int compareTo(ChamberEvent chamberEvent) {
-		return timeout.compareTo(chamberEvent.getTimeout());
-	}
+    @Override
+    public int compareTo(ChamberEvent chamberEvent) {
+        return timeout.compareTo(chamberEvent.getTimeout());
+    }
 
-	@Override
-	public String toString() {
-		return eventType.toString();
-	}
+    @Override
+    public String toString() {
+        return eventType.toString();
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-		ChamberEvent that = (ChamberEvent) o;
+        ChamberEvent that = (ChamberEvent) o;
 
-		return eventId.equals(that.eventId);
-	}
+        return eventId.equals(that.eventId);
+    }
 
-	@Override
-	public int hashCode() {
-		return eventId.hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return eventId.hashCode();
+    }
 }

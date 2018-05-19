@@ -1,8 +1,13 @@
-google.charts.load('current', {'packages':['corechart']});
-google.charts.setOnLoadCallback(drawCharts);
+
+if (typeof google !== 'undefined') {
+	google.charts.load('current', {'packages':['corechart', 'calendar'], 'language': 'pt'});
+	google.charts.setOnLoadCallback(drawCharts);
+}
 
 function drawChart(title, dataArray, elementId, chartType, additionalOptions) {
-	if (!dataArray) return;
+	if (typeof google == 'undefined' || !dataArray) {
+		return;
+	}
 
 	var options = {
 		title: title,

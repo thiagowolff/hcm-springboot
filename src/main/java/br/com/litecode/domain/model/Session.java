@@ -148,7 +148,7 @@ public class Session implements Comparable<Session>, Serializable {
 	}
 
 	public int getDuration() {
-		return chamber.getFinalEvent().getTimeout();
+		return chamber.getLastEvent().getTimeout();
 	}
 
 	public TimePeriod getTimePeriod() {
@@ -178,7 +178,7 @@ public class Session implements Comparable<Session>, Serializable {
 
 	public ChamberEvent getCurrentChamberEvent() {
 		if (status == SessionStatus.FINISHED) {
-			return chamber.getFinalEvent();
+			return chamber.getLastEvent();
 		}
 		return executionMetadata.getCurrentEvent();
 	}

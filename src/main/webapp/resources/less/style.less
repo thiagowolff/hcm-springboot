@@ -266,6 +266,7 @@ button:not([disabled]).ui-button-icon-only span.ui-icon {
 	&.fa-stop { color: @red-700 !important; }
 	&.fa-stop-circle-o { color: @deepOrange-600 !important; }
 	&.fa-undo { color: @lightGreen-900 !important; }
+	&.fa-calendar { color: @yellow-800 !important; }
 }
 
 .ui-menuitem-icon {
@@ -443,6 +444,10 @@ th .ui-button-icon-only {
 }
 
 @media screen and (max-width: 640px) {
+	.ui-datatable td[role="gridcell"] {
+		font-size: 10px;
+	}
+
 	.small-column {
 		width: 3.8em;
 	}
