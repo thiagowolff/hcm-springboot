@@ -21,7 +21,7 @@
 	</script>
 
 	<div class="content-wrapper">
-		<h:form id="form">
+		<h:form id="sessionsForm">
 			<p:panelGrid columns="9" layout="grid" styleClass="session-toolbar">
 				<h:panelGroup style="white-space: nowrap;">
 					<p:commandButton icon="fa fa-arrow-left" actionListener="#{sessionController.previousSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
@@ -198,16 +198,16 @@
 						<div class="container-fluid">
 							<div class="row">
 								<div class="col-sm-6 col-md-3">
-									<p:commandButton title="#{msg['button.start']}" icon="fa fa-play" actionListener="#{sessionController.startSession(chamberSession)}" process="@this" update=":form:chambersGrid" global="false" disabled="#{chamberSession.running or chamberSession.status eq 'FINISHED'}" oncomplete="track('Start session');" />
+									<p:commandButton title="#{msg['button.start']}" icon="fa fa-play" actionListener="#{sessionController.startSession(chamberSession)}" process="@this" update=":sessionsForm:chambersGrid" global="false" disabled="#{chamberSession.running or chamberSession.status eq 'FINISHED'}" oncomplete="track('Start session');" />
 								</div>
 								<div class="col-sm-6 col-md-3">
-									<p:commandButton title="#{msg['button.pause']}" icon="fa fa-pause" actionListener="#{sessionController.pauseSession(chamberSession)}" process="@this" update=":form:chambersGrid" global="false" disabled="#{not chamberSession.running}" oncomplete="track('Pause session');"/>
+									<p:commandButton title="#{msg['button.pause']}" icon="fa fa-pause" actionListener="#{sessionController.pauseSession(chamberSession)}" process="@this" update=":sessionsForm:chambersGrid" global="false" disabled="#{not chamberSession.running}" oncomplete="track('Pause session');"/>
 								</div>
 								<div class="col-sm-6 col-md-3">
-									<p:commandButton title="#{msg['button.stop']}" icon="fa fa-stop" actionListener="#{sessionController.stopSession(chamberSession)}" process="@this" update=":form:chambersGrid" disabled="#{chamberSession.status eq 'CREATED'}" oncomplete="track('Reset session');"/>
+									<p:commandButton title="#{msg['button.stop']}" icon="fa fa-stop" actionListener="#{sessionController.stopSession(chamberSession)}" process="@this" update=":sessionsForm:chambersGrid" disabled="#{chamberSession.status eq 'CREATED'}" oncomplete="track('Reset session');"/>
 								</div>
 								<div class="col-sm-6 col-md-3">
-									<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process="@this" update=":form:chambersGrid" disabled="#{chamberSession.status eq 'FINISHED'}" oncomplete="track('Finalize session');" />
+									<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process="@this" update=":sessionsForm:chambersGrid" disabled="#{chamberSession.status eq 'FINISHED'}" oncomplete="track('Finalize session');" />
 								</div>
 							</div>
 						</div>
@@ -227,7 +227,7 @@
 									</p:commandButton>
 								</div>
 								<div class="col-md-4">
-									<p:commandButton id="deleteSessionButton" title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionData.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":form:chambersGrid" global="false" disabled="#{chamberSession.running}" styleClass="hidden-sm" />
+									<p:commandButton id="deleteSessionButton" title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionData.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":sessionsForm:chambersGrid" global="false" disabled="#{chamberSession.running}" styleClass="hidden-sm" />
 								</div>
 							</div>
 						</div>
@@ -249,7 +249,7 @@
 					</p:selectCheckboxMenu>
 				</div>
 				<div class="col-md-3 col-sm-6 pull-right">
-					<p:commandButton value="#{msg['label.addPatients']}" actionListener="#{sessionController.addPatientsToSession(sessionController.sessionData.session)}" process="@this, newSessionPatients" update=":form:chambersGrid, sessionPatientsTable, sessionMessages, newSessionPatients" styleClass="btn-primary" />
+					<p:commandButton value="#{msg['label.addPatients']}" actionListener="#{sessionController.addPatientsToSession(sessionController.sessionData.session)}" process="@this, newSessionPatients" update=":sessionsForm:chambersGrid, sessionPatientsTable, sessionMessages, newSessionPatients" styleClass="btn-primary" />
 				</div>
 			</div>
 			<p:dataTable id="sessionPatientsTable" styleClass="dialog-table" var="sessionPatient" value="#{sessionController.sessionData.session.patientSessions}" emptyMessage="#{msg['message.noData']}">
@@ -264,9 +264,9 @@
 					<h:outputText value="#{status}" styleClass="#{sessionPatient.absent ? 'patient-absent' : 'patient-present'}" />
 				</p:column>
 				<p:column headerText="#{msg['label.action']}" width="100">
-					<p:commandButton process="@this" update=":form:chambersGrid, :editSessionForm:sessionPatientsTable" actionListener="#{sessionController.setPatientSessionStatus(sessionPatient, false)}" icon="fa fa-calendar-check-o" title="#{msg['button.active']}" rendered="#{sessionPatient.absent}" />
-					<p:commandButton process="@this" update=":form:chambersGrid, :editSessionForm:sessionPatientsTable" actionListener="#{sessionController.setPatientSessionStatus(sessionPatient, true)}" icon="fa fa-calendar-times-o" title="#{msg['button.absent']}" rendered="#{not sessionPatient.absent}" />
-					<p:commandButton process="@this" update=":form:chambersGrid, :editSessionForm:sessionPatientsTable, :editSessionForm:newSessionPatients" actionListener="#{sessionController.removePatientFromSession(sessionPatient)}" icon="fa fa-trash" title="#{msg['button.delete']}" />
+					<p:commandButton process="@this" update=":sessionsForm:chambersGrid, :editSessionForm:sessionPatientsTable" actionListener="#{sessionController.setPatientSessionStatus(sessionPatient, false)}" icon="fa fa-calendar-check-o" title="#{msg['button.active']}" rendered="#{sessionPatient.absent}" />
+					<p:commandButton process="@this" update=":sessionsForm:chambersGrid, :editSessionForm:sessionPatientsTable" actionListener="#{sessionController.setPatientSessionStatus(sessionPatient, true)}" icon="fa fa-calendar-times-o" title="#{msg['button.absent']}" rendered="#{not sessionPatient.absent}" />
+					<p:commandButton process="@this" update=":sessionsForm:chambersGrid, :editSessionForm:sessionPatientsTable, :editSessionForm:newSessionPatients" actionListener="#{sessionController.removePatientFromSession(sessionPatient)}" icon="fa fa-trash" title="#{msg['button.delete']}" />
 				</p:column>
 			</p:dataTable>
 		</p:dialog>
@@ -284,7 +284,7 @@
 					</p:selectOneMenu>
 				</div>
 				<div class="col-md-4">
-					<p:commandButton value="#{msg['button.move']}" process="@this, newSessionChamber" update=":form:chambersGrid" actionListener="#{sessionController.switchSessionChamber()}" oncomplete="PF('moveSessionDialog').hide(); track('Move session');" styleClass="btn-primary"/>
+					<p:commandButton value="#{msg['button.move']}" process="@this, newSessionChamber" update=":sessionsForm:chambersGrid" actionListener="#{sessionController.switchSessionChamber()}" oncomplete="PF('moveSessionDialog').hide(); track('Move session');" styleClass="btn-primary"/>
 				</div>
 			</div>
 		</p:dialog>
@@ -293,7 +293,7 @@
 	<h:form>
 		<p:confirmDialog message="#{msg['confirmation.deleteSession']}" header="#{msg['title.deleteSession']}" severity="alert" widgetVar="confirmDeleteSessionDialog">
 			<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDeleteSessionDialog').hide()" styleClass="btn-primary pull-right"/>
-			<p:commandButton value="#{msg['button.delete']}" process="@this" update=":form:chambersGrid" oncomplete="PF('confirmDeleteSessionDialog').hide(); track('Delete session');" actionListener="#{sessionController.deleteSession(sessionController.sessionData.session)}" styleClass="btn-danger pull-right"/>
+			<p:commandButton value="#{msg['button.delete']}" process="@this" update=":sessionsForm:chambersGrid" oncomplete="PF('confirmDeleteSessionDialog').hide(); track('Delete session');" actionListener="#{sessionController.deleteSession(sessionController.sessionData.session)}" styleClass="btn-danger pull-right"/>
 		</p:confirmDialog>
 	</h:form>
 
@@ -304,104 +304,31 @@
 				<p:calendar id="previousSessionsDate" value="#{sessionController.fromSessionsDate}" required="true" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" converter="localDateTimeConverter" beforeShowDay="sessionDates" />
 				<p:outputLabel value="#{msg['label.to']}"/>
 				<p:calendar id="newSessionsDate" value="#{sessionController.toSessionsDate}" required="true" pattern="dd/MM/yyyy" showOn="button" readonlyInput="true" size="15" converter="localDateTimeConverter" beforeShowDay="sessionDates" />
-				<p:commandButton value="#{msg['button.duplicate']}" process="@this, previousSessionsDate, newSessionsDate" update=":form:chambersGrid" actionListener="#{sessionController.duplicateSessions()}" oncomplete="PF('duplicateSessionDialog').hide(); track('Duplicate session');" styleClass="btn-primary"/>
+				<p:commandButton value="#{msg['button.duplicate']}" process="@this, previousSessionsDate, newSessionsDate" update=":sessionsForm:chambersGrid" actionListener="#{sessionController.duplicateSessions()}" oncomplete="PF('duplicateSessionDialog').hide(); track('Duplicate session');" styleClass="btn-primary"/>
 			</p:panelGrid>
 		</p:dialog>
 	</h:form>
 
-	<h:form>
-		<p:remoteCommand name="refreshSessions" oncomplete="onSessionTimeout(this.data)" actionListener="#{sessionController.invalidateSessionCache()}" process="@this" update=":form:chambersGrid :editSessionForm, :onlineUsers" global="false" />
-		<p:remoteCommand name="fetchUserSettings" oncomplete="getUserSettingsCallback(xhr, status, args)" actionListener="#{userController.getUserSettings()}" process="@this" global="false" />
-		<p:remoteCommand name="updateOnlineUsers" process="@this" update="onlineUsers" global="false" />
-	</h:form>
+    <h:form>
+        <p:remoteCommand name="refreshSessions" oncomplete="onSessionTimeout(this.data)" actionListener="#{sessionController.invalidateSessionCache()}" process="@this" update=":sessionsForm:chambersGrid :editSessionForm" global="false" />
+    </h:form>
 
-	<script>
+    <script>
 		//<![CDATA[
-		var loggedUser;
-		var socket;
-		var stompClient;
-
-		function initWebsocket() {
-			if (socket && stompClient) {
-				return;
-			}
-
-			socket = SockJS('/push');
-			stompClient = Stomp.over(socket);
-			stompClient.debug = null;
-
-			console.log("Websocket initialized!")
-		}
-
-		function register(registrations, onClose) {
-			stompClient.connect({}, function(frame) {
-				loggedUser = frame.headers['user-name'];
-				registrations.forEach(function (registration) {
-					stompClient.subscribe(registration.route, registration.callback);
-					console.log("Registered", registration.route);
-				});
-			});
-
-			socket.onclose = onClose;
-		}
-
 		$().ready(function() {
-			initWebsocket();
-
-			if (stompClient && !stompClient.connected) {
-				register([
-					{
-						route: '/topic/progress', callback: function (data) {
-							var sessionProgress = JSON.parse(data.body);
-							updateTimer(sessionProgress);
-						}
-					},
-					{
-						route: '/topic/notify', callback: function (data) {
-							var message = JSON.parse(data.body);
-							handleMessage(message);
-							refreshSessions([{name: "sessionId", value: message.sessionId}, {name: "eventType", value: message.eventType}]);
-						}
-					},
-					{
-						route: '/topic/refresh', callback: function (data) {
-							if (data.headers['user-name'] != loggedUser) {
-								refreshSessions();
-							}
-						}
-					},
-					{
-						route: '/topic/update', callback: function (data) {
-							updateOnlineUsers();
-						}
-					}
-				], function() {
-					refreshSessions();
-					stompClient.disconnect();
-				});
-			}
-
+			refreshSessions();
 			track('Sessions page');
 		});
 
-		function handleMessage(notificationMessage) {
-			fetchUserSettings();
+		function updateTimer(session) {
+			$('#currentTime-' + session.sessionId).text(session.timeRemaining);
+			progressStep(session);
+		}
 
-			window.getUserSettingsCallback = function(xhr, status, args) {
-				var userSettings = args.userSettings ? JSON.parse(args.userSettings) : null;
-
-				if (!userSettings || userSettings.notificationMessages) {
-					var facesMessage = {
-						summary: notificationMessage.messageSummary,
-						detail: notificationMessage.messageDetail,
-						severity: notificationMessage.eventType || 'info'
-					};
-					PF('growl').show([facesMessage]);
-				}
-
-				if (userSettings && userSettings.notificationSounds) {
-					playSound(notificationMessage.eventType);
-				}
+		function progressStep(session) {
+			var widget = PF('progress-' + session.sessionId);
+			if (widget && session.currentProgress > 0) {
+				widget.setValue(session.currentProgress);
 			}
 		}
 
@@ -433,26 +360,6 @@
 				}, 2000);
 			}
 		}
-
-		function playSound(eventType) {
-			var audio = document.getElementById('audio');
-			audio.src = '#{request.contextPath}/javax.faces.resource/sounds/' + eventType + '.mp3';
-			setTimeout(function () {
-				audio.play();
-			}, 100);
-		}
-
-		function updateTimer(session) {
-			$('#currentTime-' + session.sessionId).text(session.timeRemaining);
-			progressStep(session);
-		}
-
-		function progressStep(session) {
-			var widget = PF('progress-' + session.sessionId);
-			if (widget && session.currentProgress > 0) {
-				widget.setValue(session.currentProgress);
-			}
-		}
 		//]]>
-	</script>
+    </script>
 </ui:composition>

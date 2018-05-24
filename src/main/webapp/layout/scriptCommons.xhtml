@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html"
+	  xmlns:p="http://primefaces.org/ui">
+	
+	<ui:composition>
+		<h:outputScript>
+            //<![CDATA[
+
+            var loggedUser;
+            var socket;
+            var stompClient;
+
+            function initWebsocket() {
+                socket = SockJS('/push');
+                stompClient = Stomp.over(socket);
+                stompClient.debug = null;
+
+                console.log("Websocket initialized!")
+            }
+
+            function register(registrations) {
+                stompClient.connect({}, function (frame) {
+                    loggedUser = frame.headers['user-name'];
+                    registrations.forEach(function (registration) {
+                        stompClient.subscribe(registration.route, registration.callback);
+                        console.log("Registered", registration.route);
+                    });
+                });
+            }
+
+            $().ready(function () {
+                initWebsocket();
+                register([
+                    {
+                        route: '/topic/progress',
+                        callback: function (data) {
+                            var sessionProgress = JSON.parse(data.body);
+                            if (typeof updateTimer !== 'undefined') {
+                                updateTimer(sessionProgress);
+                            }
+                        }
+                    },
+                    {
+                        route: '/topic/notify',
+                        callback: function (data) {
+                            var message = JSON.parse(data.body);
+                            handleMessage(message);
+                            if (typeof refreshSessions !== 'undefined') {
+                                refreshSessions([{name: "sessionId", value: message.sessionId}, {name: "eventType", value: message.eventType}]);
+                            }
+                        }
+                    },
+                    {
+                        route: '/topic/refresh',
+                        callback: function (data) {
+                            if (typeof refreshSessions !== 'undefined' && data.headers['user-name'] != loggedUser) {
+                                refreshSessions();
+                            }
+                        }
+                    },
+                    {
+                        route: '/topic/update',
+                        callback: function () {
+                            console.log('updateOnlineUsers');
+                            updateOnlineUsers();
+                        }
+                    }
+                ]);
+            });
+
+            function handleMessage(notificationMessage) {
+                fetchUserSettings();
+
+                window.getUserSettingsCallback = function (xhr, status, args) {
+                    var userSettings = args.userSettings ? JSON.parse(args.userSettings) : null;
+
+                    if (!userSettings || userSettings.notificationMessages) {
+                        var facesMessage = {
+                            summary: notificationMessage.messageSummary,
+                            detail: notificationMessage.messageDetail,
+                            severity: notificationMessage.eventType || 'info'
+                        };
+                        PF('growl').show([facesMessage]);
+                    }
+
+                    if (userSettings && userSettings.notificationSounds) {
+                        playSound(notificationMessage.eventType);
+                    }
+                }
+            }
+
+            function playSound(eventType) {
+                var audio = document.getElementById('audio');
+                audio.src = '#{request.contextPath}/javax.faces.resource/sounds/' + eventType + '.mp3';
+                setTimeout(function () {
+                    audio.play();
+                }, 100);
+            }
+
+            //]]>
+        </h:outputScript>
+	</ui:composition>
+</html>

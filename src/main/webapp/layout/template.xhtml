@@ -3,6 +3,7 @@
 	  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 	  xmlns:h="http://xmlns.jcp.org/jsf/html"
 	  xmlns:f="http://xmlns.jcp.org/jsf/core"
+	  xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
 	  xmlns:o="http://omnifaces.org/ui"
 	  xmlns:p="http://primefaces.org/ui">
 
@@ -21,7 +22,9 @@
 		<audio id="audio" />
 		<p:tooltip />
 
-		<div class="wrapper">
+        <p:growl id="growl" widgetVar="growl" showDetail="true" life="10000" escape="false" />
+
+        <div class="wrapper">
 			<div class="header">
 				<o:cache>
 					<div class="header-left animate-0 fadeIn">
@@ -39,7 +42,6 @@
 				<div class="container">
 					<div class="inner-container">
 						<h:panelGroup id="content" layout="block">
-							<p:growl id="growl" widgetVar="growl" showDetail="true" life="10000" escape="false" />
 							<ui:include src="#{navigationController.activePage}" />
 						</h:panelGroup>
 					</div>
@@ -51,8 +53,15 @@
 			<div class="animate-1 fadeIn">
 				<span class="animate-3 fadeIn" style="#{loginController.newVersion ? 'color: green' : ''}">v#{version['version']} (#{version['versionUpdatedOn']} #{version['versionDate']})</span>
 			</div>
-			<h:panelGroup id="onlineUsers" layout="block" styleClass="text-primary text-center" style="position: relative; top: -15px;">usuários online: #{userController.onlineUsers}</h:panelGroup>
-		</footer>
+			<h:panelGroup id="onlineUsers" >
+                <h:panelGroup id="onlineUserPanel" layout="block" styleClass="text-primary text-center" style="position: relative; top: -15px;">
+                    <c:forEach var="i" begin="1" end="#{userController.onlineUsers}">
+                        <i class="fa fa-user-o animate-#{i} flash" />
+                    </c:forEach>
+                </h:panelGroup>
+                <p:tooltip for="onlineUserPanel" value="Usuários online: #{userController.onlineUsers}" position="top"/>
+            </h:panelGroup>
+        </footer>
 
 		<p:dialog header="#{msg['title.help']}" widgetVar="helpDialog" width="50%" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
 			<h:form id="helpForm">
@@ -67,6 +76,8 @@
 
 		<h:form>
 			<p:remoteCommand name="refreshNavigation" process="@this" actionListener="#{navigationController.updateNavigation()}" />
+            <p:remoteCommand name="fetchUserSettings" oncomplete="getUserSettingsCallback(xhr, status, args)" actionListener="#{userController.getUserSettings()}" process="@this" global="false" />
+            <p:remoteCommand name="updateOnlineUsers" process="@this" update="onlineUsers" global="false" />
 		</h:form>
 
 		<script>
@@ -78,6 +89,8 @@
 			});
 			//]]>
 		</script>
-	</h:body>
+
+        <ui:include src="/layout/scriptCommons.xhtml" />
+    </h:body>
 </f:view>
 </html>
