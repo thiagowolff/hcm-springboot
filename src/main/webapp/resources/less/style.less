@@ -45,9 +45,9 @@ body {
 	position: fixed;
 	width: 100%;
 	z-index: 1000;
+	border-bottom: 1px solid #dddddd;
 
 	.header-left {
-		height: @headerHeight;
 		background: @headerBackgroundColor;
 		float: left;
 		border: none;
@@ -236,11 +236,11 @@ div.timer-progress-cell {
 @colorFinishedStatus: @blue-600;
 
 @bgColorCreatedStatus: #f7f7f7;
-@bgColorCompressingStatus: rgba(0, 142, 208, 0.05);;
-@bgColorO2OnStatus: rgba(237, 255, 241, 0.25);
-@bgColorO2OffStatus: rgba(235, 135, 35, 0.05);
-@bgColorShuttingDownStatus: rgba(177, 69, 56, 0.05);
-@bgColorFinishedStatus: #ffffff;
+@bgColorCompressingStatus: rgba(0, 142, 208, 0.06);;
+@bgColorO2OnStatus: rgba(67, 160, 71, 0.06);
+@bgColorO2OffStatus: rgba(235, 135, 35, 0.06);
+@bgColorShuttingDownStatus: rgba(177, 69, 56, 0.06);
+@bgColorFinishedStatus: rgba(30, 136, 229, 0.06);
 
 .enum {
 	&-sessionStatus {
@@ -264,6 +264,8 @@ div.timer-progress-cell {
 button:not([disabled]).ui-button-icon-only span.ui-icon {
 	&.fa-play { color: @green-500 !important; }
 	&.fa-stop { color: @red-700 !important; }
+	&.fa-pause { color: @orange-700 !important; }
+	&.fa-fast-forward { color: @blue-700 !important; }
 	&.fa-stop-circle-o { color: @deepOrange-600 !important; }
 	&.fa-undo { color: @lightGreen-900 !important; }
 	&.fa-calendar { color: @yellow-800 !important; }
@@ -379,7 +381,7 @@ th .ui-button-icon-only {
 .ui-datatable td.session-action {
 	padding: 1px 10px !important;
 	div {
-		padding: 0;
+		padding: 1px;
 		.ui-button-icon-left {
 			margin-left: -12px;
 		}
@@ -537,7 +539,7 @@ th .ui-button-icon-only {
 	}
 
 	.medium-column {
-		width: 12em;
+		width: 12.1em;
 	}
 
 	.large-column {

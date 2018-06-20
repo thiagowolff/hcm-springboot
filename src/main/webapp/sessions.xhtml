@@ -68,12 +68,13 @@
 
 				<p:dataTable id="sessionsTable" value="#{chamberSessions}" var="chamberSession" rows="#{chamber.capacity}" rendered="#{not empty chamberSessions}">
 					<ui:param name="patientStats" value="#{patientController.getPatientStats(chamberSession, sessionController.sessionData.sessionDate)}" />
+					<ui:param name="bgStyleClass" value="#{lcf:enumStyle(chamberSession.status)}-bg" />
 
 					<f:facet name="header">
 						#{chamber.name}
 					</f:facet>
 
-					<p:column headerText="#{msg['label.id']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column" style="width: 3.2em;">
+					<p:column headerText="#{msg['label.id']}" styleClass="#{bgStyleClass} small-column" style="width: 3.2em;">
 						<h:outputText id="sessionId" value="#{chamberSession.sessionId}" />
 						<h:panelGroup rendered="#{loginController.hasAdminRights() and not empty chamberSession.sessionInfo}">
 							<i class="session-info-#{chamberSession.sessionId} fa fa-info-circle hidden-xs" />
@@ -81,7 +82,7 @@
 						</h:panelGroup>
 					</p:column>
 
-					<p:column headerText="#{msg['label.patients']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg large-column" style="vertical-align: top;">
+					<p:column headerText="#{msg['label.patients']}" styleClass="#{bgStyleClass} large-column" style="vertical-align: top;">
 						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
 							<div class="long-text text-left">
 								<h:outputText
@@ -95,7 +96,7 @@
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.healthInsurance']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column hidden-sm hidden-xs" style="vertical-align: top">
+					<p:column headerText="#{msg['label.healthInsurance']}" styleClass="#{bgStyleClass} medium-column hidden-sm hidden-xs" style="vertical-align: top">
 						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
 							<div class="long-text text-left">
 								#{empty patientSession.patient.healthInsurance ? '-' : patientSession.patient.healthInsurance.name}
@@ -103,7 +104,7 @@
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.attendance']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column patient-stats-#{chamberSession.sessionId} hidden-xs" style="vertical-align: top; white-space: nowrap">
+					<p:column headerText="#{msg['label.attendance']}" styleClass="#{bgStyleClass} small-column patient-stats-#{chamberSession.sessionId} hidden-xs" style="vertical-align: top; white-space: nowrap">
 						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession" varStatus="status">
 							<div class="animate-#{status.index}">
 								#{patientStats[patientSession.patient.patientId].completedSessions}
@@ -111,7 +112,7 @@
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.capacity']}" styleClass="capacity #{lcf:enumStyle(chamberSession.status)}-bg text-left hidden-sm hidden-xs">
+					<p:column headerText="#{msg['label.capacity']}" styleClass="capacity #{bgStyleClass} text-left hidden-sm hidden-xs">
 						<ui:repeat value="#{sessionController.getChamberPayload(chamberSession)}" var="payloadStatus">
 							<div class="col-md-4" style="padding-left: 2px;">
 								<span class="fa-stack fa-2x" style="font-size: 12px;">
@@ -123,21 +124,21 @@
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.time']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-xs">
+					<p:column headerText="#{msg['label.time']}" styleClass="#{bgStyleClass} small-column hidden-xs">
 						<h:outputText value="#{chamberSession.scheduledTime}">
 							<f:converter converterId="localDateTimeConverter" />
 							<f:attribute name="pattern" value="HH:mm:ss" />
 						</h:outputText>
 					</p:column>
 
-					<p:column headerText="#{msg['label.startTime']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-xs">
+					<p:column headerText="#{msg['label.startTime']}" styleClass="#{bgStyleClass} small-column hidden-xs">
 						<h:outputText value="#{chamberSession.startTime}" style="color: #007d18;">
 							<f:converter converterId="localDateTimeConverter" />
 							<f:attribute name="pattern" value="HH:mm:ss" />
 						</h:outputText>
 					</p:column>
 
-					<p:column headerText="#{msg['label.nextEvent']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column hidden-md hidden-sm hidden-xs">
+					<p:column headerText="#{msg['label.nextEvent']}" styleClass="#{bgStyleClass} medium-column hidden-md hidden-sm hidden-xs">
 						<div class="event-progress">
 							<ui:repeat value="#{chamberSession.chamber.chamberEvents}" var="event" varStatus="status">
 								<span class="fa-stack fa-2x" style="font-size: 3px; color: #486d8c;">
@@ -157,14 +158,14 @@
 						</div>
 					</p:column>
 
-					<p:column headerText="#{msg['label.endTime']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-xs">
+					<p:column headerText="#{msg['label.endTime']}" styleClass="#{bgStyleClass} small-column hidden-xs">
 						<h:outputText value="#{chamberSession.endTime}" style="color: #b14538;">
 							<f:converter converterId="localDateTimeConverter" />
 							<f:attribute name="pattern" value="HH:mm:ss" />
 						</h:outputText>
 					</p:column>
 
-					<p:column headerText="#{msg['label.startTime']}&lt;br/&gt;#{msg['label.endTime']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg small-column hidden-sm hidden-md hidden-lg">
+					<p:column headerText="#{msg['label.startTime']}&lt;br/&gt;#{msg['label.endTime']}" styleClass="#{bgStyleClass} small-column hidden-sm hidden-md hidden-lg">
 						<h:outputText value="#{chamberSession.startTime}" style="color: #007d18;">
 							<f:converter converterId="localDateTimeConverter" />
 							<f:attribute name="pattern" value="HH:mm:ss" />
@@ -176,13 +177,13 @@
 						</h:outputText>
 					</p:column>
 
-					<p:column headerText="#{msg['label.status']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column">
+					<p:column headerText="#{msg['label.status']}" styleClass="#{bgStyleClass} medium-column">
 						<div class="session-status-#{chamberSession.sessionId} animate-0">
 							<h:outputText value="#{lcf:enum(chamberSession.status)}" styleClass="#{lcf:enumStyle(chamberSession.status)}"/>
 						</div>
 					</p:column>
 
-					<p:column headerText="#{msg['label.progress']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column">
+					<p:column headerText="#{msg['label.progress']}" styleClass="#{bgStyleClass} medium-column">
 						<div class="timer-progress-cell">
 							<div id="currentTime-#{chamberSession.sessionId}">
 								#{chamberSession.timeRemaining}
@@ -194,7 +195,7 @@
 						</div>
 					</p:column>
 
-					<p:column headerText="#{msg['label.controls']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg medium-column session-action hidden-xs">
+					<p:column headerText="#{msg['label.controls']}" styleClass="#{bgStyleClass} medium-column session-action hidden-xs">
 						<div class="container-fluid">
 							<div class="row">
 								<div class="col-sm-6 col-md-3">
@@ -213,7 +214,7 @@
 						</div>
 					</p:column>
 
-					<p:column headerText="#{msg['label.action']}" styleClass="#{lcf:enumStyle(chamberSession.status)}-bg xsmall-column session-action hidden-xs">
+					<p:column headerText="#{msg['label.action']}" styleClass="#{bgStyleClass} xsmall-column session-action hidden-xs">
 						<div class="container-fluid">
 							<div class="row">
 								<div class="col-md-4">

@@ -90,7 +90,7 @@
 				<p:column headerText="#{msg['label.numberOfAbsentSessions']}" width="80" styleClass="hidden-xs hidden-sm hidden-md">
 					<h:outputText value="#{patientStats.absentSessions eq null ? 0 : patientStats.absentSessions}" style="color: #b14538;" />
 				</p:column>
-				<p:column headerText="#{msg['label.initialSessionDate']}&lt;br/&gt;#{msg['label.finalSessionDate']}" styleClass="small-column hidden-xs">
+				<p:column headerText="#{msg['label.initialSessionDate']}&lt;br/&gt;#{msg['label.finalSessionDate']}" styleClass="medium-column hidden-xs">
 					<h:outputText value="#{patientStats.initialSessionDate}" converter="localDateTimeConverter" />
 					<br />
 					<h:outputText value="#{patient.finalSessionDate}" converter="localDateTimeConverter" style="color: #f57c00;" rendered="#{patient.finalSessionDate ne null}"/>
@@ -108,7 +108,6 @@
 					<p:commandButton process="@this" update=":finishTreatmentForm:patienTreatmentStatus" actionListener="#{patientController.setPatient(patient)}" onclick="PF('finishTreatmentDialog').show();" icon="fa fa-stop-circle-o" title="#{msg['button.finishTreatment']}" rendered="#{patient.finalSessionDate eq null}" />
 					<p:commandButton process="@this" update="patientsTable" actionListener="#{patientController.restartTreatment(patient)}" icon="fa fa-undo" title="#{msg['button.restartTreatment']}" oncomplete="track('Restart treatment')" rendered="#{patient.finalSessionDate ne null and loginController.hasAdminRights()}" />
 					<p:commandButton process="@this" update=":attendanceChartForm:chartGrid" actionListener="#{patientController.setAttendanceChartData(chartsController.getPatientAttendance(patient.patientId))}" onclick="PF('attendanceChartDialog').show();" oncomplete="loadChart(); track('Patient attendance chart')" icon="fa fa-calendar" title="#{msg['button.patientAttendance']}" />
-
 					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" update=":patientInputForm" oncomplete="PF('patientDialog').show(); track('Edit patient');" icon="fa fa-pencil" title="#{msg['button.edit']}" global="false">
 						<p:resetInput target=":patientInputForm:patientGrid" />
 					</p:commandButton>

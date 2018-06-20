@@ -38,7 +38,6 @@ public class NavigationController implements Serializable {
 		if (update != null) {
 			PrimeFaces.current().ajax().update(update);
 		}
-		PrimeFaces.current().ajax().update("onlineUsers");
 	}
 
 	public String getActivePage() {
