@@ -63,7 +63,7 @@ public class User {
 		long minutes = duration.minusDays(days).minusHours(hours).toMinutes();
 
 		String lastAccess = minutes + "m";
-		if (hours > 0) {
+		if (days > 0 || hours > 0) {
 			lastAccess = hours + "h " + lastAccess;
 			if (days > 0) {
 				lastAccess = days + "d " + lastAccess;

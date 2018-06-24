@@ -416,15 +416,23 @@ th .ui-button-icon-only {
 	}
 }
 
+@colorRoleDev: @green-500;
+@colorRoleAdmin: @deepOrange-500;
+@colorRoleUser: @grey-600;
+
+.role-dev { color: @colorRoleDev; }
+.role-admin { color: @colorRoleAdmin; }
+.role-user { color: @colorRoleUser; }
+
 .logged-user {
 	position: absolute;
 	top: 0;
 	right: 0;
 	padding: 0 10px;
 	font-size: 12px;
-	&.dev { color: @green-500;	}
-	&.admin { color: @deepOrange-500; }
-	&.user { color: @grey-600; }
+	&.dev { color: @colorRoleDev; }
+	&.admin { color: @colorRoleAdmin; }
+	&.user { color: @colorRoleUser; }
 }
 
 .patient-session-warning {

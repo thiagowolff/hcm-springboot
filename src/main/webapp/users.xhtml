@@ -2,6 +2,7 @@
 				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 				xmlns:f="http://xmlns.jcp.org/jsf/core"
 				xmlns:h="http://xmlns.jcp.org/jsf/html"
+				xmlns:fn="http://java.sun.com/jsp/jstl/functions"
 				xmlns:p="http://primefaces.org/ui"
 				xmlns:o="http://omnifaces.org/ui"
 				xmlns:lcf="http://litecode.com.br/functions"
@@ -19,21 +20,20 @@
 				<p:column headerText="#{msg['label.name']}" sortBy="#{user.name}" styleClass="text-left" priority="1">
 					<h:outputText value="#{user.name}" />
 				</p:column>
-				<p:column headerText="#{msg['label.role']}" styleClass="text-left" priority="2">
+				<p:column headerText="#{msg['label.role']}" styleClass="text-left role-#{fn:toLowerCase(user.role)}" priority="2">
 					<h:outputText value="#{lcf:enum(user.role)}" />
 				</p:column>
-
-				<p:column headerText="#{msg['label.creationDate']}" sortBy="#{user.creationDate}" width="150" priority="3">
-					<h:outputText value="#{user.creationDate}" converter="localDateTimeConverter" />
-				</p:column>
 				
-				<p:column headerText="#{msg['label.lastAccess']}" sortBy="#{user.lastAccess}" width="150" priority="1">
+				<p:column headerText="#{msg['label.lastAccess']}" sortBy="#{user.lastAccess}" width="250" priority="1">
 					<h:outputText id="userLastAccess" value="#{user.lastAccess}">
 						<f:converter converterId="localDateTimeConverter" />
 						<f:attribute name="pattern" value="dd/MM/yyyy HH:mm:ss" />
 					</h:outputText>
+					<span style="color: #787878">(#{user.lastAccessDuration})</span>
 					<p:tooltip for="#{p:component('userLastAccess')}" value="#{user.lastAccessLocationFormatted}" position="bottom" escape="false" rendered="#{loginController.hasDevRights()}" />
-					<div>(#{user.lastAccessDuration})</div>
+				</p:column>
+				<p:column headerText="#{msg['label.creationDate']}" sortBy="#{user.creationDate}" width="150" priority="3">
+					<h:outputText value="#{user.creationDate}" converter="localDateTimeConverter" />
 				</p:column>
 				
 				<p:column headerText="#{msg['label.action']}" width="175" priority="4" styleClass="text-left">
