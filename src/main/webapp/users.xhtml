@@ -24,7 +24,7 @@
 					<h:outputText value="#{lcf:enum(user.role)}" />
 				</p:column>
 				
-				<p:column headerText="#{msg['label.lastAccess']}" sortBy="#{user.lastAccess}" width="250" priority="1">
+				<p:column headerText="#{msg['label.lastAccess']}" sortBy="#{user.lastAccess}" width="250" styleClass="text-left" priority="1">
 					<h:outputText id="userLastAccess" value="#{user.lastAccess}">
 						<f:converter converterId="localDateTimeConverter" />
 						<f:attribute name="pattern" value="dd/MM/yyyy HH:mm:ss" />

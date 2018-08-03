@@ -34,10 +34,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import java.io.IOException;
 import java.io.Serializable;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -253,17 +250,27 @@ public class SessionController implements Serializable {
 	}
 
 	public void switchSessionChamber() {
-		sessionData.getSession().setChamber(sessionData.getChamber());
+	    Chamber destChamber = sessionData.getChamber();
+
+	    if (sessionData.getSession().getPatientSessions().size() > destChamber.getCapacity()) {
+            Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", destChamber.getCapacity()));
+            Faces.validationFailed();
+	        return;
+        }
+
+		sessionData.getSession().setChamber(destChamber);
 		sessionRepository.save(sessionData.getSession());
 		invalidateSessionCache();
 	}
 
 	public void previousSessionDate() {
-		sessionData.setSessionDate(sessionData.getSessionDate().minusDays(1));
+		int daysToSubtract = sessionData.getSessionDate().getDayOfWeek() == DayOfWeek.MONDAY ? 2 : 1;
+		sessionData.setSessionDate(sessionData.getSessionDate().minusDays(daysToSubtract));
 	}
 
 	public void nextSessionDate() {
-		sessionData.setSessionDate(sessionData.getSessionDate().plusDays(1));
+		int daysToAdd = sessionData.getSessionDate().getDayOfWeek() == DayOfWeek.SATURDAY ? 2 : 1;
+		sessionData.setSessionDate(sessionData.getSessionDate().plusDays(daysToAdd));
 	}
 
 	public ChamberPayloadStatus[] getChamberPayload(Session session) {

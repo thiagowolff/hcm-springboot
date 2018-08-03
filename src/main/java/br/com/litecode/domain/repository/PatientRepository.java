@@ -12,7 +12,7 @@ public interface PatientRepository extends PagingAndSortingRepository<Patient, I
 	@Query("select p from Patient p where active = true order by p.auditLog.createdDate desc, p.name")
 	List<Patient> findActivePatients();
 
-	@Query("select p from Patient p where active = true order by case when p.finalSessionDate is null then '' else p.name end,  p.name, p.auditLog.createdDate desc")
+	@Query("select p from Patient p where active = true and p.finalSessionDate is null order by p.name end,  p.name, p.auditLog.createdDate desc")
 	List<Patient> findAvailablePatients();
 
 	@Query(value = "select ps.patient.patientId as patientId, " +
