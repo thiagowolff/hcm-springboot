@@ -4,8 +4,13 @@ import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.model.User.Role;
 import br.com.litecode.domain.repository.UserRepository;
 import br.com.litecode.security.UserSessionTracker;
+import br.com.litecode.service.PushoverService;
 import com.google.common.io.ByteStreams;
 import lombok.extern.slf4j.Slf4j;
+import net.pushover.client.PushoverClient;
+import net.pushover.client.PushoverException;
+import net.pushover.client.PushoverMessage;
+import net.pushover.client.PushoverRestClient;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -35,12 +40,16 @@ public class LoginController {
 	@Autowired
 	private UserSessionTracker userSessionTracker;
 
+	@Autowired
+	private PushoverService pushoverService;
+
 	private String username;
 	private String password;
+	private boolean rememberMe;
 
 	public void login() {
 		Subject currentUser = SecurityUtils.getSubject();
-		UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+		UsernamePasswordToken token = new UsernamePasswordToken(username, password, rememberMe);
 
 		try {
 			currentUser.login(token);
@@ -67,6 +76,8 @@ public class LoginController {
 				user.setTimeZone(getDefaultTimeZone());
 			}
 
+			sendLoginNotification(user);
+
 			userRepository.save(user);
 			userSessionTracker.addUserSession(user, Faces.getSession());
 			Faces.getSessionMap().put("loggedUser", user);
@@ -90,6 +101,14 @@ public class LoginController {
 		} catch (Exception e) {
 			log.warn("Unable to retrieve IP geo location for {}", Faces.getRemoteAddr());
 			return null;
+		}
+	}
+
+	private void sendLoginNotification(User user) {
+		try {
+			pushoverService.sendNotification("User " + user.getUsername() + " logged in" + (rememberMe ? " [rememberMe] " : ""));
+		} catch (PushoverException e) {
+			log.error("Unable to send login notification", e);
 		}
 	}
 	
@@ -155,4 +174,12 @@ public class LoginController {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+
+    public boolean isRememberMe() {
+        return rememberMe;
+    }
+
+    public void setRememberMe(boolean rememberMe) {
+        this.rememberMe = rememberMe;
+    }
 }

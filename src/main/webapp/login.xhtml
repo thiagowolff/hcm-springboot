@@ -42,6 +42,11 @@
 							</div>
 						</div>
 						<div class="row">
+							<div class="col-md-12">
+								<p:selectBooleanCheckbox itemLabel="#{msg['label.rememberMe']}" value="#{loginController.rememberMe}" style="margin-top: -30px;" />
+							</div>
+						</div>
+						<div class="row">
 							<div class="login-input col-xs-#{isDev ? '3' : '12' }">
 								<p:commandButton id="loginButton" value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" onclick="onLogin()" style="width: 100%;" />
 							</div>

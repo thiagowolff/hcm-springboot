@@ -64,7 +64,7 @@ dependencies {
     compile "ch.qos.logback:logback-classic:1.2.3"
     compile "com.itextpdf:itextpdf:5.5.12"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.3"
-
+    compile "com.github.sps.pushover.net:pushover-client:1.0.0"
 
     testCompile "org.springframework.boot:spring-boot-starter-test"
 //    testCompile "com.google.guava:guava-testlib:23.2-jre"
