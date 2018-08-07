@@ -17,7 +17,6 @@ import com.itextpdf.text.DocumentException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
 import org.omnifaces.util.Faces;
 import org.omnifaces.util.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +26,7 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -140,7 +140,7 @@ public class SessionController implements Serializable {
 			session.init();
 		}
 
-		session.getExecutionMetadata().setStartedBy((String) SecurityUtils.getSubject().getPrincipal());
+		session.getExecutionMetadata().setStartedBy((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		sessionRepository.save(session);
 		sessionTimer.startSession(session);
 	}

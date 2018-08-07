@@ -9,12 +9,12 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.omnifaces.util.Messages;
 import org.primefaces.PrimeFaces;
 import org.primefaces.context.RequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -32,6 +32,9 @@ public class UserController implements Serializable {
 
 	@Autowired
 	private MailService mailService;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@Getter
 	@Setter
@@ -77,7 +80,8 @@ public class UserController implements Serializable {
 	}
 
 	private String createPasswordHash(String password) {
-		return new Sha256Hash(password).toBase64();
+//		return new Sha256Hash(password).toBase64();
+		return passwordEncoder.encode(password);
 	}
 
 	private boolean isUsernameUnique(User user) {
@@ -130,7 +134,7 @@ public class UserController implements Serializable {
 			return;
 		}
 
-		mailService.sendEmail("thiago.wolff@gmail.com", "HCM - Report Issue [" + SecurityUtils.getSubject().getPrincipal() + "]", helpMessage);
+		mailService.sendEmail("thiago.wolff@gmail.com", "HCM - Report Issue [" + SecurityContextHolder.getContext().getAuthentication().getPrincipal() + "]", helpMessage);
 	}
 
 	public void newUser() {

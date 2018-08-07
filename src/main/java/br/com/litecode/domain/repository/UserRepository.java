@@ -13,7 +13,7 @@ public interface UserRepository extends CrudRepository<User, Integer> {
 	List<User> findActiveUsers();
 
 	@Query("select u from User u where u.username = :username")
-	User findUserByUsername(String username);
+	User findByUsername(String username);
 
 	@Query("select u from User u where u.sessionId = :sessionId")
 	User findUserBySessionId(String sessionId);

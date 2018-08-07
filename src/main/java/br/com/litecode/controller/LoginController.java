@@ -7,21 +7,13 @@ import br.com.litecode.security.UserSessionTracker;
 import br.com.litecode.service.PushoverService;
 import com.google.common.io.ByteStreams;
 import lombok.extern.slf4j.Slf4j;
-import net.pushover.client.PushoverClient;
 import net.pushover.client.PushoverException;
-import net.pushover.client.PushoverMessage;
-import net.pushover.client.PushoverRestClient;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.subject.Subject;
 import org.omnifaces.util.Faces;
 import org.omnifaces.util.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.enterprise.context.RequestScoped;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -48,17 +40,17 @@ public class LoginController {
 	private boolean rememberMe;
 
 	public void login() {
-		Subject currentUser = SecurityUtils.getSubject();
-		UsernamePasswordToken token = new UsernamePasswordToken(username, password, rememberMe);
+//		Subject subject = SecurityUtils.getSubject();
+//		UsernamePasswordToken token = new UsernamePasswordToken(username, password, rememberMe);
 
 		try {
-			currentUser.login(token);
-			User user = userRepository.findUserByUsername(username);
+//            subject.login(token);
+			User user = userRepository.findByUsername(username);
 
-			HttpSession userSession = userSessionTracker.getUserSession(user);
-			if (user.getRole() != Role.DEV && userSession != null && !userSession.getId().equals(Faces.getSessionId())) {
-				userSessionTracker.killUserSession(user);
-			}
+//			Subject loggedSubject = userSessionTracker.getUserSession(user);
+//			if (user.getRole() != Role.DEV && subject != null && !loggedSubject.getSession().getId().equals(Faces.getSessionId())) {
+//				userSessionTracker.killUserSession(user);
+//			}
 
 			user.setLastAccess(Instant.now());
 			user.setSessionId(Faces.getSessionId());
@@ -79,14 +71,15 @@ public class LoginController {
 			sendLoginNotification(user);
 
 			userRepository.save(user);
-			userSessionTracker.addUserSession(user, Faces.getSession());
+
+//			userSessionTracker.addUserSession(user, subject);
 			Faces.getSessionMap().put("loggedUser", user);
 			Faces.redirect("");
 
 			log.info("User {} logged in successfully", user.getUsername());
-		} catch (AuthenticationException e) {
-			Messages.addGlobalError("error.login");
-			log.warn("Unable to authenticate", e);
+//		} catch (AuthenticationException e) {
+//			Messages.addGlobalError("error.login");
+//			log.warn("Unable to authenticate", e);
 		} catch (IOException e) {
 			Messages.addGlobalError(e.getMessage());
 		}
@@ -113,7 +106,7 @@ public class LoginController {
 	}
 	
 	public void logout() {
-		SecurityUtils.getSubject().logout();
+		//SecurityUtils.getSubject().logout();
 		Faces.invalidateSession();
 
         try {

@@ -4,7 +4,6 @@ import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.UserRepository;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushService;
-import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,11 +50,10 @@ public class UserSessionTracker implements Serializable {
 	}
 	
 	public synchronized void killUserSession(User user) {
-		HttpSession userSession = userSessions.get(user);
-		user.setSessionId(null);
-		userRepository.save(user);
-		removeUserSession(user);
-		SecurityUtils.getSubject().logout();
-		userSession.invalidate();
+//		HttpSession session = userSessions.get(user);
+//		user.setSessionId(null);
+//		userRepository.save(user);
+//		removeUserSession(user);
+//		subject.logout();
 	}
 }

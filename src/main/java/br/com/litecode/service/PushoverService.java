@@ -17,7 +17,7 @@ import javax.mail.internet.MimeMessage;
 @Service
 @Slf4j
 public class PushoverService {
-    @Value("${pushover.enabled}")
+    @Value("${pushover.enabled:false}")
     private boolean enabled;
 
     @Value("${pushover.token}")

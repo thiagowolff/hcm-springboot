@@ -1,6 +1,5 @@
 package br.com.litecode.security;
 
-import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,13 +21,13 @@ public class UserSessionListener implements HttpSessionListener {
 
 	@Override
 	public void sessionDestroyed(HttpSessionEvent sessionEvent) {
-		try {
-			User user = userRepository.findUserBySessionId(sessionEvent.getSession().getId());
-			if (user != null) {
-				userSessionTracker.killUserSession(user);
-			}	
-		} catch(Exception e) {
-			//ignore
-		}
+//		try {
+//			User user = userRepository.findUserBySessionId(sessionEvent.getSession().getId());
+//			if (user != null) {
+//				userSessionTracker.getUserSession(user).getSession().stop();
+//			}
+//		} catch(Exception e) {
+//			//ignore
+//		}
 	}
 }
