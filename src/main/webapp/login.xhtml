@@ -9,7 +9,9 @@
 	<h:head>
 		<ui:include src="/layout/headCommons.xhtml" />
 	</h:head>
-	
+
+    <f:event type="preRenderView" listener="#{loginController.checkIfAlreadyLoggedIn}" />
+
 	<h:body styleClass="login-page">
 		<div class="container">
 			<h:form id="login" prependId="false">

@@ -92,6 +92,13 @@ public class LoginController {
 		}
 	}
 
+	public void checkIfAlreadyLoggedIn() throws IOException {
+        Subject loggedUser = SecurityUtils.getSubject();
+        if (loggedUser != null && (loggedUser.isAuthenticated() || loggedUser.isRemembered())) {
+            Faces.redirect("");
+        }
+    }
+
 	private String getLastAccessLocation() {
 		try {
 			URL url = new URL("https://ipinfo.io/" + Faces.getRemoteAddr() + "/json");
