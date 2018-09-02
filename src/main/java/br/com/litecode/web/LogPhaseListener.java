@@ -1,7 +1,6 @@
 package br.com.litecode.web;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StopWatch;
 
 import javax.faces.event.PhaseEvent;

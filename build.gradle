@@ -68,6 +68,7 @@ dependencies {
     compile "com.github.sps.pushover.net:pushover-client:1.0.0"
 
     testCompile "org.springframework.boot:spring-boot-starter-test"
+    testCompile "org.springframework.security:spring-security-test"
 //    testCompile "com.google.guava:guava-testlib:23.2-jre"
     testCompile "org.mockito:mockito-core:2.9.0"
     testCompile "org.powermock:powermock-module-junit4:1.7.1"

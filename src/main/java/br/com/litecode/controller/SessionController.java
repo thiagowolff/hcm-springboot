@@ -4,6 +4,7 @@ import br.com.litecode.domain.model.*;
 import br.com.litecode.domain.model.Session.SessionStatus;
 import br.com.litecode.domain.repository.ChamberRepository;
 import br.com.litecode.domain.repository.SessionRepository;
+import br.com.litecode.security.UserPrincipal;
 import br.com.litecode.service.SessionReportService;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushRefresh;
@@ -26,7 +27,6 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -119,7 +119,7 @@ public class SessionController implements Serializable {
 		session.setScheduledTime(scheduledTime);
 		session.setStartTime(startTime);
 		session.setEndTime(endTime);
-		session.setCreatedBy(User.getLoggedUser());
+		session.setCreatedBy(UserPrincipal.getLoggedUser());
 		session.setCreatedOn(Instant.now());
 
 		sessionData.getPatients().forEach(session::addPatient);
@@ -127,7 +127,7 @@ public class SessionController implements Serializable {
 		invalidateSessionCache();
 
 		NotificationMessage notificationMessage = NotificationMessage.create(session, new EventType("create_session"));
-		pushService.publish(PushChannel.NOTIFY, notificationMessage, User.getLoggedUser());
+		pushService.publish(PushChannel.NOTIFY, notificationMessage, UserPrincipal.getLoggedUser());
 	}
 
 	@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }")
@@ -140,7 +140,7 @@ public class SessionController implements Serializable {
 			session.init();
 		}
 
-		session.getExecutionMetadata().setStartedBy((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		session.getExecutionMetadata().setStartedBy(UserPrincipal.getLoggedUser().getUsername());
 		sessionRepository.save(session);
 		sessionTimer.startSession(session);
 	}
@@ -190,7 +190,7 @@ public class SessionController implements Serializable {
 		sessionRepository.delete(session);
 
 		NotificationMessage notificationMessage = NotificationMessage.create(session, new EventType("delete_session"));
-		pushService.publish(PushChannel.NOTIFY,  notificationMessage, User.getLoggedUser());
+		pushService.publish(PushChannel.NOTIFY,  notificationMessage, UserPrincipal.getLoggedUser());
 	}
 
 	@PushRefresh
@@ -240,7 +240,7 @@ public class SessionController implements Serializable {
 			session.setScheduledTime(sessionTime);
 			session.setStartTime(sessionTime.toLocalTime());
 			session.setEndTime(sessionTime.plusSeconds(sessionDuration).toLocalTime());
-			session.setCreatedBy(User.getLoggedUser());
+			session.setCreatedBy(UserPrincipal.getLoggedUser());
 			session.setCreatedOn(Instant.now());
 			fromSession.getPatientSessions().forEach(ps -> session.addPatient(ps.getPatient()));
 			sessionRepository.save(session);

@@ -1,9 +1,7 @@
 package br.com.litecode.domain.model;
 
-import javafx.collections.transformation.SortedList;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.SortNatural;
 
 import javax.persistence.*;
 import java.util.Comparator;

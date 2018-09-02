@@ -1,6 +1,7 @@
 package br.com.litecode.service.push;
 
 import br.com.litecode.domain.model.User;
+import br.com.litecode.security.UserPrincipal;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
@@ -17,7 +18,7 @@ public class PushAspect {
 
 	@After(value = "execution(* br.com.litecode..controller..*(..)) && @annotation(push))")
 	public void pushRefresh(JoinPoint joinPoint, PushRefresh push) {
-		User loggedUser = User.getLoggedUser();
+		User loggedUser = UserPrincipal.getLoggedUser();
 		pushService.publish(PushChannel.REFRESH, "", loggedUser);
 
 		log.info("[{}] {}", loggedUser.getUsername(), joinPoint.getSignature().getName());

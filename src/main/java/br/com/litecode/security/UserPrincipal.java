@@ -2,8 +2,11 @@ package br.com.litecode.security;
 
 import br.com.litecode.domain.model.User;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 public class UserPrincipal implements UserDetails {
@@ -13,9 +16,22 @@ public class UserPrincipal implements UserDetails {
         this.user = user;
     }
 
+    public static User getLoggedUser() {
+        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userPrincipal != null) {
+            return userPrincipal.getUser();
+        }
+
+        return null;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return Arrays.asList(new SimpleGrantedAuthority(user.getRole().toString()));
     }
 
     @Override
@@ -30,17 +46,17 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override

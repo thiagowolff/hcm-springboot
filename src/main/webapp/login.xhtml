@@ -9,8 +9,10 @@
 	<h:head>
 		<ui:include src="/layout/headCommons.xhtml" />
 	</h:head>
-	
-	<h:body styleClass="login-page">
+
+    <f:event type="preRenderView" listener="#{loginController.checkIfAlreadyLoggedIn}" />
+
+    <h:body styleClass="login-page">
 		<div class="container">
 			<h:form id="login" prependId="false">
 				<div class="container">
@@ -29,44 +31,35 @@
 						</div>
 						<div class="row">
 							<div class="login-input col-md-12">
-								<p:inputText id="username" value="#{loginController.username}" required="#{not isDev}" requiredMessage="#{msg['error.loginRequired']}" label="#{msg['label.username']}" size="50" />
-								<p:watermark for="login:username" value="#{msg['label.login']}" />
+								<p:inputText id="username" required="#{not isDev}" requiredMessage="#{msg['error.loginRequired']}" label="#{msg['label.username']}" size="50" />
+								<p:watermark for="username" value="#{msg['label.login']}" />
 								<div class="input-icon"><span class="fa fa-at" /></div>
 							</div>
 						</div>
 						<div class="row">
 							<div class="login-input col-md-12">
-								<p:password id="password" value="#{loginController.password}" required="#{not isDev}" requiredMessage="#{msg['error.passwordRequired']}" label="#{msg['label.password']}" size="50" />
-								<p:watermark for="login:password" value="#{msg['label.password']}" />
+								<p:password id="password" required="#{not isDev}" requiredMessage="#{msg['error.passwordRequired']}" label="#{msg['label.password']}" size="50" />
+								<p:watermark for="password" value="#{msg['label.password']}" />
 								<div class="input-icon"><span class="fa fa-lock" /></div>
 							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-12">
-								<p:selectBooleanCheckbox itemLabel="#{msg['label.rememberMe']}" value="#{loginController.rememberMe}" style="margin-top: -30px;" />
+								<p:selectBooleanCheckbox id="rememberMe" itemLabel="#{msg['label.rememberMe']}" style="margin-top: -30px;" />
 							</div>
 						</div>
 						<div class="row">
 							<div class="login-input col-xs-#{isDev ? '3' : '12' }">
-								<p:commandButton id="loginButton" value="#{msg['button.login']}" process="@form" action="#{loginController.login}" ajax="false" onclick="onLogin()" style="width: 100%;" />
+								<p:commandButton id="loginButton" value="#{msg['button.login']}" ajax="false" onclick="onLogin()" style="width: 100%;" />
 							</div>
 							<div class="login-input login-button col-xs-3">
-								<p:commandButton value="USER" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}" styleClass="btn-success">
-									<f:setPropertyActionListener value="user" target="#{loginController.username}" />
-									<f:setPropertyActionListener value="user" target="#{loginController.password}" />
-								</p:commandButton>
+								<p:commandButton value="ADMIN" ajax="false" rendered="#{isDev}" styleClass="btn-success" onclick="$('#username').val('admin'); $('#password').val('admin')" />
 							</div>
 							<div class="login-input login-button col-xs-3">
-								<p:commandButton value="ADMIN" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}" styleClass="btn-success">
-									<f:setPropertyActionListener value="admin" target="#{loginController.username}" />
-									<f:setPropertyActionListener value="admin" target="#{loginController.password}" />
-								</p:commandButton>
+                                <p:commandButton value="USER" ajax="false" rendered="#{isDev}" styleClass="btn-success" onclick="$('#username').val('user'); $('#password').val('user')" />
 							</div>
 							<div class="login-input login-button col-xs-3">
-								<p:commandButton value="DEV" process="@form" action="#{loginController.login}" ajax="false" rendered="#{isDev}" styleClass="btn-success">
-									<f:setPropertyActionListener value="thiago" target="#{loginController.username}" />
-									<f:setPropertyActionListener value="admin" target="#{loginController.password}" />
-								</p:commandButton>
+                                <p:commandButton value="DEV" ajax="false" rendered="#{isDev}" styleClass="btn-success" onclick="$('#username').val('thiago'); $('#password').val('admin')" />
 							</div>
 						</div>
 					</div>

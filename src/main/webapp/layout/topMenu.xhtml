@@ -6,11 +6,13 @@
 	  xmlns:of="http://omnifaces.org/functions"
 	  xmlns:fn="http://java.sun.com/jsp/jstl/functions"
 	  xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
-	  xmlns:f="http://java.sun.com/jsf/core">
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:sec="http://www.springframework.org/security/tags">
 	
 	<ui:composition>
-		<h:form prependId="false">
-			<div class="animate-3 rollIn logged-user hidden-xs hidden-sm #{fn:toLowerCase(loggedUser.role)}">#{loggedUser.username}</div>
+		<h:form id="menuForm" prependId="false">
+            <ui:param name="loggedUser" value="#{request.userPrincipal.principal.user}" />
+			<div class="animate-3 rollIn logged-user hidden-xs hidden-sm #{fn:toLowerCase(loggedUser.role)}">#{request.userPrincipal.name}</div>
 			<div class="navbar hidden-xs hidden-sm">
 				<ul class="nav navbar-nav">
 					<li>
@@ -23,7 +25,7 @@
 					</li>
 					<ui:fragment rendered="#{loginController.hasAdminRights()}">
 					<li>
-						<p:button id="chambersMenuButton" pt:url="/chambers" icon="fa fa-server" onclick="return false" rendered="#{loginController.hasAdminRights()}" />
+						<p:button id="chambersMenuButton" pt:url="/chambers" icon="fa fa-server" onclick="return false" />
 						<p:tooltip for="chambersMenuButton" value="#{msg['menu.chambers']}" position="bottom"/>
 					</li>
 					</ui:fragment>
@@ -44,7 +46,7 @@
 							<p:menuitem value="#{loggedUser.name}" icon="fa fa-user-md" disabled="true" />
 							<p:separator/>
 							<p:menuitem value="#{msg['menu.users']}" url="/users" icon="fa fa-user" onclick="return false" rendered="#{loginController.hasAdminRights()}" />
-							<p:menuitem value="#{msg['menu.logout']}" process="@this" action="#{loginController.logout}" icon="fa fa-sign-out" />
+							<p:menuitem value="#{msg['menu.logout']}" onclick="logout()" icon="fa fa-sign-out" />
 						</p:menuButton>
 					</li>
 				</ul>
@@ -61,7 +63,7 @@
 						<p:separator rendered="#{loginController.hasAdminRights()}" />
 						<p:menuitem value="#{msg['menu.users']}" url="/users" icon="fa fa-user" rendered="#{loginController.hasAdminRights()}" />
 						<p:separator/>
-						<p:menuitem value="#{msg['menu.logout']}" process="@this" action="#{loginController.logout}" icon="fa fa-sign-out" />
+						<p:menuitem value="#{msg['menu.logout']}" onclick="logout()" icon="fa fa-sign-out" />
 					</p:menuButton>
 				</div>
 			</div>
@@ -86,10 +88,6 @@
 
 						history.pushState(null, null, currentPage);
 						updateNavigation([{name: 'activePage', value: currentPage}]);
-
-//						if (currentPage === '/') {
-//							refreshSessions();
-//						}
 					})
 
 					window.addEventListener('popstate', function(e) {
@@ -102,6 +100,11 @@
 						}
 					});
 				});
+
+				function logout() {
+					$('#menuForm').attr('action', '#{request.contextPath}/logout');
+					$('#menuForm').submit();
+				}
 			</script>
 		</h:form>
 
