@@ -4,12 +4,11 @@ import br.com.litecode.domain.model.Patient;
 import br.com.litecode.domain.model.Patient.PatientStats;
 import br.com.litecode.domain.model.PatientSession;
 import br.com.litecode.domain.model.Session;
-import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.PatientRepository;
+import br.com.litecode.security.UserPrincipal;
 import br.com.litecode.service.AlarmService;
 import br.com.litecode.util.MessageUtil;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.Setter;
 import org.omnifaces.util.Faces;
@@ -92,7 +91,7 @@ public class PatientController implements Serializable {
 	
 	public void deletePatient() {
 		patient.setActive(false);
-		patient.audit(User.getLoggedUser());
+		patient.audit(UserPrincipal.getLoggedUser());
 		patientRepository.save(patient);
 		refresh();
 	}
@@ -107,7 +106,7 @@ public class PatientController implements Serializable {
 			}
 
 			patient.setName(patient.getName().trim());
-			patient.audit(User.getLoggedUser());
+			patient.audit(UserPrincipal.getLoggedUser());
 			patientRepository.save(patient);
 		} catch (DataIntegrityViolationException e) {
 			Faces.validationFailed();

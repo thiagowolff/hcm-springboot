@@ -5,9 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.Setter;
-import org.omnifaces.util.Faces;
 
-import javax.faces.context.FacesContext;
 import javax.persistence.*;
 import java.time.Duration;
 import java.time.Instant;
@@ -16,7 +14,16 @@ import java.time.Instant;
 @Getter
 @Setter
 public class User {
-	public enum Role { DEV, ADMIN, USER }
+	public enum Role {
+        DEVELOPER,
+		ADMIN,
+		USER;
+
+        @Override
+        public String toString() {
+            return "ROLE_" + name();
+        }
+    }
     
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,13 +50,6 @@ public class User {
     	creationDate = Instant.now();
 		userSettings = new UserSettings();
     }
-
-	public static User getLoggedUser() {
-    	if (FacesContext.getCurrentInstance() == null) {
-    		return null;
-		}
-		return Faces.getSessionAttribute("loggedUser");
-	}
 
     public String getLastAccessDuration() {
     	if (lastAccess == null) {

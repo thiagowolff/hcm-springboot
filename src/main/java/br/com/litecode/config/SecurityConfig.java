@@ -1,73 +1,83 @@
 package br.com.litecode.config;
 
-import br.com.litecode.security.FacesAjaxAwareUserFilter;
-import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
-import org.apache.shiro.cache.MemoryConstrainedCacheManager;
-import org.apache.shiro.crypto.hash.Sha256Hash;
-import org.apache.shiro.mgt.SecurityManager;
-import org.apache.shiro.realm.AuthorizingRealm;
-import org.apache.shiro.realm.jdbc.JdbcRealm;
-import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
-import org.apache.shiro.web.filter.authc.AnonymousFilter;
-import org.apache.shiro.web.filter.authc.LogoutFilter;
-import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import br.com.litecode.security.JsfRedirectStrategy;
+import br.com.litecode.security.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.servlet.Filter;
-import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
-public class SecurityConfig {
-	@Autowired
-	private DataSource dataSource;
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    public static final String LOGIN_PAGE = "/login.xhtml";
 
-	@Bean
-	public ShiroFilterFactoryBean shiroFilter() {
-		ShiroFilterFactoryBean shiroFilter = new ShiroFilterFactoryBean();
-		shiroFilter.setLoginUrl("/login.xhtml");
-		shiroFilter.setSuccessUrl("/index.xhtml");
+    @Autowired
+    private UserService userDetailsService;
 
-		Map<String, String> filterChainDefinitionMapping = new HashMap<>();
-		filterChainDefinitionMapping.put("/login.xhtml", "anon");
-		filterChainDefinitionMapping.put("/index.xhtml", "auth");
-		filterChainDefinitionMapping.put("/", "auth");
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.authorizeRequests()
+                .antMatchers("/javax.faces.resource/**").permitAll()
+                .antMatchers("/resources/**").permitAll()
+                .anyRequest().authenticated();
 
-		shiroFilter.setFilterChainDefinitionMap(filterChainDefinitionMapping);
-		shiroFilter.setSecurityManager(securityManager());
+        http.formLogin()
+                .loginPage(LOGIN_PAGE)
+                .permitAll();
 
-		Map<String, Filter> filters = new HashMap<>();
-		filters.put("anon", new AnonymousFilter());
-		filters.put("auth", new FacesAjaxAwareUserFilter());
-		filters.put("logout", new LogoutFilter());
-		shiroFilter.setFilters(filters);
-		return shiroFilter;
-	}
+        http.rememberMe()
+                .rememberMeParameter("rememberMe_input")
+                .tokenValiditySeconds(2592000)
+                .userDetailsService(userDetailsService);
 
-	@Bean
-	public SecurityManager securityManager() {
-		DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
-		securityManager.setRealm(jdbcRealm());
-		securityManager.setCacheManager(new MemoryConstrainedCacheManager());
-		return securityManager;
-	}
+        http.logout().logoutSuccessUrl(LOGIN_PAGE);
+        http.csrf().disable();
+        http.sessionManagement()
+                .invalidSessionStrategy(jsfRedirectStrategy())
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(false)
+                .expiredUrl(LOGIN_PAGE)
+                .sessionRegistry(sessionRegistry());
 
-	@Bean
-	public AuthorizingRealm jdbcRealm() {
-		HashedCredentialsMatcher credentialsMatcher = new HashedCredentialsMatcher();
-		credentialsMatcher.setHashAlgorithmName(Sha256Hash.ALGORITHM_NAME);
-		credentialsMatcher.setStoredCredentialsHexEncoded(false);
+        http.exceptionHandling().authenticationEntryPoint(jsfRedirectStrategy());
+    }
 
-		JdbcRealm jdbcRealm = new JdbcRealm();
-		jdbcRealm.setDataSource(dataSource);
-		jdbcRealm.setCredentialsMatcher(credentialsMatcher);
-		jdbcRealm.setAuthenticationQuery("select password from user where active = 1 and username = ?");
-		jdbcRealm.setUserRolesQuery("select role from user where username = ?");
-		jdbcRealm.init();
-		return jdbcRealm;
-	}
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) {
+        auth.authenticationProvider(authenticationProvider());
+    }
 
+    @Bean
+    SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(encoder());
+
+        return authProvider;
+    }
+
+    @Bean
+    public PasswordEncoder encoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public JsfRedirectStrategy jsfRedirectStrategy() {
+        JsfRedirectStrategy jsfRedirectStrategy = new JsfRedirectStrategy(LOGIN_PAGE);
+        return jsfRedirectStrategy;
+    }
 }

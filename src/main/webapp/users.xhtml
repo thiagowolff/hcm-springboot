@@ -9,6 +9,8 @@
 				xmlns:lc="http://java.sun.com/jsf/composite/components">
 	
 	<h:form id="usersForm">  
+		<ui:param name="loggedUser" value="#{request.userPrincipal.principal.user}" />
+
 		<lc:headerPanel title="#{msg['title.users']}" addButtonAction="#{userController.newUser()}" update=":userForm" oncomplete="PF('userDialog').show()" />
 
 		<div class="content-wrapper">
@@ -65,7 +67,7 @@
 
 				<p:outputLabel value="#{msg['label.role']}" for="role" />
 				<p:selectOneMenu id="role" value="#{userController.user.role}" required="true" converter="omnifaces.SelectItemsConverter">
-					<f:selectItem itemLabel="#{lcf:enum(Role.DEV)}" itemValue="#{Role.DEV}" itemDisabled="#{not loginController.hasDevRights()}" />
+					<f:selectItem itemLabel="#{lcf:enum(Role.DEVELOPER)}" itemValue="#{Role.DEVELOPER}" itemDisabled="#{not loginController.hasDevRights()}" />
 					<f:selectItem itemLabel="#{lcf:enum(Role.ADMIN)}" itemValue="#{Role.ADMIN}" />
 					<f:selectItem itemLabel="#{lcf:enum(Role.USER)}" itemValue="#{Role.USER}" />
 				</p:selectOneMenu>

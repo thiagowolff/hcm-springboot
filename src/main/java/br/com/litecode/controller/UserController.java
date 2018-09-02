@@ -3,18 +3,17 @@ package br.com.litecode.controller;
 import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.model.UserSettings;
 import br.com.litecode.domain.repository.UserRepository;
+import br.com.litecode.security.UserPrincipal;
 import br.com.litecode.security.UserSessionTracker;
 import br.com.litecode.service.MailService;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.omnifaces.util.Messages;
 import org.primefaces.PrimeFaces;
-import org.primefaces.context.RequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -32,6 +31,9 @@ public class UserController implements Serializable {
 
 	@Autowired
 	private MailService mailService;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@Getter
 	@Setter
@@ -64,7 +66,7 @@ public class UserController implements Serializable {
 	public void saveUser() {
 		if (!isUsernameUnique(user)) {
 			Messages.addGlobalError("error.userAlreadyExists");
-			RequestContext.getCurrentInstance().addCallbackParam("validationFailed", true);
+			PrimeFaces.current().ajax().addCallbackParam("validationFailed", true);
 			return;
 		}
 
@@ -77,7 +79,7 @@ public class UserController implements Serializable {
 	}
 
 	private String createPasswordHash(String password) {
-		return new Sha256Hash(password).toBase64();
+		return passwordEncoder.encode(password);
 	}
 
 	private boolean isUsernameUnique(User user) {
@@ -112,12 +114,12 @@ public class UserController implements Serializable {
 	}
 
 	public void getUserSettings() {
-		if (User.getLoggedUser() == null) {
+		if (UserPrincipal.getLoggedUser() == null) {
 			PrimeFaces.current().ajax().addCallbackParam("userSettings", null);
 			return;
 		}
 
-		UserSettings userSettings = User.getLoggedUser().getUserSettings();
+		UserSettings userSettings = UserPrincipal.getLoggedUser().getUserSettings();
 		PrimeFaces.current().ajax().addCallbackParam("userSettings", new Gson().toJson(userSettings));
 	}
 
@@ -130,7 +132,7 @@ public class UserController implements Serializable {
 			return;
 		}
 
-		mailService.sendEmail("thiago.wolff@gmail.com", "HCM - Report Issue [" + SecurityUtils.getSubject().getPrincipal() + "]", helpMessage);
+		mailService.sendEmail("thiago.wolff@gmail.com", "HCM - Report Issue [" + UserPrincipal.getLoggedUser().getUsername() + "]", helpMessage);
 	}
 
 	public void newUser() {

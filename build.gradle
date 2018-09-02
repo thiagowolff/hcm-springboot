@@ -45,6 +45,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-cache"
     compile "org.springframework.boot:spring-boot-starter-websocket"
     compile "org.springframework.boot:spring-boot-starter-mail"
+    compile "org.springframework.boot:spring-boot-starter-security"
 
     compile "com.github.ben-manes.caffeine:caffeine"
     compile "org.hibernate:hibernate-ehcache"
@@ -58,15 +59,16 @@ dependencies {
     compile "org.omnifaces:omnifaces:1.14.1"
 
     compile "com.google.guava:guava:23.2-jre"
-    compile "org.apache.shiro:shiro-core:1.4.0"
-    compile "org.apache.shiro:shiro-web:1.4.0"
-    compile "org.apache.shiro:shiro-spring:1.4.0"
+//    compile "org.apache.shiro:shiro-core:1.4.0-RC2"
+//    compile "org.apache.shiro:shiro-web:1.4.0-RC2"
+//    compile "org.apache.shiro:shiro-spring-boot-web-starter:1.4.0-RC2"
     compile "ch.qos.logback:logback-classic:1.2.3"
     compile "com.itextpdf:itextpdf:5.5.12"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.3"
     compile "com.github.sps.pushover.net:pushover-client:1.0.0"
 
     testCompile "org.springframework.boot:spring-boot-starter-test"
+    testCompile "org.springframework.security:spring-security-test"
 //    testCompile "com.google.guava:guava-testlib:23.2-jre"
     testCompile "org.mockito:mockito-core:2.9.0"
     testCompile "org.powermock:powermock-module-junit4:1.7.1"

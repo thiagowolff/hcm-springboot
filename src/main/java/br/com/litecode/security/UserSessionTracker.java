@@ -4,8 +4,10 @@ import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.UserRepository;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushService;
-import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -26,6 +28,9 @@ public class UserSessionTracker implements Serializable {
 
 	private Map<User, HttpSession> userSessions;
 
+    @Autowired
+    private SessionRegistry sessionRegistry;
+
 	@PostConstruct
 	public void init() {
 		userSessions = new ConcurrentHashMap<>();
@@ -42,8 +47,9 @@ public class UserSessionTracker implements Serializable {
 	}
 
 	public void removeUserSession(User user) {
-		userSessions.remove(user);
-		pushService.publish(PushChannel.UPDATE, "", null);
+        user.setSessionId(null);
+        userRepository.save(user);
+        userSessions.remove(user);
 	}
 
 	public int getOnlineUsers() {
@@ -51,11 +57,21 @@ public class UserSessionTracker implements Serializable {
 	}
 	
 	public synchronized void killUserSession(User user) {
-		HttpSession userSession = userSessions.get(user);
-		user.setSessionId(null);
-		userRepository.save(user);
-		removeUserSession(user);
-		SecurityUtils.getSubject().logout();
-		userSession.invalidate();
-	}
+		HttpSession session = userSessions.get(user);
+
+        for (Object principal : sessionRegistry.getAllPrincipals()) {
+            UserPrincipal userPrincipal = (UserPrincipal) principal;
+
+            if (userPrincipal.getUser().getSessionId() == null) {
+                continue;
+            }
+
+            if (userPrincipal.getUser().getSessionId().equals(session.getId())) {
+                sessionRegistry.getSessionInformation(session.getId()).expireNow();
+            }
+        }
+
+        removeUserSession(user);
+        pushService.publish(PushChannel.UPDATE, "", null);
+    }
 }

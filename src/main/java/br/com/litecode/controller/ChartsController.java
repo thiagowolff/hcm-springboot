@@ -1,20 +1,15 @@
 package br.com.litecode.controller;
 
 import br.com.litecode.domain.repository.ChartsRepository;
-import com.google.gson.*;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import javax.faces.view.ViewScoped;
-import java.lang.reflect.Type;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @ViewScoped
 @Component
