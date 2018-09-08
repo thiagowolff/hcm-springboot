@@ -30,7 +30,8 @@ public class JsfRedirectStrategy extends LoginUrlAuthenticationEntryPoint implem
         if (isAjaxRedirect(request)) {
             facesRedirect(request, response);
         } else {
-            response.sendRedirect(request.getRequestURL().toString());
+            request.getSession(true);
+            response.sendRedirect(request.getContextPath() + getLoginFormUrl());
         }
     }
 

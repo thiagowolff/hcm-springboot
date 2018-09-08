@@ -20,6 +20,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.omnifaces.util.Faces;
 import org.omnifaces.util.Messages;
+import org.primefaces.event.RowEditEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -200,6 +201,14 @@ public class SessionController implements Serializable {
 		patientSession.setAbsent(absent);
 		sessionRepository.save(patientSession.getSession());
 	}
+
+    @PushRefresh
+    @Transactional
+    @CacheEvict(cacheNames = "patient", allEntries = true)
+    public void onPatientVitalSignsEdit(RowEditEvent event) {
+	    PatientSession patientSession = (PatientSession) event.getObject();
+        sessionRepository.save(patientSession.getSession());
+    }
 
 	@PushRefresh
 	@Transactional

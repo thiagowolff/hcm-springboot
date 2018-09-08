@@ -57,6 +57,8 @@
 				<p:messages id="messages"/>
 			</p:panelGrid>
 
+            <o:importFunctions type="br.com.litecode.util.TextUtil" var="textUtil" />
+
 			<p:dataGrid id="chambersGrid" var="chamber" value="#{chamberController.chambers}" columns="1" layout="grid">
 				<ui:param name="chamberSessions" value="#{sessionController.getSessions(chamber.chamberId, sessionController.sessionData.sessionDate)}" />
 
@@ -83,28 +85,38 @@
 					</p:column>
 
 					<p:column headerText="#{msg['label.patients']}" styleClass="#{bgStyleClass} large-column" style="vertical-align: top;">
-						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
+						<ui:repeat value="#{chamberSession.patientSessions}" var="patientSession">
 							<div class="long-text text-left">
 								<h:outputText
 										styleClass="patient-#{patientSession.patientSessionId}"
 										value="#{patientSession.patient.name}"
 										style="#{patientSession.absent ? 'color: #b14538' : chamberSession.running ? 'color: #007d18' : ''}" />
-								<p:tooltip for="@(.patient-#{patientSession.patientSessionId})" value="#{patientSession.patient.recordInfo}" position="right"/>
+								<p:tooltip for="@(.patient-#{patientSession.patientSessionId})" value="#{patientSession.patient.recordInfo}" escape="false" position="right"/>
 								<ui:param name="warning" value="#{patientController.getWarning(patientSession.patient, patientStats[patientSession.patient.patientId])}" />
 								<h:outputText value="#{warning}" styleClass="patient-session-warning" rendered="#{not empty warning}" />
 							</div>
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.healthInsurance']}" styleClass="#{bgStyleClass} medium-column hidden-sm hidden-xs" style="vertical-align: top">
-						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession">
+					<p:column headerText="#{msg['label.vitalSigns']}" width="140" styleClass="#{bgStyleClass} hidden-md hidden-sm hidden-xs" style="vertical-align: top;">
+                        <ui:repeat value="#{chamberSession.patientSessions}" var="patientSession">
+							<div class="long-text text-left">
+                                <h:panelGroup rendered="#{not empty patientSession.temperature}">#{patientSession.temperature} <span style="font-size: 10px; color: gray">ºC</span></h:panelGroup>
+                                <h:panelGroup rendered="#{not empty patientSession.bloodPressure}" style="float: right">#{patientSession.bloodPressure} <span style="font-size: 10px; color: gray">mmHg</span></h:panelGroup>
+                                <h:panelGroup rendered="#{empty patientSession.temperature and empty patientSession.bloodPressure}" layout="block" styleClass="text-center">-</h:panelGroup>
+							</div>
+						</ui:repeat>
+					</p:column>
+
+					<p:column headerText="#{msg['label.healthInsurance']}" styleClass="#{bgStyleClass} medium-column hidden-md hidden-sm hidden-xs" style="vertical-align: top">
+						<ui:repeat value="#{chamberSession.patientSessions}" var="patientSession">
 							<div class="long-text text-left">
 								#{empty patientSession.patient.healthInsurance ? '-' : patientSession.patient.healthInsurance.name}
 							</div>
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.attendance']}" styleClass="#{bgStyleClass} small-column patient-stats-#{chamberSession.sessionId} hidden-xs" style="vertical-align: top; white-space: nowrap">
+					<p:column headerText="#{msg['label.attendance']}" width="75" styleClass="#{bgStyleClass} patient-stats-#{chamberSession.sessionId} hidden-xs" style="vertical-align: top; white-space: nowrap">
 						<ui:repeat value="#{chamberSession.patientSessions.toArray()}" var="patientSession" varStatus="status">
 							<div class="animate-#{status.index}">
 								#{patientStats[patientSession.patient.patientId].completedSessions}
@@ -113,25 +125,26 @@
 					</p:column>
 
 					<p:column headerText="#{msg['label.capacity']}" styleClass="capacity #{bgStyleClass} text-left hidden-sm hidden-xs">
+                        <ui:param name="spinClass" value="#{textUtil:randomBoolean() ? '' : 'fa-spin-reverse'}" />
 						<ui:repeat value="#{sessionController.getChamberPayload(chamberSession)}" var="payloadStatus">
 							<div class="col-md-4" style="padding-left: 2px;">
 								<span class="fa-stack fa-2x" style="font-size: 12px;">
 									<i class="fa fa-circle fa-stack-2x" style="#{payloadStatus eq 'AVAILABLE' ? 'color: #d3d3d3' : payloadStatus eq 'OCCUPIED' ? 'color: #476c8d' : 'color: #d23030'}"></i>
-									<h:panelGroup styleClass="fa fa-circle-o-notch fa-spin fa-fw fa-stack-1x" style="color: #1ee84a;" rendered="#{chamberSession.running and payloadStatus eq 'OCCUPIED' }"/>
+									<h:panelGroup styleClass="fa fa-circle-o-notch fa-spin #{spinClass} fa-fw fa-stack-1x" style="color: #1ee84a;" rendered="#{chamberSession.running and payloadStatus eq 'OCCUPIED' }"/>
 									<h:panelGroup styleClass="fa fa-pause fa-blink fa-stack-1x" style="color: #e8e006; font-size: 10px;" rendered="#{chamberSession.paused and payloadStatus eq 'OCCUPIED' }"/>
 								</span>
 							</div>
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.time']}" styleClass="#{bgStyleClass} small-column hidden-xs">
+					<p:column headerText="#{msg['label.time']}" width="75" styleClass="#{bgStyleClass} hidden-md hidden-sm hidden-xs">
 						<h:outputText value="#{chamberSession.scheduledTime}">
 							<f:converter converterId="localDateTimeConverter" />
 							<f:attribute name="pattern" value="HH:mm:ss" />
 						</h:outputText>
 					</p:column>
 
-					<p:column headerText="#{msg['label.startTime']}" styleClass="#{bgStyleClass} small-column hidden-xs">
+					<p:column headerText="#{msg['label.startTime']}" width="75" styleClass="#{bgStyleClass} hidden-xs">
 						<h:outputText value="#{chamberSession.startTime}" style="color: #007d18;">
 							<f:converter converterId="localDateTimeConverter" />
 							<f:attribute name="pattern" value="HH:mm:ss" />
@@ -158,7 +171,7 @@
 						</div>
 					</p:column>
 
-					<p:column headerText="#{msg['label.endTime']}" styleClass="#{bgStyleClass} small-column hidden-xs">
+					<p:column headerText="#{msg['label.endTime']}" width="75" styleClass="#{bgStyleClass} hidden-xs">
 						<h:outputText value="#{chamberSession.endTime}" style="color: #b14538;">
 							<f:converter converterId="localDateTimeConverter" />
 							<f:attribute name="pattern" value="HH:mm:ss" />
@@ -198,16 +211,16 @@
 					<p:column headerText="#{msg['label.controls']}" styleClass="#{bgStyleClass} medium-column session-action hidden-xs">
 						<div class="container-fluid">
 							<div class="row">
-								<div class="col-sm-6 col-md-3">
+								<div class="col-md-6 col-lg-3">
 									<p:commandButton title="#{msg['button.start']}" icon="fa fa-play" actionListener="#{sessionController.startSession(chamberSession)}" process="@this" update=":sessionsForm:chambersGrid" global="false" disabled="#{chamberSession.running or chamberSession.status eq 'FINISHED'}" oncomplete="track('Start session');" />
 								</div>
-								<div class="col-sm-6 col-md-3">
+								<div class="col-md-6 col-lg-3">
 									<p:commandButton title="#{msg['button.pause']}" icon="fa fa-pause" actionListener="#{sessionController.pauseSession(chamberSession)}" process="@this" update=":sessionsForm:chambersGrid" global="false" disabled="#{not chamberSession.running}" oncomplete="track('Pause session');"/>
 								</div>
-								<div class="col-sm-6 col-md-3">
+								<div class="col-md-6 col-lg-3">
 									<p:commandButton title="#{msg['button.stop']}" icon="fa fa-stop" actionListener="#{sessionController.stopSession(chamberSession)}" process="@this" update=":sessionsForm:chambersGrid" disabled="#{chamberSession.status eq 'CREATED'}" oncomplete="track('Reset session');"/>
 								</div>
-								<div class="col-sm-6 col-md-3">
+								<div class="col-md-6 col-lg-3">
 									<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process="@this" update=":sessionsForm:chambersGrid" disabled="#{chamberSession.status eq 'FINISHED'}" oncomplete="track('Finalize session');" />
 								</div>
 							</div>
@@ -253,18 +266,33 @@
 					<p:commandButton value="#{msg['label.addPatients']}" actionListener="#{sessionController.addPatientsToSession(sessionController.sessionData.session)}" process="@this, newSessionPatients" update=":sessionsForm:chambersGrid, sessionPatientsTable, sessionMessages, newSessionPatients" styleClass="btn-primary" />
 				</div>
 			</div>
-			<p:dataTable id="sessionPatientsTable" styleClass="dialog-table" var="sessionPatient" value="#{sessionController.sessionData.session.patientSessions}" emptyMessage="#{msg['message.noData']}">
-				<p:column headerText="#{msg['label.id']}" width="50">
+			<p:dataTable id="sessionPatientsTable" styleClass="dialog-table" var="sessionPatient" editable="true" value="#{sessionController.sessionData.session.patientSessions}" emptyMessage="#{msg['message.noData']}">
+                <p:ajax event="rowEdit" listener="#{sessionController.onPatientVitalSignsEdit}" update=":sessionsForm:chambersGrid, :editSessionForm:sessionPatientsTable"  />
+
+                <p:column headerText="#{msg['label.id']}" width="50">
 					#{sessionPatient.patient.patientId}
 				</p:column>
 				<p:column headerText="#{msg['label.name']}" styleClass="text-left">
 					#{sessionPatient.patient.name}
 				</p:column>
+                <p:column headerText="#{msg['label.temperature']} (ºC)">
+                    <p:cellEditor>
+                        <f:facet name="output">#{sessionPatient.temperature}</f:facet>
+                        <f:facet name="input"><p:inputNumber value="#{sessionPatient.temperature}" /></f:facet>
+                    </p:cellEditor>
+				</p:column>
+                <p:column headerText="#{msg['label.bloodPressure']} (mmHg)">
+                    <p:cellEditor>
+                        <f:facet name="output">#{sessionPatient.bloodPressure}</f:facet>
+                        <f:facet name="input"><p:inputMask value="#{sessionPatient.bloodPressure}" mask="999/99?9" slotChar="" /></f:facet>
+                    </p:cellEditor>
+				</p:column>
 				<p:column headerText="#{msg['label.status']}" width="120">
 					<ui:param name="status" value="#{msg[sessionPatient.absent ? 'label.patientSessionAbsent' : 'label.patientSessionPresent']}" />
 					<h:outputText value="#{status}" styleClass="#{sessionPatient.absent ? 'patient-absent' : 'patient-present'}" />
 				</p:column>
-				<p:column headerText="#{msg['label.action']}" width="100">
+				<p:column headerText="#{msg['label.action']}" width="130">
+                    <p:rowEditor editTitle="#{msg['label.vitalSigns']}" />
 					<p:commandButton process="@this" update=":sessionsForm:chambersGrid, :editSessionForm:sessionPatientsTable" actionListener="#{sessionController.setPatientSessionStatus(sessionPatient, false)}" icon="fa fa-calendar-check-o" title="#{msg['button.active']}" rendered="#{sessionPatient.absent}" />
 					<p:commandButton process="@this" update=":sessionsForm:chambersGrid, :editSessionForm:sessionPatientsTable" actionListener="#{sessionController.setPatientSessionStatus(sessionPatient, true)}" icon="fa fa-calendar-times-o" title="#{msg['button.absent']}" rendered="#{not sessionPatient.absent}" />
 					<p:commandButton process="@this" update=":sessionsForm:chambersGrid, :editSessionForm:sessionPatientsTable, :editSessionForm:newSessionPatients" actionListener="#{sessionController.removePatientFromSession(sessionPatient)}" icon="fa fa-trash" title="#{msg['button.delete']}" />

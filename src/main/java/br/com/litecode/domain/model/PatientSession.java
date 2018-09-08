@@ -25,6 +25,10 @@ public class PatientSession implements Comparable<PatientSession>, Serializable 
 
 	private boolean absent;
 
+	private Float temperature;
+
+	private String bloodPressure;
+
 	public PatientSession() {
 	}
 

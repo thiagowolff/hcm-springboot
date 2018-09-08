@@ -1,7 +1,9 @@
 package br.com.litecode.domain.model;
 
 import br.com.litecode.domain.model.PatientData.PatientStatus;
+import br.com.litecode.util.MessageUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.base.Joiner;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -72,7 +74,10 @@ public class Patient {
 	}
 
 	public String getRecordInfo() {
-		return consultationReason == null ? null : consultationReason.getName();
+		String record = MessageUtil.getFormattedLabel("label.patientRecord", patientRecord);
+		String reason = MessageUtil.getFormattedLabel("label.consultationReason", consultationReason == null ? null : consultationReason.getName());
+
+		return Joiner.on("<br/>").skipNulls().join(record, reason);
 	}
 
 	public Integer getAge() {

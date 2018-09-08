@@ -1,5 +1,6 @@
 package br.com.litecode.security;
 
+import br.com.litecode.config.SecurityConfig;
 import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.model.User.Role;
 import br.com.litecode.domain.repository.UserRepository;
@@ -9,11 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import net.pushover.client.PushoverException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Instant;
@@ -22,7 +23,7 @@ import java.util.TimeZone;
 
 @Component
 @Slf4j
-public class AuthenticationListener implements ApplicationListener<InteractiveAuthenticationSuccessEvent> {
+public class LoginSuccessListener implements ApplicationListener<InteractiveAuthenticationSuccessEvent> {
     @Autowired
     private UserRepository userRepository;
 
@@ -41,8 +42,8 @@ public class AuthenticationListener implements ApplicationListener<InteractiveAu
         User user = userPrincipal.getUser();
 
         if (user.getRole() != Role.DEVELOPER) {
-            HttpSession activeSession = userSessionTracker.getUserSession(user);
-            if (activeSession != null && !httpServletRequest.getSession().getId().equals(activeSession.getId())) {
+            String activeSessionId = userSessionTracker.getUserSession(user);
+            if (activeSessionId != null && !httpServletRequest.getSession().getId().equals(activeSessionId)) {
                 userSessionTracker.killUserSession(user);
             }
         }
@@ -64,9 +65,15 @@ public class AuthenticationListener implements ApplicationListener<InteractiveAu
         }
 
         userRepository.save(user);
-        userSessionTracker.addUserSession(user, httpServletRequest.getSession());
+        userSessionTracker.addUserSession(user, httpServletRequest.getSession().getId());
 
-        sendLoginNotification(user);
+        if (event.getAuthentication() instanceof UsernamePasswordAuthenticationToken) {
+            sendLoginNotification(user);
+        }
+    }
+
+    private boolean isRemembered() {
+        return httpServletRequest.getParameterValues(SecurityConfig.REMEMBER_ME_PARAMETER) != null;
     }
 
     private String getLastAccessLocation() {
@@ -83,7 +90,7 @@ public class AuthenticationListener implements ApplicationListener<InteractiveAu
 
     private void sendLoginNotification(User user) {
         try {
-            pushoverService.sendNotification("User " + user.getUsername() + " logged in");
+            pushoverService.sendNotification("User " + user.getUsername() + " logged in" + (isRemembered() ? " [rememberMe]" : ""));
         } catch (PushoverException e) {
             log.error("Unable to send login notification", e);
         }

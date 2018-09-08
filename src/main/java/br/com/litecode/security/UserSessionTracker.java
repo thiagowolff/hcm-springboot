@@ -5,14 +5,12 @@ import br.com.litecode.domain.repository.UserRepository;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,10 +21,13 @@ public class UserSessionTracker implements Serializable {
 	@Autowired
 	private UserRepository userRepository;
 
+    @Autowired
+    private PersistentTokenRepository persistentTokenRepository;
+
 	@Autowired
 	private PushService pushService;
 
-	private Map<User, HttpSession> userSessions;
+	private Map<User, String> userSessions;
 
     @Autowired
     private SessionRegistry sessionRegistry;
@@ -37,17 +38,18 @@ public class UserSessionTracker implements Serializable {
 		userRepository.initializeUserSessions();
 	}
 
-	public HttpSession getUserSession(User user) {
+	public String getUserSession(User user) {
 		return userSessions.get(user);
 	}
 
-	public void addUserSession(User user, HttpSession session) {
-		userSessions.put(user, session);
+	public void addUserSession(User user, String sessionId) {
+		userSessions.put(user, sessionId);
 		pushService.publish(PushChannel.UPDATE, "", null);
 	}
 
 	public void removeUserSession(User user) {
         user.setSessionId(null);
+        persistentTokenRepository.removeUserTokens(user.getUsername());
         userRepository.save(user);
         userSessions.remove(user);
 	}
@@ -57,7 +59,7 @@ public class UserSessionTracker implements Serializable {
 	}
 	
 	public synchronized void killUserSession(User user) {
-		HttpSession session = userSessions.get(user);
+        String sessionId = userSessions.get(user);
 
         for (Object principal : sessionRegistry.getAllPrincipals()) {
             UserPrincipal userPrincipal = (UserPrincipal) principal;
@@ -66,8 +68,8 @@ public class UserSessionTracker implements Serializable {
                 continue;
             }
 
-            if (userPrincipal.getUser().getSessionId().equals(session.getId())) {
-                sessionRegistry.getSessionInformation(session.getId()).expireNow();
+            if (userPrincipal.getUser().getSessionId().equals(sessionId)) {
+                sessionRegistry.getSessionInformation(sessionId).expireNow();
             }
         }
 

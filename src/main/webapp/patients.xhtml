@@ -125,6 +125,10 @@
 			</p:messages>
 
 			<p:panelGrid id="patientGrid" columns="3">
+				<h:outputText value="#{msg['label.id']}" rendered="#{patient.patientId ne null}" />
+				<h:outputText value="#{patient.patientId}" rendered="#{patient.patientId ne null}" />
+				<h:outputText value="" rendered="#{patient.patientId ne null}" />
+
 				<p:outputLabel value="#{msg['label.name']}" for="patientName" />
 				<p:inputText id="patientName" value="#{patient.name}" required="true" maxlength="150" size="50" />
 				<p:message for="patientName" display="text" />
@@ -183,7 +187,7 @@
 				<div></div>
 
 				<p:outputLabel value="#{msg['label.phone']}" for="patientPhone" />
-				<p:inputMask id="patientPhone" value="#{patient.phoneNumber}" mask="(99) ?9999999999" maxlength="15" size="15" />
+				<p:inputMask id="patientPhone" value="#{patient.phoneNumber}" mask="(99) 999999999" maxlength="15" size="15" />
 				<div></div>
 
 				<p:outputLabel value="#{msg['label.remarks']}" for="remarks" />

@@ -453,6 +453,37 @@ th .ui-button-icon-only {
 	font-size: 90%;
 }
 
+#editSessionForm\:sessionPatientsTable.ui-datatable table tbody tr td .ui-row-editor
+	.ui-icon-pencil {
+		background: none !important;
+		text-indent: initial;
+		font: normal normal normal 14px/1 FontAwesome;
+		font-size: inherit;
+		text-rendering: auto;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		transform: translate(0, 0);
+		width: 35px;
+
+		&:before {
+			content: "\f2c9";
+		}
+
+		&:hover {
+			color: @defaultIconHoverColor;
+		}
+	.ui-row-editor-pencil {
+	}
+}
+
+.ui-datatable table tbody tr td {
+	.ui-button-icon-only {
+		.ui-button-text {
+			padding: 0;
+		}
+	}
+}
+
 @media screen and (max-width: 640px) {
 	.ui-datatable td[role="gridcell"] {
 		font-size: 10px;
@@ -480,6 +511,10 @@ th .ui-button-icon-only {
 }
 
 @media screen and (min-width: 641px) and (max-width: 1024px) {
+	.ui-datatable td[role="gridcell"] {
+		font-size: 12px;
+	}
+
 	.xsmall-column {
 		width: 4.5em;
 	}
@@ -515,7 +550,7 @@ th .ui-button-icon-only {
 	}
 
 	.large-column {
-		width: 10em;
+		width: 10.5em;
 	}
 }
 
@@ -551,7 +586,6 @@ th .ui-button-icon-only {
 	}
 
 	.large-column {
-		min-width: 13em;
 		width: 100%;
 	}
 }

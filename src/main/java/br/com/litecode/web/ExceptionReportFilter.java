@@ -41,10 +41,12 @@ public class ExceptionReportFilter implements Filter {
 				request.getRequestDispatcher("/login.xhtml").forward(request, response);
 			}
 
-			request.setAttribute("javax.servlet.error.status_code", 500);
-			request.setAttribute("javax.servlet.error.exception_type", e);
-			request.setAttribute("javax.servlet.error.message", e.getMessage());
-			request.getRequestDispatcher("/errorPage.xhtml").forward(request, response);
+			if (!response.isCommitted()) {
+                request.setAttribute("javax.servlet.error.status_code", 500);
+                request.setAttribute("javax.servlet.error.exception_type", e);
+                request.setAttribute("javax.servlet.error.message", e.getMessage());
+                request.getRequestDispatcher("/errorPage.xhtml").forward(request, response);
+            }
 
 			if (numberOfEmailsSent < MAX_EMAILS_PER_MINUTE && projectStage == ProjectStage.Production) {
 				mailService.sendEmail("thiago.wolff@gmail.com", "HCM - Exception", Throwables.getStackTraceAsString(e));

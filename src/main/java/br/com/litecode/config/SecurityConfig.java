@@ -14,11 +14,19 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+
+import javax.sql.DataSource;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public static final String LOGIN_PAGE = "/login.xhtml";
+    public static final String REMEMBER_ME_PARAMETER = "rememberMe_input";
+
+    @Autowired
+    private DataSource dataSource;
 
     @Autowired
     private UserService userDetailsService;
@@ -35,8 +43,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll();
 
         http.rememberMe()
-                .rememberMeParameter("rememberMe_input")
+                .rememberMeParameter(REMEMBER_ME_PARAMETER)
                 .tokenValiditySeconds(2592000)
+                .tokenRepository(tokenRepository())
                 .userDetailsService(userDetailsService);
 
         http.logout().logoutSuccessUrl(LOGIN_PAGE);
@@ -73,6 +82,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public PasswordEncoder encoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public PersistentTokenRepository tokenRepository() {
+        JdbcTokenRepositoryImpl jdbcTokenRepositoryImpl = new JdbcTokenRepositoryImpl();
+        jdbcTokenRepositoryImpl.setDataSource(dataSource);
+        return jdbcTokenRepositoryImpl;
     }
 
     @Bean
