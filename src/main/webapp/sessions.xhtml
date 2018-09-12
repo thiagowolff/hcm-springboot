@@ -103,7 +103,12 @@
 							<div class="long-text text-left">
                                 <h:panelGroup rendered="#{not empty patientSession.temperature}">#{patientSession.temperature} <span style="font-size: 10px; color: gray">ºC</span></h:panelGroup>
                                 <h:panelGroup rendered="#{not empty patientSession.bloodPressure}" style="float: right">#{patientSession.bloodPressure} <span style="font-size: 10px; color: gray">mmHg</span></h:panelGroup>
-                                <h:panelGroup rendered="#{empty patientSession.temperature and empty patientSession.bloodPressure}" layout="block" styleClass="text-center">-</h:panelGroup>
+                                <h:panelGroup rendered="#{empty patientSession.temperature and empty patientSession.bloodPressure and (not chamberSession.running or patientSession.absent)}" layout="block" styleClass="text-center">-</h:panelGroup>
+                                <h:panelGroup rendered="#{empty patientSession.temperature and empty patientSession.bloodPressure and chamberSession.running and not patientSession.absent}" layout="block" styleClass="text-center">
+                                    <p:commandLink value="#{msg['button.register']}" styleClass="tiny-link fa-blink-slow" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); track('Edit session');" process="@this" update=":editSessionForm" global="false">
+                                        <f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
+                                    </p:commandLink>
+                                </h:panelGroup>
 							</div>
 						</ui:repeat>
 					</p:column>
@@ -178,7 +183,7 @@
 						</h:outputText>
 					</p:column>
 
-					<p:column headerText="#{msg['label.startTime']}&lt;br/&gt;#{msg['label.endTime']}" styleClass="#{bgStyleClass} small-column hidden-sm hidden-md hidden-lg">
+					<p:column headerText="#{msg['label.startTime']}&lt;br/&gt;#{msg['label.endTime']}" styleClass="#{bgStyleClass} hidden-sm hidden-md hidden-lg" width="50">
 						<h:outputText value="#{chamberSession.startTime}" style="color: #007d18;">
 							<f:converter converterId="localDateTimeConverter" />
 							<f:attribute name="pattern" value="HH:mm:ss" />
@@ -292,8 +297,9 @@
 					<h:outputText value="#{status}" styleClass="#{sessionPatient.absent ? 'patient-absent' : 'patient-present'}" />
 				</p:column>
 				<p:column headerText="#{msg['label.action']}" width="130">
-                    <p:rowEditor editTitle="#{msg['label.vitalSigns']}" />
-					<p:commandButton process="@this" update=":sessionsForm:chambersGrid, :editSessionForm:sessionPatientsTable" actionListener="#{sessionController.setPatientSessionStatus(sessionPatient, false)}" icon="fa fa-calendar-check-o" title="#{msg['button.active']}" rendered="#{sessionPatient.absent}" />
+                    <p:tooltip for="editVitalSigns" value="#{msg['label.vitalSigns']}" position="left" />
+                    <p:rowEditor id="editVitalSigns" />
+                    <p:commandButton process="@this" update=":sessionsForm:chambersGrid, :editSessionForm:sessionPatientsTable" actionListener="#{sessionController.setPatientSessionStatus(sessionPatient, false)}" icon="fa fa-calendar-check-o" title="#{msg['button.active']}" rendered="#{sessionPatient.absent}" />
 					<p:commandButton process="@this" update=":sessionsForm:chambersGrid, :editSessionForm:sessionPatientsTable" actionListener="#{sessionController.setPatientSessionStatus(sessionPatient, true)}" icon="fa fa-calendar-times-o" title="#{msg['button.absent']}" rendered="#{not sessionPatient.absent}" />
 					<p:commandButton process="@this" update=":sessionsForm:chambersGrid, :editSessionForm:sessionPatientsTable, :editSessionForm:newSessionPatients" actionListener="#{sessionController.removePatientFromSession(sessionPatient)}" icon="fa fa-trash" title="#{msg['button.delete']}" />
 				</p:column>

@@ -67,7 +67,7 @@ public class LoginSuccessListener implements ApplicationListener<InteractiveAuth
         userRepository.save(user);
         userSessionTracker.addUserSession(user, httpServletRequest.getSession().getId());
 
-        if (event.getAuthentication() instanceof UsernamePasswordAuthenticationToken) {
+        if (user.getRole() != Role.DEVELOPER && event.getAuthentication() instanceof UsernamePasswordAuthenticationToken) {
             sendLoginNotification(user);
         }
     }

@@ -11,7 +11,7 @@ import javax.servlet.http.HttpSessionListener;
 
 @WebListener
 @Slf4j
-public class UserSessionListener implements HttpSessionListener {
+public class SessionListener implements HttpSessionListener {
 	@Autowired
 	private UserSessionTracker userSessionTracker;
 

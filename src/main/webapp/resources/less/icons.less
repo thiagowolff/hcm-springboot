@@ -41,7 +41,6 @@
 	.icon(@icon-pencil)
 }
 
-
 @keyframes fa-blink {
 	0% { opacity: 1; }
 	25% { opacity: 0.75; }
@@ -56,6 +55,20 @@
 	-ms-animation: fa-blink 1.5s linear infinite;
 	-o-animation: fa-blink 1.5s linear infinite;
 	animation: fa-blink 1.5s linear infinite;
+}
+
+@keyframes fa-blink-slow {
+	0% { opacity: 1; }
+	50% { opacity: 0.5; }
+	100% { opacity: 0.8; }
+}
+
+.fa-blink-slow {
+	-webkit-animation: fa-blink-slow 2.5s linear infinite;
+	-moz-animation: fa-blink-slow 2.5s linear infinite;
+	-ms-animation: fa-blink-slow 2.5s linear infinite;
+	-o-animation: fa-blink-slow 2.5s linear infinite;
+	animation: fa-blink-slow 2.5s linear infinite;
 }
 
 .fa-spin-reverse {

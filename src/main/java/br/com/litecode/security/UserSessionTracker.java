@@ -49,7 +49,6 @@ public class UserSessionTracker implements Serializable {
 
 	public void removeUserSession(User user) {
         user.setSessionId(null);
-        persistentTokenRepository.removeUserTokens(user.getUsername());
         userRepository.save(user);
         userSessions.remove(user);
 	}
@@ -74,6 +73,7 @@ public class UserSessionTracker implements Serializable {
         }
 
         removeUserSession(user);
+		persistentTokenRepository.removeUserTokens(user.getUsername());
         pushService.publish(PushChannel.UPDATE, "", null);
     }
 }
