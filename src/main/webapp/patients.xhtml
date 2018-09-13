@@ -180,7 +180,7 @@
 					<f:selectItem itemValue="" itemLabel=""/>
 					<f:selectItems value="#{physicianAssistantController.patientData}" var="physicianAssistant" itemValue="#{physicianAssistant}" itemLabel="#{physicianAssistant.name}"/>
 				</p:selectOneMenu>
-				<p:message for="physicianAssistant" display="text" />
+				<p:commandLink value="#{msg['button.add']}" process="@this" update=":physicianAssistantComponent:physicianAssistantForm" actionListener="#{physicianAssistantController.refresh()}" oncomplete="PF('physicianAssistantDialog').show();" global="false" onclick="track('Manage physician assistant', { 'source': 'link' })" styleClass="form-link" />
 
 				<p:outputLabel value="#{msg['label.email']}" for="patientEmail" />
 				<p:inputText id="patientEmail" value="#{patient.email}" maxlength="75" size="50" />
@@ -232,7 +232,7 @@
 						var chartData = '#{patientController.attendanceChartData}';
 
 						if (!chartData) {
-							var noDataMessage = $("<p>Nenhuma sessão realizada para este paciente.</p>");;
+							var noDataMessage = $("<p>Nenhuma sessão realizada para este paciente.</p>");
 							noDataMessage.appendTo($('#patientAttendanceChart'));
 							return;
 						}
@@ -283,6 +283,8 @@
 				<div id="patientAttendanceChart"></div>
 			</h:panelGroup>
 		</p:dialog>
+
+        <p:remoteCommand name="updatePatientInputForm" update=":patientInputForm:patientGrid" />
 	</h:form>
 
 	<lc:confirmDeleteDialog entity="Patient" deleteAction="#{patientController.deletePatient()}" update=":patientsForm:messages, :patientsForm:patientsTable, :patientInputForm:patientGrid" oncomplete="PF('patientsTable').clearFilters();" />

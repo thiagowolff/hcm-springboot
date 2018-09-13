@@ -6,6 +6,7 @@ import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushService;
 import br.com.litecode.service.push.message.NotificationMessage;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
@@ -23,19 +24,15 @@ import java.util.concurrent.ScheduledFuture;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AlarmService {
 	private static final ScriptEngine scriptEngine = new NashornScriptEngineFactory().getScriptEngine();
 
-	@Autowired
-	private AlarmRepository alarmRepository;
+	private final AlarmRepository alarmRepository;
+	private final PushService pushService;
+	private final TaskScheduler taskScheduler;
 
-	@Autowired
-	private PushService pushService;
-
-	@Autowired
-	private TaskScheduler taskScheduler;
-
-	Map<Integer, ScheduledFuture> scheduledAlarms;
+	private Map<Integer, ScheduledFuture> scheduledAlarms;
 
 	@PostConstruct
 	private void init() {

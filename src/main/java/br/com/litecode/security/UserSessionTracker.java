@@ -27,10 +27,10 @@ public class UserSessionTracker implements Serializable {
 	@Autowired
 	private PushService pushService;
 
-	private Map<User, String> userSessions;
-
     @Autowired
     private SessionRegistry sessionRegistry;
+
+	private Map<User, String> userSessions;
 
 	@PostConstruct
 	public void init() {

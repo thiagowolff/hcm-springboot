@@ -13,14 +13,20 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class PushAspect {
-	@Autowired
 	private PushService pushService;
 
-	@After(value = "execution(* br.com.litecode..controller..*(..)) && @annotation(push))")
+	@Autowired
+    public PushAspect(PushService pushService) {
+        this.pushService = pushService;
+    }
+
+    @After(value = "execution(* br.com.litecode..controller..*(..)) && @annotation(push))")
 	public void pushRefresh(JoinPoint joinPoint, PushRefresh push) {
 		User loggedUser = UserPrincipal.getLoggedUser();
 		pushService.publish(PushChannel.REFRESH, "", loggedUser);
 
-		log.info("[{}] {}", loggedUser.getUsername(), joinPoint.getSignature().getName());
+		if (loggedUser != null) {
+            log.info("[{}] {}", loggedUser.getUsername(), joinPoint.getSignature().getName());
+        }
 	}
 }

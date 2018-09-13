@@ -15,7 +15,7 @@
 
 <composite:implementation>
 	<h:form id="#{of:concat(cc.attrs.messagePrefix, 'Form')}">
-		<p:dialog header="#{msg['title.manage']} #{msg[of:concat('label.', cc.attrs.messagePrefix)].toLowerCase()}" widgetVar="#{of:concat(cc.attrs.messagePrefix, 'Dialog')}" onShow="PF('patientDataTable').getPaginator().setPage(0);" fitViewport="true" resizable="false" showEffect="fade" modal="true" width="40%">
+		<p:dialog header="#{msg['title.manage']} #{msg[of:concat('label.', cc.attrs.messagePrefix)].toLowerCase()}" widgetVar="#{of:concat(cc.attrs.messagePrefix, 'Dialog')}" onShow="PF('patientDataTable').getPaginator().setPage(0);" onHide="updatePatientInputForm();" fitViewport="true" resizable="false" showEffect="fade" modal="true" width="40%">
 			<p:messages id="patientDataMessages" />
 
 			<p:panelGrid columns="3">

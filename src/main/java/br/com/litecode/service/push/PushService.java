@@ -10,10 +10,14 @@ import java.util.Map;
 
 @Service
 public class PushService {
-	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
-	public void publish(PushChannel channel, Object message, User user) {
+    @Autowired
+    public PushService(SimpMessagingTemplate simpMessagingTemplate) {
+        this.simpMessagingTemplate = simpMessagingTemplate;
+    }
+
+    public void publish(PushChannel channel, Object message, User user) {
 		Map<String, Object> headers = new HashMap<>();
 		if (user != null) {
 			headers.put("user-name", user.getUsername());

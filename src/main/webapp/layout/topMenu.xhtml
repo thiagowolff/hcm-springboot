@@ -102,6 +102,7 @@
 				});
 
 				function logout() {
+					track('Logout');
 					$('#menuForm').attr('action', '#{request.contextPath}/logout');
 					$('#menuForm').submit();
 				}
