@@ -1,24 +1,29 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" 
-	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-	xmlns:h="http://xmlns.jcp.org/jsf/html"
-	xmlns:f="http://xmlns.jcp.org/jsf/core"
-	xmlns:p="http://primefaces.org/ui">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html"
+	  xmlns:f="http://xmlns.jcp.org/jsf/core"
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:o="http://omnifaces.org/ui">
 
 <f:view contentType="text/html" encoding="UTF-8" oamEnableViewPool="true">
 	<h:head>
 		<ui:include src="/layout/headCommons.xhtml" />
 	</h:head>
 
-    <f:event type="preRenderView" listener="#{loginController.checkIfAlreadyLoggedIn}" />
+	<f:event type="preRenderView" listener="#{loginController.checkIfAlreadyLoggedIn}" />
+	<o:importFunctions type="br.com.litecode.util.TextUtil" var="textUtil" />
 
-    <h:body styleClass="login-page">
+	<ui:param name="backgroundColor" value="#{textUtil:randomString('#34c9d8', '#27bccb', '#23a9b6', '#1f95a1', '#1b818b', '#49cfdc', '#5fd4e0', '#74dae4', '#8ae0e8', '#176d76', '#135960')}" />
+	<ui:param name="logoEffect" value="#{textUtil:randomString('zoomIn', 'fadeIn', 'pulse', 'jello', 'tada', 'swing', 'rubberBand', 'jackInTheBox')}" />
+
+    <h:body styleClass="login-page" style="background: #{backgroundColor}">
 		<div class="container">
 			<h:form id="login" prependId="false">
 				<div class="container">
 					<div class="row login-logo">
 						<div class="col-xs-12">
-							<p:graphicImage id="logo" value="/resources/images/logo-large.png" styleClass="animate-0 zoomIn" />
+							<p:graphicImage id="logo" value="/resources/images/logo-large.png" styleClass="animate-0 #{logoEffect}" />
 							<div class="version animate-3 fadeIn" style="#{loginController.newVersion ? 'color: #00a55b; font-size: 11px !important;' : 'color: #2e363b;'}">#{version['version']}</div>
 						</div>
 					</div>
@@ -32,7 +37,7 @@
 						<div class="row">
 							<div class="login-input col-md-12">
 								<p:inputText id="username" required="#{not isDev}" requiredMessage="#{msg['error.loginRequired']}" label="#{msg['label.username']}" size="50" />
-								<p:watermark for="username" value="#{msg['label.login']}" />
+								<p:watermark for="username" value="#{msg['label.username']}" />
 								<div class="input-icon"><span class="fa fa-at" /></div>
 							</div>
 						</div>
@@ -45,12 +50,12 @@
 						</div>
 						<div class="row">
 							<div class="col-md-12">
-								<p:selectBooleanCheckbox id="rememberMe" itemLabel="#{msg['label.rememberMe']}" style="margin-top: -30px;" />
+								<p:selectBooleanCheckbox widgetVar="rememberMe" id="rememberMe" itemLabel="#{msg['label.rememberMe']}" style="margin-top: -30px;" />
 							</div>
 						</div>
 						<div class="row">
 							<div class="login-input col-xs-#{isDev ? '3' : '12' }">
-								<p:commandButton id="loginButton" value="#{msg['button.login']}" ajax="false" onclick="onLogin()" style="width: 100%;" />
+								<p:commandButton id="loginButton" value="#{msg['button.login']}"  ajax="false" onclick="onLogin()" style="width: 100%;" />
 							</div>
 							<div class="login-input login-button col-xs-3">
 								<p:commandButton value="ADMIN" ajax="false" rendered="#{isDev}" styleClass="btn-success" onclick="$('#username').val('admin'); $('#password').val('admin')" />
@@ -74,22 +79,26 @@
 			$().ready(function() {
 				track('Login page');
 
-				var timeZone = new Date().getTimezoneOffset() / 60 * -1;
-				setClientTimeZone([{ name: 'clientTimeZone', value: timeZone }]);
+				//var timeZone = new Date().getTimezoneOffset() / 60 * -1;
+				//setClientTimeZone([{ name: 'clientTimeZone', value: timeZone }]);
 			});
 
 			function onLogin() {
-				if (mixpanel === 'undefined') {
-					return;
-				}
+				setTimeout(function () {
+					$('#loginButton').prop('disabled', true);
+				}, 100);
 
 				var username = $('#username').val();
-				mixpanel.track('Sign-in', { 'username': username},
+
+				if (username == 'painel') {
+					PF('rememberMe').check();
+				}
+
+				track('Sign-in', { 'username': username },
 					function() {
-						if (typeof mixpanel !== 'undefined') {
-							mixpanel.register({'username': username});
-						}
-					});
+                        mixpanel.register({ 'username': username });
+					}
+                );
 			}
 		</script>
 	</h:body>

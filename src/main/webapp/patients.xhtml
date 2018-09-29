@@ -180,7 +180,7 @@
 					<f:selectItem itemValue="" itemLabel=""/>
 					<f:selectItems value="#{physicianAssistantController.patientData}" var="physicianAssistant" itemValue="#{physicianAssistant}" itemLabel="#{physicianAssistant.name}"/>
 				</p:selectOneMenu>
-				<p:commandLink value="#{msg['button.add']}" process="@this" update=":physicianAssistantComponent:physicianAssistantForm" actionListener="#{physicianAssistantController.refresh()}" oncomplete="PF('physicianAssistantDialog').show();" global="false" onclick="track('Manage physician assistant', { 'source': 'link' })" styleClass="form-link" />
+				<p:commandLink value="#{msg['button.add']}" process="@this" update=":physicianAssistantComponent:physicianAssistantForm" actionListener="#{physicianAssistantController.refresh()}" oncomplete="PF('physicianAssistantDialog').show();" global="false" onclick="track('Manage physician assistant', { 'source': 'form' })" styleClass="btn btn-sm btn-default btn-flat" />
 
 				<p:outputLabel value="#{msg['label.email']}" for="patientEmail" />
 				<p:inputText id="patientEmail" value="#{patient.email}" maxlength="75" size="50" />

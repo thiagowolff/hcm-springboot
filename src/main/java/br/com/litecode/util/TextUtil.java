@@ -14,4 +14,8 @@ public final class TextUtil {
 	public static boolean randomBoolean() {
         return ThreadLocalRandom.current().nextBoolean();
 	}
+
+	public static String randomString(String... strings) {
+        return strings[ThreadLocalRandom.current().nextInt(0, strings.length)];
+	}
 }

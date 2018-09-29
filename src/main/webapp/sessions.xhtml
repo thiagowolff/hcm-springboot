@@ -105,7 +105,7 @@
                                 <h:panelGroup rendered="#{not empty patientSession.bloodPressure}" style="float: right">#{patientSession.bloodPressure} <span style="font-size: 10px; color: gray">mmHg</span></h:panelGroup>
                                 <h:panelGroup rendered="#{empty patientSession.temperature and empty patientSession.bloodPressure and (not chamberSession.running or patientSession.absent)}" layout="block" styleClass="text-center">-</h:panelGroup>
                                 <h:panelGroup rendered="#{empty patientSession.temperature and empty patientSession.bloodPressure and chamberSession.running and not patientSession.absent}" layout="block" styleClass="text-center">
-                                    <p:commandLink value="#{msg['button.register']}" styleClass="tiny-link fa-blink-slow" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); track('Edit session');" process="@this" update=":editSessionForm" global="false">
+                                    <p:commandLink value="#{msg['button.register']}" styleClass="tiny-link fa-blink-slow" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); track('Register vital signs',  { 'source': 'link' });" process="@this" update=":editSessionForm" global="false">
                                         <f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
                                     </p:commandLink>
                                 </h:panelGroup>
@@ -280,13 +280,13 @@
 				<p:column headerText="#{msg['label.name']}" styleClass="text-left">
 					#{sessionPatient.patient.name}
 				</p:column>
-                <p:column headerText="#{msg['label.temperature']} (ºC)">
+                <p:column headerText="#{msg['label.temperature']} (ºC)" width="120">
                     <p:cellEditor>
                         <f:facet name="output">#{sessionPatient.temperature}</f:facet>
                         <f:facet name="input"><p:inputNumber value="#{sessionPatient.temperature}" /></f:facet>
                     </p:cellEditor>
 				</p:column>
-                <p:column headerText="#{msg['label.bloodPressure']} (mmHg)">
+                <p:column headerText="#{msg['label.bloodPressure']} (mmHg)" width="120">
                     <p:cellEditor>
                         <f:facet name="output">#{sessionPatient.bloodPressure}</f:facet>
                         <f:facet name="input"><p:inputMask value="#{sessionPatient.bloodPressure}" mask="999/99?9" slotChar="" /></f:facet>

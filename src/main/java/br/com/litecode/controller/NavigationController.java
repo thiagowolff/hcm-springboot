@@ -1,5 +1,6 @@
 package br.com.litecode.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.omnifaces.util.Faces;
 import org.primefaces.PrimeFaces;
 import org.springframework.stereotype.Component;
@@ -9,6 +10,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @SessionScoped
 @Component
 public class NavigationController implements Serializable {
@@ -30,6 +32,13 @@ public class NavigationController implements Serializable {
 		String update = Faces.getRequestParameter("update");
 
 		String pageLink = pageLinkMapping.get(currentPage);
+
+		if (pageLink == null) {
+			log.warn("Page {} not mapped for ajax navigation.", currentPage);
+			activePage = "/sessions.xhtml";
+			return;
+		}
+
 		if (pageLink.equals(activePage)) {
 			return;
 		}
