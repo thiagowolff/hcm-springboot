@@ -327,6 +327,22 @@ th .ui-button-icon-only {
 	&-info { .icon(@icon-info, 36px, #ffffff, #ffffff);	}
 }
 
+.chamberEvent(@color) {
+	border: none;
+	padding: 2px;
+	font-size: 10px;
+	text-align: center;
+	font-weight: 600;
+	.gradient(fade(@color, 30%), fade(@color, 70%));
+}
+
+.chamber-event {
+	&-start { .chamberEvent(@colorCompressingStatus); }
+	&-wear_mask { .chamberEvent(@colorO2OnStatus); }
+	&-remove_mask { .chamberEvent(@colorO2OffStatus); }
+	&-shutdown { .chamberEvent(@colorShuttingDownStatus); }
+}
+
 .ui-growl-info .ui-growl-item {
 	background-color: @red-600 !important;
 	height: 100px;

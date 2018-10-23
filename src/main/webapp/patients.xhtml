@@ -140,11 +140,14 @@
 				<p:message for="patientRecord" display="text" />
 
 				<p:outputLabel value="#{msg['label.healthInsurance']}" for="healthInsurance" />
-				<p:selectOneMenu id="healthInsurance" value="#{patient.healthInsurance}" required="true" converter="omnifaces.SelectItemsConverter">
+				<p:selectOneMenu id="healthInsurance" styleClass="patient-data" value="#{patient.healthInsurance}" required="true" converter="omnifaces.SelectItemsConverter">
 					<f:selectItem itemValue="" itemLabel=""/>
 					<f:selectItems value="#{healthInsuranceController.patientData}" var="healthInsurance" itemValue="#{healthInsurance}" itemLabel="#{healthInsurance.name}"/>
 				</p:selectOneMenu>
-				<p:message for="healthInsurance" display="text" />
+                <h:panelGroup style="display: flex;">
+                    <p:commandLink value="#{msg['button.add']}" process="@this" update=":healthInsuranceComponent:healthInsuranceForm" actionListener="#{healthInsuranceController.refresh()}" oncomplete="PF('healthInsuranceDialog').show();" global="false" onclick="track('Manage health insurance', { 'source': 'form' })" styleClass="btn btn-sm btn-default btn-flat" />
+				    <p:message for="healthInsurance" display="text" />
+                </h:panelGroup>
 
 				<p:outputLabel value="#{msg['label.birthDate']}" for="patientBirthDate" />
 				<p:calendar id="patientBirthDate" value="#{patient.birthDate}" pattern="dd/MM/yyyy" mask="true" yearRange="c-100:c+15" size="15" showOn="button" navigator="true" converter="localDateTimeConverter" required="true" />
@@ -162,11 +165,14 @@
 				<p:message for="patientConsultationDate" display="text" />
 
 				<p:outputLabel value="#{msg['label.consultationReason']}" for="consultationReason" />
-				<p:selectOneMenu id="consultationReason" value="#{patient.consultationReason}" required="true" converter="omnifaces.SelectItemsConverter">
+				<p:selectOneMenu id="consultationReason" styleClass="patient-data" value="#{patient.consultationReason}" required="true" converter="omnifaces.SelectItemsConverter">
 					<f:selectItem itemValue="" itemLabel=""/>
 					<f:selectItems value="#{consultationReasonController.patientData}" var="consultationReason" itemValue="#{consultationReason}" itemLabel="#{consultationReason.name}"/>
 				</p:selectOneMenu>
-				<p:message for="consultationReason" display="text" />
+                <h:panelGroup style="display: flex;">
+                    <p:commandLink value="#{msg['button.add']}" process="@this" update=":consultationReasonComponent:consultationReasonForm" actionListener="#{consultationReasonController.refresh()}" oncomplete="PF('consultationReasonDialog').show();" global="false" onclick="track('Manage consultation reason', { 'source': 'form' })" styleClass="btn btn-sm btn-default btn-flat" />
+				    <p:message for="consultationReason" display="text" />
+                </h:panelGroup>
 
 				<p:outputLabel value="#{msg['label.medicalIndication']}" for="patientMedicalIndication" />
 				<p:selectOneRadio id="patientMedicalIndication" value="#{patient.medicalIndication}" required="true">
@@ -176,7 +182,7 @@
 				<p:message for="patientMedicalIndication" display="text" />
 
 				<p:outputLabel value="#{msg['label.physicianAssistant']}" for="physicianAssistant" />
-				<p:selectOneMenu id="physicianAssistant" value="#{patient.physicianAssistant}" required="false" converter="omnifaces.SelectItemsConverter">
+                <p:selectOneMenu id="physicianAssistant" styleClass="patient-data" value="#{patient.physicianAssistant}" required="false" converter="omnifaces.SelectItemsConverter">
 					<f:selectItem itemValue="" itemLabel=""/>
 					<f:selectItems value="#{physicianAssistantController.patientData}" var="physicianAssistant" itemValue="#{physicianAssistant}" itemLabel="#{physicianAssistant.name}"/>
 				</p:selectOneMenu>
@@ -184,22 +190,24 @@
 
 				<p:outputLabel value="#{msg['label.email']}" for="patientEmail" />
 				<p:inputText id="patientEmail" value="#{patient.email}" maxlength="75" size="50" />
-				<div></div>
+                <h:panelGroup />
 
 				<p:outputLabel value="#{msg['label.phone']}" for="patientPhone" />
 				<p:inputMask id="patientPhone" value="#{patient.phoneNumber}" mask="(99) 999999999" maxlength="15" size="15" />
-				<div></div>
+                <h:panelGroup />
 
 				<p:outputLabel value="#{msg['label.remarks']}" for="remarks" />
 				<p:inputTextarea id="remarks" value="#{patient.remarks}" rows="4" style="width: 100%;" />
-				<div></div>
+                <h:panelGroup />
 			</p:panelGrid>
 
 			<p:separator />
 			<p:commandButton value="#{msg['button.cancel']}" type="button" onclick="PF('patientDialog').hide()" styleClass="btn-danger pull-right" />
 			<p:commandButton value="#{msg['button.save']}" action="#{patientController.savePatient}" process="@form" update=":patientsForm:patientsTable, :patientsForm:messages, patientGrid" oncomplete="if (!args.validationFailed) { PF('patientDialog').hide(); PF('patientsTable').clearFilters(); }" validateClient="true" styleClass="btn-primary pull-right"/>
 		</p:dialog>
-	</h:form>
+
+        <p:remoteCommand name="updatePatientInputForm" update="@(.patient-data)" process="@(.patient-data)"  />
+    </h:form>
 
 	<h:form id="finishTreatmentForm">
 		<p:dialog header="#{msg['title.finishTreatment']}" widgetVar="finishTreatmentDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
@@ -225,7 +233,7 @@
 				<h:outputScript>
 					//<![CDATA[
 					function loadChart() {
-						if (typeof google == 'undefined') {
+						if (typeof google === 'undefined') {
 							return;
 						}
 
@@ -270,9 +278,9 @@
 						};
 
 						var dataTable = new google.visualization.DataTable();
-						dataTable.addColumn({type: 'date', id: 'Data'});
-						dataTable.addColumn({type: 'number', id: 'Presença'});
-						dataTable.addColumn({type: 'string', role: 'tooltip', 'p': {'html': true}});
+						dataTable.addColumn({ type: 'date', id: 'Data' });
+						dataTable.addColumn({ type: 'number', id: 'Presença' });
+						dataTable.addColumn({ type: 'string', role: 'tooltip', 'p': {'html': true} });
 
 						dataTable.addRows(dataArray);
 						var chart = new google.visualization.Calendar(document.getElementById('patientAttendanceChart'));
@@ -283,8 +291,6 @@
 				<div id="patientAttendanceChart"></div>
 			</h:panelGroup>
 		</p:dialog>
-
-        <p:remoteCommand name="updatePatientInputForm" update=":patientInputForm:patientGrid" />
 	</h:form>
 
 	<lc:confirmDeleteDialog entity="Patient" deleteAction="#{patientController.deletePatient()}" update=":patientsForm:messages, :patientsForm:patientsTable, :patientInputForm:patientGrid" oncomplete="PF('patientsTable').clearFilters();" />

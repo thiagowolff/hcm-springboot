@@ -85,7 +85,7 @@ public class PatientController implements Serializable {
 		return patientRepository.findPatienStats(patientId);
 	}
 
-	public List<Patient> getAvailabePatientsForSession(Integer sessionId) {
+	public List<Patient> getAvailablePatientsForSession(Integer sessionId) {
 		return patientRepository.findPatientsNotInSession(sessionId);
 	}
 	

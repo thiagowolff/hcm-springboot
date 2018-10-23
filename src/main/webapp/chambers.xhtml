@@ -1,11 +1,12 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:fn="http://java.sun.com/jsp/jstl/functions"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
 				xmlns:p="http://primefaces.org/ui"
 				xmlns:lc="http://java.sun.com/jsf/composite/components"
 				xmlns:lcf="http://litecode.com.br/functions">
-	
+
 	<h:form id="chambersForm">
 		<lc:headerPanel title="#{msg['title.chambers']}" />
 
@@ -15,7 +16,7 @@
 					<h:outputText value="#{chamber.chamberId}" />
 				</p:column>
 				
-				<p:column headerText="#{msg['label.name']}" sortBy="#{chamber.name}">
+				<p:column headerText="#{msg['label.name']}" sortBy="#{chamber.name}" width="200">
 					<h:outputText value="#{chamber.name}" />
 				</p:column>
 
@@ -23,22 +24,20 @@
 					<h:outputText value="#{chamber.capacity}" />
 				</p:column>
 
-				<p:column headerText="#{msg['label.events']}" styleClass="text-left">
-					<div class="row">
-						<ui:repeat value="#{chamber.chamberEvents}" var="event">
-							<div class="col-md-3">
-								<h:outputText value="#{event.eventType.description}" />
-							</div>
-							<div class="col-md-9">
-								<h:outputText value="#{event.duration}" />
-							</div>
-						</ui:repeat>
-					</div>
+                <p:column headerText="#{msg['label.events']}">
+					<h:panelGroup id="chartGrid" layout="block" style="display: flex; padding: 2px;">
+                        <ui:repeat value="#{chamberController.getChamberEventsChartData(chamber.chamberId).entrySet()}" var="event">
+                            <div class="chamber-event-#{fn:toLowerCase(event.key.eventType.eventTypeCode)}" style="width: #{event.value.first}%; display: inline-block;" title="#{event.key.eventType.description}">#{event.value.second}</div>
+                        </ui:repeat>
+					</h:panelGroup>
 				</p:column>
 			</p:dataTable>
 		</div>
 	</h:form>
+
 	<script type="text/javascript">
-		track('Chambers page');
-	</script>
+		$().ready(function() {
+			track('Chambers page');
+		});
+    </script>
 </ui:composition>

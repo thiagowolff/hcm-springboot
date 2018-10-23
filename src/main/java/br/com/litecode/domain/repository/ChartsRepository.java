@@ -26,7 +26,7 @@ public interface ChartsRepository extends Repository<Session, Serializable> {
 	@Query(value = "select ifnull(cr.name, 'N/D'), count(*) from patient left join patient_data cr on patient_data_id = consultation_reason_id group by consultation_reason_id order by count(*) desc", nativeQuery = true)
 	List<Object[]> findPatientsPerConsultationReason();
 
-	@Query(value = "select date_format(created_date, '%Y-%m') month, count(*) from patient where created_date >= '2017-01-01' group by date_format(created_date, '%Y-%m') order by month", nativeQuery = true)
+	@Query(value = "select date_format(created_date, '%Y-%m') month, count(*) from patient where created_date >= now() - interval 12 month group by date_format(created_date, '%Y-%m') order by month", nativeQuery = true)
 	List<Object[]> findMonthlyNewPatients();
 
 	@Query(value = "select date_format(scheduled_time, '%Y-%m-%d') date, sum(case when ps.absent = 0 then 1 else 0 end) from session s join patient_session ps using (session_id) where s.status = 'FINISHED' and ps.patient_id = :patientId group by date order by date", nativeQuery = true)

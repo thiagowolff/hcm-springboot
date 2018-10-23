@@ -98,7 +98,7 @@
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.vitalSigns']}" width="140" styleClass="#{bgStyleClass} hidden-md hidden-sm hidden-xs" style="vertical-align: top;">
+					<p:column headerText="#{msg['label.vitalSigns']}" width="140" styleClass="#{bgStyleClass} hidden-sm hidden-xs" style="vertical-align: top;">
                         <ui:repeat value="#{chamberSession.patientSessions}" var="patientSession">
 							<div class="long-text text-left">
                                 <h:panelGroup rendered="#{not empty patientSession.temperature}">#{patientSession.temperature} <span style="font-size: 10px; color: gray">ºC</span></h:panelGroup>
@@ -129,7 +129,7 @@
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.capacity']}" styleClass="capacity #{bgStyleClass} text-left hidden-sm hidden-xs">
+					<p:column headerText="#{msg['label.capacity']}" styleClass="capacity #{bgStyleClass} text-left hidden-md hidden-sm hidden-xs">
                         <ui:param name="spinClass" value="#{textUtil:randomBoolean() ? '' : 'fa-spin-reverse'}" />
 						<ui:repeat value="#{sessionController.getChamberPayload(chamberSession)}" var="payloadStatus">
 							<div class="col-md-4" style="padding-left: 2px;">
@@ -257,14 +257,14 @@
 	</div>
 
 	<h:form id="editSessionForm">
-		<p:dialog header="#{msg['label.session']} #{sessionController.sessionData.session.sessionId}" widgetVar="sessionDialog" width="50%" resizable="false" showEffect="fade" hideEffect="fade" modal="true" dynamic="true">
+		<p:dialog header="#{msg['label.session']} #{sessionController.sessionData.session.sessionId}" widgetVar="sessionDialog" width="60%" resizable="false" showEffect="fade" hideEffect="fade" modal="true" dynamic="true">
 			<p:messages id="sessionMessages">
 				<p:autoUpdate />
 			</p:messages>
 			<div class="row ui-fluid" style="padding-bottom: 10px;">
 				<div class="col-md-3 col-sm-6">
 					<p:selectCheckboxMenu id="newSessionPatients" label="#{msg['label.patients']}" value="#{sessionController.sessionData.patients}" filter="true" filterMatchMode="startsWith" converter="omnifaces.SelectItemsConverter" required="true" style="width: 160px" panelStyle="width: 250px">
-						<f:selectItems value="#{patientController.getAvailabePatientsForSession(sessionController.sessionData.session.sessionId)}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
+						<f:selectItems value="#{patientController.getAvailablePatientsForSession(sessionController.sessionData.session.sessionId)}" var="patient" itemValue="#{patient}" itemLabel="#{patient.name}"/>
 					</p:selectCheckboxMenu>
 				</div>
 				<div class="col-md-3 col-sm-6 pull-right">
@@ -274,19 +274,19 @@
 			<p:dataTable id="sessionPatientsTable" styleClass="dialog-table" var="sessionPatient" editable="true" value="#{sessionController.sessionData.session.patientSessions}" emptyMessage="#{msg['message.noData']}">
                 <p:ajax event="rowEdit" listener="#{sessionController.onPatientVitalSignsEdit}" update=":sessionsForm:chambersGrid, :editSessionForm:sessionPatientsTable"  />
 
-                <p:column headerText="#{msg['label.id']}" width="50">
+                <p:column headerText="#{msg['label.id']}" width="30">
 					#{sessionPatient.patient.patientId}
 				</p:column>
 				<p:column headerText="#{msg['label.name']}" styleClass="text-left">
 					#{sessionPatient.patient.name}
 				</p:column>
-                <p:column headerText="#{msg['label.temperature']} (ºC)" width="120">
+                <p:column headerText="#{msg['label.temperature']} (ºC)" width="100">
                     <p:cellEditor>
                         <f:facet name="output">#{sessionPatient.temperature}</f:facet>
                         <f:facet name="input"><p:inputNumber value="#{sessionPatient.temperature}" /></f:facet>
                     </p:cellEditor>
 				</p:column>
-                <p:column headerText="#{msg['label.bloodPressure']} (mmHg)" width="120">
+                <p:column headerText="#{msg['label.bloodPressure']} (mmHg)" width="100">
                     <p:cellEditor>
                         <f:facet name="output">#{sessionPatient.bloodPressure}</f:facet>
                         <f:facet name="input"><p:inputMask value="#{sessionPatient.bloodPressure}" mask="999/99?9" slotChar="" /></f:facet>

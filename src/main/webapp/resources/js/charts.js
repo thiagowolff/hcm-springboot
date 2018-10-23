@@ -1,11 +1,14 @@
 
 if (typeof google !== 'undefined') {
-	google.charts.load('current', {'packages':['corechart', 'calendar'], 'language': 'pt'});
-	google.charts.setOnLoadCallback(drawCharts);
+	google.charts.load('current', {'packages':['corechart', 'calendar', 'timeline'], 'language': 'pt'});
+
+	if (typeof drawCharts !== 'undefined') {
+		google.charts.setOnLoadCallback(drawCharts);
+	}
 }
 
 function drawChart(title, dataArray, elementId, chartType, additionalOptions) {
-	if (typeof google == 'undefined' || !dataArray) {
+	if (typeof google === 'undefined' || !dataArray) {
 		return;
 	}
 
