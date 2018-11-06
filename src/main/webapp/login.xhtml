@@ -88,13 +88,16 @@
 					$('#loginButton').prop('disabled', true);
 				}, 100);
 
-				var username = $('#username').val();
+				var username = $('#username').val().trim().toLowerCase();
+                var autoRememberedUsers = [ 'painel' ];
+                var rememberMe = false;
 
-				if (username == 'painel') {
+				if (autoRememberedUsers.includes(username)) {
 					PF('rememberMe').check();
+					rememberMe = true;
 				}
 
-				track('Sign-in', { 'username': username },
+				track('Sign-in', { 'username': username, 'rememberMe': rememberMe },
 					function() {
                         mixpanel.register({ 'username': username });
 					}

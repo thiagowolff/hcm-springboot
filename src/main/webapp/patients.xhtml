@@ -54,7 +54,7 @@
 				<p:column styleClass="text-left medium-column hidden-xs">
 					<f:facet name="header">
 						<h:outputText value="#{msg['label.healthInsurance']}" />
-						<p:commandButton process="@this" update=":healthInsuranceComponent:healthInsuranceForm" actionListener="#{healthInsuranceController.refresh()}" oncomplete="PF('healthInsuranceDialog').show();" icon="fa fa-plus-square-o" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage health insurance', { 'source': 'icon'})" />
+						<p:commandButton process="@this" update=":healthInsuranceComponent:healthInsuranceForm" actionListener="#{healthInsuranceController.refresh()}" oncomplete="PF('healthInsuranceDialog').show();" icon="fa fa-ellipsis-h" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage health insurance', { 'source': 'icon'})" />
 					</f:facet>
 					<h:outputText value="#{patient.healthInsurance.name}" />
 				</p:column>
@@ -71,7 +71,7 @@
 				<p:column styleClass="text-left medium-column hidden-xs hidden-sm">
 					<f:facet name="header">
 						<h:outputText value="#{msg['label.consultationDateAndReason']}" />
-						<p:commandButton process="@this" update=":consultationReasonComponent:consultationReasonForm" actionListener="#{consultationReasonController.refresh()}" oncomplete="PF('consultationReasonDialog').show();" icon="fa fa-plus-square-o" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage consultation reason', { 'source': 'icon'})" />
+						<p:commandButton process="@this" update=":consultationReasonComponent:consultationReasonForm" actionListener="#{consultationReasonController.refresh()}" oncomplete="PF('consultationReasonDialog').show();" icon="fa fa-ellipsis-h" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage consultation reason', { 'source': 'icon'})" />
 					</f:facet>
 					<h:outputText value="#{patient.consultationDate}" converter="localDateTimeConverter" />
 					<br />
@@ -80,7 +80,7 @@
 				<p:column styleClass="text-left medium-column hidden-xs hidden-sm">
 					<f:facet name="header">
 						<h:outputText value="#{msg['label.physicianAssistant']}" />
-						<p:commandButton process="@this" update=":physicianAssistantComponent:physicianAssistantForm" actionListener="#{physicianAssistantController.refresh()}" oncomplete="PF('physicianAssistantDialog').show();" icon="fa fa-plus-square-o" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage physician assistant', { 'source': 'icon'})" />
+						<p:commandButton process="@this" update=":physicianAssistantComponent:physicianAssistantForm" actionListener="#{physicianAssistantController.refresh()}" oncomplete="PF('physicianAssistantDialog').show();" icon="fa fa-ellipsis-h" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage physician assistant', { 'source': 'icon'})" />
 					</f:facet>
 					<h:outputText value="#{patient.physicianAssistant.name}" />
 				</p:column>
@@ -99,7 +99,7 @@
 				<p:column headerText="#{msg['label.status']}" styleClass="text-left medium-column hidden-xs">
 					<f:facet name="header">
 						<h:outputText value="#{msg['label.patientStatus']}" />
-						<p:commandButton process="@this" update=":patientStatusComponent:patientStatusForm" actionListener="#{patientStatusController.refresh()}" oncomplete="PF('patientStatusDialog').show();" icon="fa fa-plus-square-o" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage patient status', { 'source': 'icon'})" />
+						<p:commandButton process="@this" update=":patientStatusComponent:patientStatusForm" actionListener="#{patientStatusController.refresh()}" oncomplete="PF('patientStatusDialog').show();" icon="fa fa-ellipsis-h" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage patient status', { 'source': 'icon'})" />
 					</f:facet>
 					<h:outputText value="#{patient.patientStatus.name}" rendered="#{patient.finalSessionDate ne null}" />
 					<h:outputText value="#{msg['label.inTreatment']}" style="color: #1976d2;" rendered="#{patient.finalSessionDate eq null}" />

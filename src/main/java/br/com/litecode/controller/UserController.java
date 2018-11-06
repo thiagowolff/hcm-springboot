@@ -123,6 +123,10 @@ public class UserController implements Serializable {
 		PrimeFaces.current().ajax().addCallbackParam("userSettings", new Gson().toJson(userSettings));
 	}
 
+	public boolean isUserRemembered(String username) {
+		return userRepository.hasPersistentLogin(username).intValue() > 0;
+	}
+
 	public int getOnlineUsers() {
 		return userSessionTracker.getOnlineUsers();
 	}

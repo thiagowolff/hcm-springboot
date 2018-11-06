@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.util.List;
 
 public interface UserRepository extends CrudRepository<User, Integer> {
@@ -17,6 +18,10 @@ public interface UserRepository extends CrudRepository<User, Integer> {
 
 	@Query("select u from User u where u.sessionId = :sessionId")
 	User findUserBySessionId(String sessionId);
+
+
+	@Query(value = "select count(*) from persistent_logins where username = :username", nativeQuery = true)
+    BigInteger hasPersistentLogin(String username);
 
 	@Modifying
 	@Query("update User u set u.sessionId = null")

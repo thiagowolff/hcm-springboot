@@ -4,6 +4,8 @@ import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.UserRepository;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushService;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
@@ -15,6 +17,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @ApplicationScoped
 @Component
 public class UserSessionTracker implements Serializable {
@@ -75,5 +78,7 @@ public class UserSessionTracker implements Serializable {
         removeUserSession(user);
 		persistentTokenRepository.removeUserTokens(user.getUsername());
         pushService.publish(PushChannel.UPDATE, "", null);
+
+        log.info("User session killed: {}", user.getUsername());
     }
 }
