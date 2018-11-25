@@ -3,6 +3,7 @@ package br.com.litecode.web;
 import br.com.litecode.service.MailService;
 import com.google.common.base.Throwables;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.faces.application.ProjectStage;
@@ -15,7 +16,7 @@ import java.time.Instant;
 @Slf4j
 @WebFilter(asyncSupported = true)
 public class ExceptionReportFilter implements Filter {
-	private static final int MAX_EMAILS_PER_MINUTE = 10;
+	private static final int MAX_EMAILS_PER_MINUTE = 5;
 
 	@Autowired
 	private MailService mailService;
@@ -25,7 +26,7 @@ public class ExceptionReportFilter implements Filter {
 	private Instant lastEmailsSent;
 
 	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
+	public void init(FilterConfig filterConfig) {
 		projectStage = ProjectStage.valueOf(filterConfig.getServletContext().getInitParameter(ProjectStage.PROJECT_STAGE_PARAM_NAME));
 		numberOfEmailsSent = 0;
 	}
@@ -36,6 +37,10 @@ public class ExceptionReportFilter implements Filter {
 			chain.doFilter(request, response);
 		} catch (Exception e) {
 			log.error("Unexpected error: {} ", e.getMessage());
+
+            if (e.getClass() == ClientAbortException.class) {
+                return;
+            }
 
 			if (e.getCause().getClass() == ViewExpiredException.class) {
 				request.getRequestDispatcher("/login.xhtml").forward(request, response);
@@ -49,7 +54,7 @@ public class ExceptionReportFilter implements Filter {
             }
 
 			if (numberOfEmailsSent < MAX_EMAILS_PER_MINUTE && projectStage == ProjectStage.Production) {
-				mailService.sendEmail("thiago.wolff@gmail.com", "HCM - Exception", Throwables.getStackTraceAsString(e));
+				mailService.sendEmail("thiago.wolff@gmail.com", "HCM - Exception (" + e.getClass() + ")", Throwables.getStackTraceAsString(e));
 				numberOfEmailsSent++;
 
 				if (lastEmailsSent != null && Instant.now().minusSeconds(60).isAfter(lastEmailsSent)) {

@@ -5,6 +5,7 @@ import br.com.litecode.domain.repository.PatientDataRepository;
 import br.com.litecode.util.MessageUtil;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.exception.ConstraintViolationException;
 import org.omnifaces.util.Messages;
 import org.primefaces.event.RowEditEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +45,12 @@ public abstract class PatientDataController<T extends PatientData> {
 	public void addPatientData() {
 		T patientData = createPatientData();
 		patientData.setName(name);
-		getRepository().save(patientData);
-		refresh();
+		try {
+            getRepository().save(patientData);
+			refresh();
+        } catch (DataIntegrityViolationException e) {
+            Messages.addGlobalError(MessageUtil.getMessage("error.dataAlreadyExists"));
+        }
 	}
 
 	public void onRowEdit(RowEditEvent event) {

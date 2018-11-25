@@ -99,7 +99,7 @@ public class PatientController implements Serializable {
 	@CacheEvict(cacheNames = "patient", allEntries = true)
 	public void savePatient() {
 		try {
-			if (patient.getAge() != null && patient.getAge() < 10) {
+			if (patient.getAge() != null && patient.getAge() < 1) {
 				Faces.validationFailed();
 				Messages.addGlobalError(MessageUtil.getMessage("error.patientInvalid"));
 				return;

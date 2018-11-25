@@ -14,8 +14,8 @@
 	<f:event type="preRenderView" listener="#{loginController.checkIfAlreadyLoggedIn}" />
 	<o:importFunctions type="br.com.litecode.util.TextUtil" var="textUtil" />
 
-	<ui:param name="backgroundColor" value="#{textUtil:randomString('#34c9d8', '#27bccb', '#23a9b6', '#1f95a1', '#1b818b', '#49cfdc', '#5fd4e0', '#74dae4', '#8ae0e8', '#176d76', '#135960')}" />
-	<ui:param name="logoEffect" value="#{textUtil:randomString('zoomIn', 'fadeIn', 'pulse', 'jello', 'tada', 'swing', 'rubberBand', 'jackInTheBox')}" />
+	<ui:param name="backgroundColor" value="#{textUtil:randomString('#b9ccce', '#34c9d8', '#27bccb', '#23a9b6', '#1f95a1', '#1b818b', '#49cfdc', '#5fd4e0', '#74dae4', '#8ae0e8', '#176d76', '#135960', '#06282b','#9c27b0', '#b3e5fc')}" />
+	<ui:param name="logoEffect" value="#{textUtil:randomString('zoomIn', 'fadeIn', 'pulse', 'jello', 'rubberBand', 'jackInTheBox')}" />
 
     <h:body styleClass="login-page" style="background: #{backgroundColor}">
 		<div class="container">
@@ -24,7 +24,7 @@
 					<div class="row login-logo">
 						<div class="col-xs-12">
 							<p:graphicImage id="logo" value="/resources/images/logo-large.png" styleClass="animate-0 #{logoEffect}" />
-							<div class="version animate-3 fadeIn" style="#{loginController.newVersion ? 'color: #00a55b; font-size: 11px !important;' : 'color: #2e363b;'}">#{version['version']}</div>
+							<div class="version animate-3 fadeIn #{loginController.newVersion ? 'new-version' : ''}">#{version['version']}</div>
 						</div>
 					</div>
 
