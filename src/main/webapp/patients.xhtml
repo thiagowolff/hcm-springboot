@@ -70,11 +70,9 @@
 				</p:column>
 				<p:column styleClass="text-left medium-column hidden-xs hidden-sm">
 					<f:facet name="header">
-						<h:outputText value="#{msg['label.consultationDateAndReason']}" />
+						<h:outputText value="#{msg['label.consultationReason']}" />
 						<p:commandButton process="@this" update=":consultationReasonComponent:consultationReasonForm" actionListener="#{consultationReasonController.refresh()}" oncomplete="PF('consultationReasonDialog').show();" icon="fa fa-ellipsis-h" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage consultation reason', { 'source': 'icon'})" />
 					</f:facet>
-					<h:outputText value="#{patient.consultationDate}" converter="localDateTimeConverter" />
-					<br />
 					<h:outputText value="#{patient.consultationReason.name}" />
 				</p:column>
 				<p:column styleClass="text-left medium-column hidden-xs hidden-sm">
@@ -84,13 +82,17 @@
 					</f:facet>
 					<h:outputText value="#{patient.physicianAssistant.name}" />
 				</p:column>
-				<p:column headerText="#{msg['label.numberOfCompletedSessions']}" width="80">
-					<h:outputText value="#{patientStats.completedSessions eq null ? 0 :patientStats.completedSessions}" style="color: #007d18;" />
-				</p:column>
-				<p:column headerText="#{msg['label.numberOfAbsentSessions']}" width="80" styleClass="hidden-xs hidden-sm hidden-md">
+				<p:column headerText="#{msg['label.completedAndAbsentSessions']}" width="120">
+					<h:outputText value="#{patientStats.completedSessions eq null ? 0 :patientStats.completedSessions}" style="color: #007d18;" /> /
 					<h:outputText value="#{patientStats.absentSessions eq null ? 0 : patientStats.absentSessions}" style="color: #b14538;" />
 				</p:column>
-				<p:column headerText="#{msg['label.initialSessionDate']}&lt;br/&gt;#{msg['label.finalSessionDate']}" styleClass="medium-column hidden-xs">
+				<p:column headerText="#{msg['label.consultationDate']}&lt;br/&gt;#{msg['label.lastSessionDate']}" styleClass="small-column hidden-sm hidden-xs">
+                    <h:outputText value="#{patient.consultationDate}" converter="localDateTimeConverter" />
+					<br />
+					<h:outputText value="#{patientStats.lastSessionDate}" converter="localDateTimeConverter" rendered="#{patientStats.lastSessionDate ne null}"/>
+					<h:outputText value="-" rendered="#{patientStats.lastSessionDate eq null}"/>
+				</p:column>
+                <p:column headerText="#{msg['label.initialSessionDate']}&lt;br/&gt;#{msg['label.finalSessionDate']}" styleClass="small-column hidden-sm hidden-xs">
 					<h:outputText value="#{patientStats.initialSessionDate}" converter="localDateTimeConverter" />
 					<br />
 					<h:outputText value="#{patient.finalSessionDate}" converter="localDateTimeConverter" style="color: #f57c00;" rendered="#{patient.finalSessionDate ne null}"/>

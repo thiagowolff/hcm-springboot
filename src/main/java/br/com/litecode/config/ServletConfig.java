@@ -60,6 +60,10 @@ public class ServletConfig extends WebMvcConfigurerAdapter implements ServletCon
 		try {
 			ResourceBundle versionBundle = ResourceBundle.getBundle("version");
 			LocalDate versionDate = LocalDate.parse(versionBundle.getString("versionDate"), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+			String[] version = versionBundle.getString("version").split("\\.");
+			servletContext.setAttribute("versionMajor", version[0]);
+			servletContext.setAttribute("versionMinor", version[1]);
+			servletContext.setAttribute("versionPatch", version[2]);
 			servletContext.setAttribute("versionDate", versionDate);
 		} catch (Exception e) {
 			log.warn("Unable to load version date", e);

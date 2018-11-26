@@ -37,6 +37,10 @@ public class PatientSession implements Comparable<PatientSession>, Serializable 
 		this.session = session;
 	}
 
+	public Integer getPatientId() {
+	    return patient.getPatientId();
+    }
+
 	@Override
 	public int compareTo(PatientSession patientSession) {
 		return TextUtil.normalizeText(patient.getName()).compareTo(TextUtil.normalizeText(patientSession.getPatient().getName()));

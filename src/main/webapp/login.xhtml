@@ -24,7 +24,7 @@
 					<div class="row login-logo">
 						<div class="col-xs-12">
 							<p:graphicImage id="logo" value="/resources/images/logo-large.png" styleClass="animate-0 #{logoEffect}" />
-							<div class="version animate-3 fadeIn #{loginController.newVersion ? 'new-version' : ''}">#{version['version']}</div>
+							<div class="version animate-3 fadeIn #{loginController.newVersion ? 'new-version' : ''}">#{applicationScope['versionMajor']}.#{applicationScope['versionMinor']}.<span>#{applicationScope['versionPatch']}</span></div>
 						</div>
 					</div>
 

@@ -1,6 +1,7 @@
 package br.com.litecode.service.timer;
 
 import br.com.litecode.domain.model.ChamberEvent;
+import br.com.litecode.domain.model.PatientSession;
 import br.com.litecode.domain.model.Session;
 import br.com.litecode.domain.model.Session.SessionStatus;
 import br.com.litecode.domain.model.User;
@@ -13,10 +14,13 @@ import br.com.litecode.service.push.message.ProgressMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -29,6 +33,9 @@ public class ChamberSessionTimer implements SessionTimer {
 
 	@Autowired
 	private PushService pushService;
+
+	@Autowired
+	private CacheManager cacheManager;
 
 	@Autowired
 	@Getter
@@ -60,11 +67,18 @@ public class ChamberSessionTimer implements SessionTimer {
 
 		if (session.getStatus() == SessionStatus.FINISHED) {
 			sessionTimeTicker.stop(session);
+            onSessionComplete(session);
 		}
 
 		User user = userRepository.findByUsername(session.getExecutionMetadata().getStartedBy());
 		pushService.publish(PushChannel.NOTIFY, NotificationMessage.create(session, chamberEvent.getEventType()), user);
 	}
+
+	private void onSessionComplete(Session session) {
+        Cache patientCache = cacheManager.getCache("patient");
+        List<Integer> patientIds = session.getPatientSessions().stream().map(PatientSession::getPatientId).collect(Collectors.toList());
+        patientIds.forEach(patientCache::evict);
+    }
 
 	@Override
 	public void stopSession(Session session) {

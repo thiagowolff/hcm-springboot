@@ -127,6 +127,7 @@ public class Patient {
 		int getCompletedSessions();
 		int getAbsentSessions();
 		LocalDateTime getInitialSessionDate();
+		LocalDateTime getLastSessionDate();
 	}
 
 	public static PatientStats getEmptyPatientStats(Integer patientId) {
@@ -148,6 +149,11 @@ public class Patient {
 
 			@Override
 			public LocalDateTime getInitialSessionDate() {
+				return null;
+			}
+
+			@Override
+			public LocalDateTime getLastSessionDate() {
 				return null;
 			}
 		};
