@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 
@@ -44,14 +45,12 @@ public class ChamberEvent implements Comparable<ChamberEvent>, Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         ChamberEvent that = (ChamberEvent) o;
-
-        return eventId.equals(that.eventId);
+        return Objects.equals(eventId, that.eventId);
     }
 
     @Override
     public int hashCode() {
-        return eventId.hashCode();
+        return Objects.hash(eventId);
     }
 }

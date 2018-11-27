@@ -6,6 +6,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Entity
@@ -44,14 +45,13 @@ public class Chamber {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-
 		Chamber chamber = (Chamber) o;
-		return chamberId != null ? chamberId.equals(chamber.chamberId) : chamber.chamberId == null;
+		return Objects.equals(chamberId, chamber.chamberId);
 	}
 
 	@Override
 	public int hashCode() {
-		return chamberId.hashCode();
+		return Objects.hash(chamberId);
 	}
 
 	@Override

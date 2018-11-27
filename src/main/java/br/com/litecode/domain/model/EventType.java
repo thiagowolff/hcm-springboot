@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -31,14 +32,12 @@ public class EventType implements Serializable {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-
 		EventType eventType = (EventType) o;
-
-		return eventTypeCode.equals(eventType.eventTypeCode);
+		return Objects.equals(eventTypeCode, eventType.eventTypeCode);
 	}
 
 	@Override
 	public int hashCode() {
-		return eventTypeCode.hashCode();
+		return Objects.hash(eventTypeCode);
 	}
 }

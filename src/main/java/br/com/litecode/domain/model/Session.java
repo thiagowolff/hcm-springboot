@@ -12,6 +12,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -224,14 +225,13 @@ public class Session implements Comparable<Session>, Serializable {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-
 		Session session = (Session) o;
-		return sessionId.equals(session.sessionId);
+		return Objects.equals(sessionId, session.sessionId);
 	}
 
 	@Override
 	public int hashCode() {
-		return sessionId.hashCode();
+		return Objects.hash(sessionId);
 	}
 
 	@Override

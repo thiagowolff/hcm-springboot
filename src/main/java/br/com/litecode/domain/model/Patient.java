@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -101,23 +102,20 @@ public class Patient {
 		}
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof Patient)) return false;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Patient patient = (Patient) o;
+        return Objects.equals(patientRecord, patient.patientRecord);
+    }
 
-		Patient patient = (Patient) o;
+    @Override
+    public int hashCode() {
+        return Objects.hash(patientRecord);
+    }
 
-		return patientId != null ? patientId.equals(patient.patientId) : patient.patientId == null;
-
-	}
-
-	@Override
-	public int hashCode() {
-		return patientId != null ? patientId.hashCode() : 0;
-	}
-
-	@Override
+    @Override
 	public String toString() {
 		return "[" + patientId + "] " + name;
 	}

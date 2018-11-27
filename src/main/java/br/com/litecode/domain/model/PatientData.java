@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -20,15 +21,13 @@ public abstract class PatientData {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-
 		PatientData that = (PatientData) o;
-
-		return patientDataId.equals(that.patientDataId);
+		return Objects.equals(patientDataId, that.patientDataId);
 	}
 
 	@Override
 	public int hashCode() {
-		return patientDataId.hashCode();
+		return Objects.hash(patientDataId);
 	}
 
 	@Override

@@ -9,6 +9,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -91,24 +92,16 @@ public class User {
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((username == null) ? 0 : username.hashCode());
-		return result;
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		User user = (User) o;
+		return Objects.equals(username, user.username);
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-
-		if (!(obj instanceof User)) {
-			return false;
-		}
-		User other = (User) obj;
-		return username.equals(other.username);
+	public int hashCode() {
+		return Objects.hash(username);
 	}
 
 	@Override
