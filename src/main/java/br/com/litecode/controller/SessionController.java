@@ -142,7 +142,7 @@ public class SessionController implements Serializable {
 		}
 
 		session.getExecutionMetadata().setStartedBy(UserPrincipal.getLoggedUser().getUsername());
-		sessionRepository.save(session);
+		session = sessionRepository.save(session);
 		sessionTimer.startSession(session);
 	}
 
@@ -202,6 +202,13 @@ public class SessionController implements Serializable {
 		sessionRepository.save(patientSession.getSession());
 	}
 
+	@PushRefresh
+	@Transactional
+	@CacheEvict(cacheNames = "patient", allEntries = true)
+	public void updatePatientSession(PatientSession patientSession) {
+		sessionRepository.save(patientSession.getSession());
+	}
+
     @PushRefresh
     @Transactional
     @CacheEvict(cacheNames = "patient", allEntries = true)
@@ -221,6 +228,18 @@ public class SessionController implements Serializable {
 
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionData.getPatients().forEach(session::addPatient);
+		sessionData.setSession(sessionRepository.save(session));
+	}
+
+	@PushRefresh
+	@Transactional
+	@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }")
+	public void resetVitalSigns(Session session) {
+		session = sessionRepository.findOne(session.getSessionId());
+		for (PatientSession patientSession : session.getPatientSessions()) {
+			patientSession.setTemperature(null);
+			patientSession.setBloodPressure(null);
+		}
 		sessionData.setSession(sessionRepository.save(session));
 	}
 

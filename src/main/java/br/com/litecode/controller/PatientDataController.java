@@ -5,14 +5,17 @@ import br.com.litecode.domain.repository.PatientDataRepository;
 import br.com.litecode.util.MessageUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.exception.ConstraintViolationException;
 import org.omnifaces.util.Messages;
 import org.primefaces.event.RowEditEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 
 @Getter
 @Setter
+@CacheConfig(cacheNames = "patientData")
 public abstract class PatientDataController<T extends PatientData> {
 	@Autowired
 	protected PatientController patientController;
@@ -26,6 +29,7 @@ public abstract class PatientDataController<T extends PatientData> {
 	public PatientDataController() {
 	}
 
+	@Cacheable(key = "#root.targetClass")
 	public Iterable<T> getPatientData() {
 		if (patientData == null) {
 			patientData = getRepository().findAllByOrderByNameAsc();
@@ -33,6 +37,7 @@ public abstract class PatientDataController<T extends PatientData> {
 		return patientData;
 	}
 
+	@CacheEvict(key = "#root.targetClass")
 	public void deletePatientData(T patientData) {
 		try {
 			getRepository().delete(patientData);
@@ -42,6 +47,7 @@ public abstract class PatientDataController<T extends PatientData> {
 		}
 	}
 
+	@CacheEvict(key = "#root.targetClass")
 	public void addPatientData() {
 		T patientData = createPatientData();
 		patientData.setName(name);
@@ -53,6 +59,7 @@ public abstract class PatientDataController<T extends PatientData> {
         }
 	}
 
+	@CacheEvict(key = "#root.targetClass")
 	public void onRowEdit(RowEditEvent event) {
 		getRepository().save((T) event.getObject());
 		refresh();

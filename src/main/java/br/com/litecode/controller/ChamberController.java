@@ -4,6 +4,8 @@ import br.com.litecode.domain.model.Chamber;
 import br.com.litecode.domain.model.ChamberEvent;
 import br.com.litecode.domain.repository.ChamberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +22,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 
 @ViewScoped
 @Component
+@CacheConfig(cacheNames = "chamber")
 public class ChamberController implements Serializable {
 	@Autowired
 	private ChamberRepository chamberRepository;
@@ -31,6 +34,7 @@ public class ChamberController implements Serializable {
 		chamber = new Chamber();
 	}
 
+	@Cacheable(key = "#root.methodName")
 	public Iterable<Chamber> getChambers() {
 		if (chambers == null) {
 			chambers = chamberRepository.findAll();
@@ -38,6 +42,7 @@ public class ChamberController implements Serializable {
 		return chambers;
 	}
 
+	@Cacheable(key = "#chamberId")
 	public Map<ChamberEvent, Pair<Integer, String>> getChamberEventsChartData(Integer chamberId) {
 		Chamber chamber = chamberRepository.findOne(chamberId);
         Map<ChamberEvent, Pair<Integer, String>> events = new LinkedHashMap<>();

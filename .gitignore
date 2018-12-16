@@ -6,3 +6,4 @@ gradle/
 .gradle/
 gradle.properties
 out/
+logs/

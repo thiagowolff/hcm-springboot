@@ -12,7 +12,7 @@ public class LogPhaseListener implements PhaseListener {
 	private StopWatch stopwatch = new StopWatch();
 
 	public void afterPhase(PhaseEvent event) {
-		if (!log.isDebugEnabled()) {
+		if (!log.isTraceEnabled()) {
 			return;
 		}
 
@@ -27,7 +27,7 @@ public class LogPhaseListener implements PhaseListener {
 	}
 
 	public void beforePhase(PhaseEvent event) {
-		if (!log.isDebugEnabled()) {
+		if (!log.isTraceEnabled()) {
 			return;
 		}
 

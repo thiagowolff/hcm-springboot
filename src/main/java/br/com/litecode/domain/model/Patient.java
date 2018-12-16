@@ -1,6 +1,9 @@
 package br.com.litecode.domain.model;
 
+import br.com.litecode.domain.model.PatientData.ConsultationReason;
+import br.com.litecode.domain.model.PatientData.HealthInsurance;
 import br.com.litecode.domain.model.PatientData.PatientStatus;
+import br.com.litecode.domain.model.PatientData.PhysicianAssistant;
 import br.com.litecode.util.MessageUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Joiner;
@@ -45,15 +48,15 @@ public class Patient {
 
 	@ManyToOne
 	@JoinColumn(name = "health_insurance_id")
-	private PatientData.HealthInsurance healthInsurance;
+	private HealthInsurance healthInsurance;
 
 	@ManyToOne
 	@JoinColumn(name = "consultation_reason_id")
-	private PatientData.ConsultationReason consultationReason;
+	private ConsultationReason consultationReason;
 
 	@ManyToOne
 	@JoinColumn(name = "physician_assistant_id")
-	private PatientData.PhysicianAssistant physicianAssistant;
+	private PhysicianAssistant physicianAssistant;
 
 	@ManyToOne
 	@JoinColumn(name = "patient_status_id")

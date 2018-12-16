@@ -4,7 +4,6 @@ import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.UserRepository;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushService;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.session.SessionRegistry;

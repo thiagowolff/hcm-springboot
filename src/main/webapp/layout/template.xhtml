@@ -49,9 +49,9 @@
 			</div>
 		</div>
 		<footer class="footer hidden-xs">
-			<p:link styleClass="animate-1 fadeIn text-primary" style="position: absolute; left: 15px; z-index: 2;" onclick="PF('helpDialog').show(); return false;"><i class="fa fa-question-circle" /> #{msg['title.help']}</p:link>
+			<p:link styleClass="animate-1 fadeIn text-primary" style="position: absolute; left: 15px; z-index: 2;" onclick="PF('helpDialog').show(); track('Help dialog'); return false;"><i class="fa fa-question-circle" /> #{msg['title.help']}</p:link>
 			<div class="animate-1 fadeIn">
-				<span class="animate-3 fadeIn" style="#{loginController.newVersion ? 'color: green' : ''}">v#{version['version']} (#{version['versionUpdatedOn']} #{version['versionDate']})</span>
+				<span class="animate-3 fadeIn" style="#{systemController.newVersion ? 'color: green' : ''}">v#{version['version']} (#{version['versionUpdatedOn']} #{version['versionDate']})</span>
 			</div>
 			<h:panelGroup id="onlineUsers" >
                 <h:panelGroup id="onlineUserPanel" layout="block" styleClass="text-primary text-center" style="position: relative; top: -15px;">
@@ -63,7 +63,11 @@
             </h:panelGroup>
         </footer>
 
-		<p:dialog header="#{msg['title.help']}" widgetVar="helpDialog" width="50%" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
+		<p:dialog widgetVar="helpDialog" width="50%" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
+			<f:facet name="header">
+				#{msg['title.help']}
+				<p><small style="font-weight: 500;">#{msg['title.paragraph.help']}</small></p>
+			</f:facet>
 			<h:form id="helpForm">
 				<div class="form-group">
 					<label for="helpMessage">#{msg['message.help']}</label>

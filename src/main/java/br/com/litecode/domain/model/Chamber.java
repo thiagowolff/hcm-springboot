@@ -7,7 +7,6 @@ import javax.persistence.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Entity
 @Getter
@@ -33,25 +32,17 @@ public class Chamber {
 		return chamberEvents.stream().max(Comparator.comparingInt(ChamberEvent::getTimeout)).get();
 	}
 
-	public ChamberEvent getChamberEvent(EventType eventType) {
-		Optional<ChamberEvent> chamberEvent = chamberEvents.stream().filter(event -> event.getEventType().equals(eventType)).findFirst();
-		if (chamberEvent.isPresent()) {
-			return chamberEvent.get();
-		}
-		throw new RuntimeException("The chamber " + eventType + " event is not defined!");
-	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Chamber chamber = (Chamber) o;
-		return Objects.equals(chamberId, chamber.chamberId);
+		return Objects.equals(name, chamber.name);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(chamberId);
+		return Objects.hash(name);
 	}
 
 	@Override

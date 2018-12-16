@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @EnableScheduling
 @EnableAsync
 @EnableCaching
-@EntityScan(basePackageClasses = {Application.class, Jsr310JpaConverters.class})
+@EntityScan(basePackageClasses = { Application.class, Jsr310JpaConverters.class })
 public class Application {
 
 	public static void main(String[] args) {
@@ -40,13 +40,16 @@ public class Application {
 
 	@Bean
 	public CacheManager cacheManager(Ticker ticker) {
-		CaffeineCache chartCache = buildCache("chart", ticker, 5);
-		CaffeineCache sessionCache = buildCache("session", ticker, 15);
-		CaffeineCache patientCache = buildCache("patient", ticker, 15);
+		CaffeineCache chamberCache = buildCache("chamber", ticker, 1440);
+		CaffeineCache sessionCache = buildCache("session", ticker, 60);
+		CaffeineCache patientCache = buildCache("patient", ticker, 60);
+		CaffeineCache patientDataCache = buildCache("patientData", ticker, 120);
+		CaffeineCache chartCache = buildCache("chart", ticker, 120);
+		CaffeineCache alarmCache = buildCache("alarm", ticker, 120);
 
-		SimpleCacheManager manager = new SimpleCacheManager();
-		manager.setCaches(Arrays.asList(sessionCache, patientCache, chartCache));
-		return manager;
+		SimpleCacheManager cacheManager = new SimpleCacheManager();
+		cacheManager.setCaches(Arrays.asList(chamberCache, sessionCache, patientCache, patientDataCache, chartCache, alarmCache));
+		return cacheManager;
 	}
 
 	private CaffeineCache buildCache(String name, Ticker ticker, int minutesToExpire) {

@@ -36,6 +36,8 @@ public class SessionTimeTicker implements TimeTicker<Session> {
 		for (SessionTask sessionTask : sessionTasks.get(session)) {
 			Date startTime = Date.from(Instant.now().plusSeconds(sessionTask.delay));
 			activeSessions.computeIfAbsent(session, k -> new ArrayList<>()).add(taskScheduler.schedule(sessionTask.task, startTime));
+
+			log.info(sessionTask.delay + " " + sessionTask.task);
 		}
 
 		log.info("Session {} started with {} scheduled events", session.getSessionId(), sessionTasks.get(session).size());

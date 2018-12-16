@@ -96,7 +96,7 @@ public class PatientController implements Serializable {
 		refresh();
 	}
 
-	@CacheEvict(cacheNames = "patient", allEntries = true)
+	@CacheEvict(allEntries = true)
 	public void savePatient() {
 		try {
 			if (patient.getAge() != null && patient.getAge() < 1) {
@@ -141,6 +141,18 @@ public class PatientController implements Serializable {
 		}
 
 		return "";
+	}
+
+	@Cacheable(key = "#root.methodName")
+	public List<Patient> getInactivePatients() {
+		return patientRepository.findInactivePatients(LocalDate.now().minusMonths(12).atStartOfDay());
+	}
+
+	@CacheEvict(key = "'getInactivePatients'")
+	public void finishInactivePatientTreatment(Patient patient) {
+		patient.setFinalSessionDate(LocalDate.now());
+		patientRepository.save(patient);
+		refresh();
 	}
 
 	public void refresh() {

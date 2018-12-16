@@ -1,5 +1,6 @@
 package br.com.litecode.domain.model;
 
+import br.com.litecode.util.TextUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,12 +33,12 @@ public class AuditLog {
 	@Override
 	public String toString() {
 		StringBuilder auditInfo = new StringBuilder();
-		auditInfo.append(createdDate == null ? "" : "Criado em: " + formatDate(createdDate) + "<br/>");
-		auditInfo.append(createdBy == null ? "" : "Criado por: " + createdBy.getName() + "<br/>");
-		auditInfo.append(modifiedDate == null ? "" : "Modificado em: " + formatDate(modifiedDate) + "<br/>");
+		auditInfo.append(createdDate == null ? "" : "Criado em: " + formatDate(createdDate) + System.lineSeparator());
+		auditInfo.append(createdBy == null ? "" : "Criado por: " + createdBy.getName() + System.lineSeparator());
+		auditInfo.append(modifiedDate == null ? "" : "Modificado em: " + formatDate(modifiedDate) + System.lineSeparator());
 		auditInfo.append(modifiedBy == null ? "" : "Modificado por: " + modifiedBy.getName());
 
-		return auditInfo.toString();
+		return TextUtil.toHtmlLineBreaks(auditInfo.toString());
 	}
 
 	private String formatDate(Instant instant) {

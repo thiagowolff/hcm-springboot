@@ -34,4 +34,7 @@ public interface PatientRepository extends PagingAndSortingRepository<Patient, I
 
 	@Query("select p from Patient p where p not in (select p from Patient p join p.patientSessions ps where ps.session.sessionId = :sessionId) order by case when p.finalSessionDate is null then '' else p.name end, p.name, p.patientId")
 	List<Patient> findPatientsNotInSession(Integer sessionId);
+
+	@Query("select p from Patient p join p.patientSessions ps where p.patientStatus is null group by p having max(ps.session.scheduledTime) < :sinceDate order by max(ps.session.scheduledTime)")
+	List<Patient> findInactivePatients(LocalDateTime sinceDate);
 }

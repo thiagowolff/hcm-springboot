@@ -1,6 +1,7 @@
 package br.com.litecode.controller;
 
 import br.com.litecode.domain.model.User.Role;
+import br.com.litecode.security.UserPrincipal;
 import lombok.extern.slf4j.Slf4j;
 import org.omnifaces.util.Faces;
 import org.omnifaces.util.Messages;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import javax.enterprise.context.RequestScoped;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.ZoneId;
 
 @Slf4j
@@ -38,7 +38,8 @@ public class LoginController {
     public void checkIfAlreadyLoggedIn() throws IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
-            log.info("User {} already authenticated, redirecting", authentication.getPrincipal());
+            UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+            log.info("User {} already authenticated, redirecting", userPrincipal.getUsername());
             Faces.redirect("");
             return;
         }
@@ -56,10 +57,5 @@ public class LoginController {
 
     public boolean hasAdminRights() {
         return Faces.isUserInRole(Role.ADMIN.name()) || hasDevRights();
-    }
-
-    public boolean isNewVersion() {
-        LocalDate versionDate = Faces.getApplicationAttribute("versionDate");
-        return LocalDate.now().isBefore(versionDate.plusDays(2));
     }
 }

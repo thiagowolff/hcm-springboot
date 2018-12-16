@@ -89,6 +89,10 @@ public class LoginSuccessListener implements ApplicationListener<InteractiveAuth
     }
 
     private void sendLoginNotification(User user) {
+        if (!user.getUsername().equals("admin545")) {
+            return;
+        }
+
         try {
             pushoverService.sendNotification("User " + user.getUsername() + " logged in" + (isRemembered() ? " [rememberMe]" : ""));
         } catch (PushoverException e) {

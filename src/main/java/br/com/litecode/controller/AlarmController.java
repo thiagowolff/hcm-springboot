@@ -41,7 +41,7 @@ public class AlarmController implements Serializable {
 		return alarms;
 	}
 
-	@CacheEvict(cacheNames = "patient", allEntries = true)
+	@CacheEvict(cacheNames = "alarm", allEntries = true)
 	public void saveAlarm() {
 		alarmRepository.save(alarm);
 

@@ -29,7 +29,7 @@ public class Session implements Comparable<Session>, Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer sessionId;
 
-	@ManyToOne
+	@ManyToOne(optional = false)
 	@JoinColumn(name = "chamber_id", nullable = false)
 	private Chamber chamber;
 
@@ -52,6 +52,9 @@ public class Session implements Comparable<Session>, Serializable {
 	@OneToOne
 	@JoinColumn(name = "created_by")
 	private User createdBy;
+
+	@Transient
+	private Integer duration;
 
 	@Transient
 	private String timeRemaining;
@@ -148,8 +151,11 @@ public class Session implements Comparable<Session>, Serializable {
 		return timeRemaining;
 	}
 
-	public int getDuration() {
-		return chamber.getLastEvent().getTimeout();
+	public Integer getDuration() {
+		if (duration == null) {
+			duration = chamber.getLastEvent().getTimeout();
+		}
+		return duration;
 	}
 
 	public TimePeriod getTimePeriod() {
@@ -226,17 +232,19 @@ public class Session implements Comparable<Session>, Serializable {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Session session = (Session) o;
-		return Objects.equals(sessionId, session.sessionId);
+		return Objects.equals(chamber, session.chamber) && Objects.equals(scheduledTime, session.scheduledTime);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(sessionId);
+		return Objects.hash(chamber, scheduledTime);
 	}
 
 	@Override
 	public String toString() {
-		return "Session " + sessionId + " [" + status + "]";
+		String chamberName = Objects.isNull(chamber) ? "" : chamber.getName();
+		String sessionDate = Objects.isNull(scheduledTime) ? "" : scheduledTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+		return String.format("%s | %s | %s", sessionId, chamberName, sessionDate);
 	}
 
 	@Getter

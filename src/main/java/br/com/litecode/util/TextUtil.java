@@ -5,10 +5,11 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public final class TextUtil {
 	public static String normalizeText(String text) {
-		if (text == null) {
-			throw new IllegalArgumentException("text is null");
-		}
 		return Normalizer.normalize(text.trim(), Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+	}
+
+	public static String toHtmlLineBreaks(String text) {
+        return text.replaceAll(System.lineSeparator(), "<br/>");
 	}
 
 	public static boolean randomBoolean() {

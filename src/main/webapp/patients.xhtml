@@ -1,10 +1,21 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-				xmlns:f="http://xmlns.jcp.org/jsf/core"
-				xmlns:h="http://xmlns.jcp.org/jsf/html"
-				xmlns:p="http://primefaces.org/ui"
-				xmlns:o="http://omnifaces.org/ui"
-				xmlns:lc="http://xmlns.jcp.org/jsf/composite/components">
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+				xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+                xmlns:lc="http://xmlns.jcp.org/jsf/composite/components">
+	<script>
+		//<![CDATA[
+		var inactivePatients = new Boolean(#{fn:length(patientController.inactivePatients) gt 0});
+
+		if (inactivePatients && inactivePatients.valueOf()) {
+			setTimeout(function() {
+				PrimeFaces.widgets['inactivePatientsDialog'] && PF('inactivePatientsDialog').show();
+			}, 2000);
+		}
+		//]]>
+	</script>
 
 	<h:form id="patientsForm">
 		<p:growl id="messages" severity="info"/>
@@ -73,7 +84,10 @@
 						<h:outputText value="#{msg['label.consultationReason']}" />
 						<p:commandButton process="@this" update=":consultationReasonComponent:consultationReasonForm" actionListener="#{consultationReasonController.refresh()}" oncomplete="PF('consultationReasonDialog').show();" icon="fa fa-ellipsis-h" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage consultation reason', { 'source': 'icon'})" />
 					</f:facet>
-					<h:outputText value="#{patient.consultationReason.name}" />
+					<h:outputText id="consultReason" value="#{patient.consultationReason.name}" />
+                    <p:tooltip for="#{p:component('consultReason')}" position="bottom" escape="false">
+                        #{msg['label.consultationDate']}: <h:outputText value="#{patient.consultationDate}" converter="localDateTimeConverter" />
+                    </p:tooltip>
 				</p:column>
 				<p:column styleClass="text-left medium-column hidden-xs hidden-sm">
 					<f:facet name="header">
@@ -86,9 +100,7 @@
 					<h:outputText value="#{patientStats.completedSessions eq null ? 0 :patientStats.completedSessions}" style="color: #007d18;" /> /
 					<h:outputText value="#{patientStats.absentSessions eq null ? 0 : patientStats.absentSessions}" style="color: #b14538;" />
 				</p:column>
-				<p:column headerText="#{msg['label.consultationDate']}&lt;br/&gt;#{msg['label.lastSessionDate']}" styleClass="small-column hidden-sm hidden-xs">
-                    <h:outputText value="#{patient.consultationDate}" converter="localDateTimeConverter" />
-					<br />
+				<p:column headerText="#{msg['label.lastSessionDate']}" styleClass="small-column hidden-sm hidden-xs">
 					<h:outputText value="#{patientStats.lastSessionDate}" converter="localDateTimeConverter" rendered="#{patientStats.lastSessionDate ne null}"/>
 					<h:outputText value="-" rendered="#{patientStats.lastSessionDate eq null}"/>
 				</p:column>
@@ -302,13 +314,42 @@
 	<lc:managePatientData messagePrefix="physicianAssistant" controller="#{physicianAssistantController}" id="physicianAssistantComponent" update=":patientsForm:patientsTable" />
 	<lc:managePatientData messagePrefix="consultationReason" controller="#{consultationReasonController}" id="consultationReasonComponent" update=":patientsForm:patientsTable" ></lc:managePatientData>
 
+	<h:form id="inactivePatientsForm">
+		<p:dialog widgetVar="inactivePatientsDialog" width="60%" dynamic="true">
+			<f:facet name="header">
+				#{msg['title.inactivePatients']}
+				<p style="font-size: 14px; font-weight: 500;">#{msg['title.paragraph.inactivePatients']}</p>
+			</f:facet>
+
+			<ui:param name="patientStats" value="#{patientController.getPatientStats(inactivePatient.patientId)}" />
+			<p:dataTable id="inactivePatientsTable" widgetVar="inactivePatientsTable" value="#{patientController.inactivePatients}" var="inactivePatient" rows="10" paginator="true" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
+				<p:column headerText="#{msg['label.name']}" styleClass="text-left">
+					<h:outputText value="#{inactivePatient.name}" />
+				</p:column>
+				<p:column headerText="#{msg['label.patientRecord']}" width="75">
+					<h:outputText value="#{inactivePatient.patientRecord}" />
+				</p:column>
+				<p:column headerText="#{msg['label.lastSessionDate']}" width="100">
+					<h:outputText value="#{patientStats.lastSessionDate}" converter="localDateTimeConverter" />
+				</p:column>
+				<p:column headerText="#{msg['label.finishTreatment']}" width="250">
+					<p:selectOneMenu id="treatmentStatus" value="#{inactivePatient.patientStatus}" converter="omnifaces.SelectItemsConverter">
+						<f:selectItem itemLabel="#{msg['label.selectTreatmentResult']}" itemValue="" />
+						<f:selectItems value="#{patientStatusController.patientData}" var="patientStatus" itemValue="#{patientStatus}" itemLabel="#{patientStatus.name}"/>
+						<p:ajax event="change" listener="#{patientController.finishInactivePatientTreatment(inactivePatient)}" process="treatmentStatus" update="inactivePatientsTable" oncomplete="track('Finish treatment');" />
+					</p:selectOneMenu>
+				</p:column>
+			</p:dataTable>
+		</p:dialog>
+	</h:form>
+
 	<script>
        	$().ready(function() {
 			track('Patients page');
 		});
 
 		function drawCharts() {
-			drawChart('Novos pacientes por mês', '#{chartsController.monthlyNewPatients}', 'newPatientsPerMonthChart', google.visualization.LineChart, { colors: ['#3949ab'], fontName: 'Source Sans Pro', fontSize: 12, chartArea: { left: 0, top: 20} });
+			drawChart('Novos pacientes por mês nos últimos 12 meses', '#{chartsController.monthlyNewPatients}', 'newPatientsPerMonthChart', google.visualization.LineChart, { colors: ['#3949ab'], fontName: 'Source Sans Pro', fontSize: 12, chartArea: { left: 0, top: 20} });
 		}
 	</script>
 
