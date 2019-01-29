@@ -7,12 +7,15 @@
 
 	<script type="text/javascript">
 		function drawCharts() {
-			drawChart('Presenças por mês', '#{chartsController.presencesPerMonthModel}', 'presencesPerMonthChart', google.visualization.ColumnChart, { colors: ['#3949ab'] });
-			drawChart('Sessões por câmara', '#{chartsController.sessionsPerChamberModel}', 'sessionsPerChamberChart', google.visualization.BarChart, { colors: ['#2f353e'], hAxis: { minValue: 0 }});
+			drawChart('Sessões por mês', '#{chartsController.presencesPerMonthModel}', 'presencesPerMonthChart', google.visualization.LineChart, { colors: ['#3949ab'] });
+			drawChart('Sessões por ano', '#{chartsController.presencesPerYearModel}', 'presencesPerYearChart', google.visualization.ColumnChart, { colors: ['#3949ab'] });
+			drawChart('Consultas por mês', '#{chartsController.consultationsPerMonthModel}', 'consultationsPerMonthChart', google.visualization.LineChart, { colors: ['#e53935'] });
+			drawChart('Consultas por ano', '#{chartsController.consultationsPerYearModel}', 'consultationsPerYearChart', google.visualization.ColumnChart, { colors: ['#e53935'] });
 			drawChart('Sessões por convênio', '#{chartsController.sessionsPerHealthInsuranceModel}', 'sessionsPerHealthInsuranceChart', google.visualization.PieChart, { legend: { position: 'right' }});
-			drawChart('Sessões por mês', '#{chartsController.monthlySessionsModel}', 'monthlySessionsChart', google.visualization.LineChart);
 			drawChart('Pacientes por indicação médica', '#{chartsController.patientsPerMedicalIndicationModel}', 'patientsPerMedicalIndicationChart', google.visualization.PieChart, { sliceVisibilityThreshold: 0.0, pieHole: 0.4, colors: ['#e53935', '#3949ab', '#43a047'], legend: { position: 'right' } });
 			drawChart('Pacientes por motivos consulta', '#{chartsController.patientsPerConsultationReasonModel}', 'patientsPerConsultationReasonChart', google.visualization.ColumnChart, { colors: ['#00897b'] });
+			drawChart('Execuções por mês', '#{chartsController.monthlySessionsModel}', 'monthlySessionsChart', google.visualization.LineChart);
+			drawChart('Execuções por câmara', '#{chartsController.sessionsPerChamberModel}', 'sessionsPerChamberChart', google.visualization.BarChart, { colors: ['#2f353e'], hAxis: { minValue: 0 }});
 		}
 	</script>
 
@@ -25,7 +28,16 @@
 					<div id="presencesPerMonthChart" class="chart"></div>
 				</div>
 				<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+					<div id="presencesPerYearChart" class="chart"></div>
+				</div>
+				<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
 					<div id="patientsPerConsultationReasonChart" class="chart"></div>
+				</div>
+				<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+					<div id="consultationsPerMonthChart" class="chart"></div>
+				</div>
+				<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+					<div id="consultationsPerYearChart" class="chart"></div>
 				</div>
 				<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
 					<div id="patientsPerMedicalIndicationChart" class="chart"></div>

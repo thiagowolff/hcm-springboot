@@ -16,8 +16,8 @@
 <composite:implementation>
 	<h:form>
 		<p:confirmDialog message="#{msg[of:concat('confirmation.delete', cc.attrs.entity)]}" header="#{msg[of:concat('title.delete', cc.attrs.entity)]}" widgetVar="confirmDelete#{cc.attrs.entity}Dialog">
-			<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDelete#{cc.attrs.entity}Dialog').hide();" styleClass="btn-danger pull-right" />
 			<p:commandButton value="#{msg['button.delete']}" actionListener="#{cc.attrs.deleteAction}" process="@form" update="#{cc.attrs.update}" oncomplete="PF('confirmDelete#{cc.attrs.entity}Dialog').hide(); #{cc.attrs.oncomplete}" styleClass="btn-primary pull-right" />
+			<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDelete#{cc.attrs.entity}Dialog').hide();" styleClass="btn-danger pull-right" />
 		</p:confirmDialog>
 	</h:form>
 </composite:implementation>

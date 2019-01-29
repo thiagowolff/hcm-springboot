@@ -332,9 +332,9 @@
 				<p:column headerText="#{msg['label.lastSessionDate']}" width="100">
 					<h:outputText value="#{patientStats.lastSessionDate}" converter="localDateTimeConverter" />
 				</p:column>
-				<p:column headerText="#{msg['label.finishTreatment']}" width="250">
-					<p:selectOneMenu id="treatmentStatus" value="#{inactivePatient.patientStatus}" converter="omnifaces.SelectItemsConverter">
-						<f:selectItem itemLabel="#{msg['label.selectTreatmentResult']}" itemValue="" />
+				<p:column headerText="#{msg['label.finishTreatment']}" width="265">
+					<p:selectOneMenu id="treatmentStatus" value="#{inactivePatient.patientStatus}" placeholder="#{msg['label.selectTreatmentResult']}" converter="omnifaces.SelectItemsConverter" styleClass="red-placeholder">
+						<f:selectItem itemLabel="" itemValue="" />
 						<f:selectItems value="#{patientStatusController.patientData}" var="patientStatus" itemValue="#{patientStatus}" itemLabel="#{patientStatus.name}"/>
 						<p:ajax event="change" listener="#{patientController.finishInactivePatientTreatment(inactivePatient)}" process="treatmentStatus" update="inactivePatientsTable" oncomplete="track('Finish treatment');" />
 					</p:selectOneMenu>

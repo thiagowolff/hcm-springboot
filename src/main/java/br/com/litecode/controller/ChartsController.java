@@ -19,11 +19,11 @@ public class ChartsController {
 	private ChartsRepository chartsRepository;
 
 	public String getMonthlySessionsModel() {
-		return loadChartData(chartsRepository::findMonthlySessions, "Mês", "Sessōes");
+		return loadChartData(chartsRepository::findMonthlySessions, "Mês", "Execuções");
 	}
 
 	public String getSessionsPerChamberModel() {
-		return loadChartData(chartsRepository::findSessionsPerChamber, "Câmara", "Sessōes");
+		return loadChartData(chartsRepository::findSessionsPerChamber, "Câmara", "Execuções");
 	}
 
 	public String getSessionsPerHealthInsuranceModel() {
@@ -31,7 +31,19 @@ public class ChartsController {
 	}
 
 	public String getPresencesPerMonthModel() {
-		return loadChartData(chartsRepository::findMonthlyPresences, "Mês", "Presenças");
+		return loadChartData(chartsRepository::findMonthlyPresences, "Mês", "Sessões");
+	}
+
+	public String getPresencesPerYearModel() {
+		return loadChartData(chartsRepository::findYearlyPresences, "Ano", "Sessões");
+	}
+
+	public String getConsultationsPerMonthModel() {
+		return loadChartData(chartsRepository::findMonthlyConsultations, "Mês", "Consultas");
+	}
+
+	public String getConsultationsPerYearModel() {
+		return loadChartData(chartsRepository::findYearlyConsultations, "Ano", "Consultas");
 	}
 
 	public String getPatientsPerMedicalIndicationModel() {

@@ -19,7 +19,9 @@ import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,7 +45,7 @@ public class ChamberSessionTimer implements SessionTimer {
 
 	@Override
 	public void startSession(Session session) {
-		List<ChamberEvent> chamberEvents = session.getChamber().getChamberEvents();
+		Set<ChamberEvent> chamberEvents = new HashSet<>(session.getChamber().getEvents());
 
 		for (ChamberEvent chamberEvent : chamberEvents) {
 			if (session.getExecutionMetadata().getElapsedTime() > chamberEvent.getTimeout()) {
@@ -52,7 +54,7 @@ public class ChamberSessionTimer implements SessionTimer {
 
 			long delay = chamberEvent.getTimeout() - session.getExecutionMetadata().getElapsedTime();
 			sessionTimeTicker.register(session, () -> sessionTimeout(session, chamberEvent), delay);
-			log.debug("Chamber event {} scheduled: {}s", chamberEvent, delay);
+			log.debug("Chamber event {} scheduled: {}s", chamberEvent.getEventType(), delay);
 		}
 
 		sessionTimeTicker.start(session);
@@ -78,6 +80,8 @@ public class ChamberSessionTimer implements SessionTimer {
         Cache patientCache = cacheManager.getCache("patient");
         List<Integer> patientIds = session.getPatientSessions().stream().map(PatientSession::getPatientId).collect(Collectors.toList());
         patientIds.forEach(patientCache::evict);
+		Cache chartCache = cacheManager.getCache("chart");
+		chartCache.clear();
     }
 
 	@Override

@@ -5,7 +5,6 @@ import br.com.litecode.domain.model.PatientData.HealthInsurance;
 import br.com.litecode.domain.model.PatientData.PatientStatus;
 import br.com.litecode.domain.model.PatientData.PhysicianAssistant;
 import br.com.litecode.util.MessageUtil;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Joiner;
 import lombok.Getter;
 import lombok.Setter;
@@ -63,7 +62,6 @@ public class Patient {
 	private PatientStatus patientStatus;
 
 	@OneToMany(mappedBy = "patient")
-	@JsonIgnore
 	private Set<PatientSession> patientSessions;
 
 	public Patient() {

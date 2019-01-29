@@ -1,5 +1,6 @@
 package br.com.litecode.domain.model;
 
+import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,6 +8,7 @@ import javax.persistence.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -20,9 +22,13 @@ public class Chamber {
 	private Integer capacity;
 
 	@OneToMany(fetch = FetchType.EAGER)
-	@JoinColumn(name = "chamber_id")
+	@JoinColumn(name = "chamber_id", nullable = false)
 	@OrderBy("timeout")
-	private List<ChamberEvent> chamberEvents;
+	private Set<ChamberEvent> chamberEvents;
+
+	public List<ChamberEvent> getEvents() {
+		return Lists.newArrayList(chamberEvents);
+	}
 
 	public ChamberEvent getFirstEvent() {
 		return chamberEvents.stream().min(Comparator.comparingInt(ChamberEvent::getTimeout)).get();

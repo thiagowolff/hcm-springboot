@@ -27,7 +27,7 @@
                 <p:column headerText="#{msg['label.events']}">
 					<h:panelGroup id="chartGrid" layout="block" style="display: flex; padding: 2px;">
                         <ui:repeat value="#{chamberController.getChamberEventsChartData(chamber.chamberId).entrySet()}" var="event">
-                            <div class="chamber-event-#{fn:toLowerCase(event.key.eventType.eventTypeCode)}" style="width: #{event.value.first}%; display: inline-block;" title="#{event.key.eventType.description}">#{event.value.second}</div>
+							<div class="chamber-event-#{fn:toLowerCase(event.key.eventType.eventTypeCode)}" style="width: #{event.value.first}%; display: inline-block;" title="#{event.key.eventType.description}">#{event.value.second}</div>
                         </ui:repeat>
 					</h:panelGroup>
 				</p:column>

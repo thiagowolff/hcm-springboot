@@ -8,8 +8,17 @@ import java.io.Serializable;
 import java.util.List;
 
 public interface ChartsRepository extends Repository<Session, Serializable> {
-	@Query(value = "select date_format(scheduled_time, '%Y-%m') month, count(*) from session s join patient_session ps using (session_id) where s.status = 'FINISHED' and ps.absent = 0 group by date_format(scheduled_time, '%Y-%m') order by month", nativeQuery = true)
+	@Query(value = "select date_format(scheduled_time, '%Y-%m') month, count(*) from session s join patient_session ps using (session_id) where s.status = 'FINISHED' and ps.absent = 0 group by month order by month", nativeQuery = true)
 	List<Object[]> findMonthlyPresences();
+
+	@Query(value = "select date_format(scheduled_time, '%Y') year, count(*) from session s join patient_session ps using (session_id) where s.status = 'FINISHED' and ps.absent = 0 group by year order by year", nativeQuery = true)
+	List<Object[]> findYearlyPresences();
+
+	@Query(value = "select date_format(consultation_date, '%Y-%m') month, count(*) from patient group by month order by month;", nativeQuery = true)
+	List<Object[]> findMonthlyConsultations();
+
+	@Query(value = "select date_format(consultation_date, '%Y') year, count(*) from patient group by year order by year;", nativeQuery = true)
+	List<Object[]> findYearlyConsultations();
 
 	@Query(value = "select date_format(scheduled_time, '%Y-%m'), count(*) from session where status = 'FINISHED' group by date_format(scheduled_time, '%Y-%m') order by 1", nativeQuery = true)
 	List<Object[]> findMonthlySessions();

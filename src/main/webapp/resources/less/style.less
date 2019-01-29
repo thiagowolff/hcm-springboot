@@ -328,19 +328,21 @@ th .ui-button-icon-only {
 }
 
 .chamberEvent(@color) {
-	border: none;
+	border: 1px solid fade(@color, 80%);
 	padding: 2px;
 	font-size: 10px;
 	text-align: center;
 	font-weight: 600;
-	.gradient(fade(@color, 40%), fade(@color, 60%));
+	//color: @color;
+	.gradient(fade(@color, 2%), fade(@color, 5%));
+	border-right-width: 0px;
 }
 
 .chamber-event {
 	&-start { .chamberEvent(@colorCompressingStatus); }
 	&-wear_mask { .chamberEvent(@colorO2OnStatus); }
 	&-remove_mask { .chamberEvent(@colorO2OffStatus); }
-	&-shutdown { .chamberEvent(@colorShuttingDownStatus); }
+	&-shutdown { .chamberEvent(@colorShuttingDownStatus); border-right-width: 1px; }
 }
 
 .ui-growl-info .ui-growl-item {
@@ -526,6 +528,10 @@ a.form-link {
 	width: 50px;
 	font-size: 10px !important;
 
+}
+.red-placeholder label {
+	color: @red-600;
+	opacity: .75 !important;
 }
 
 @media screen and (max-width: 640px) {

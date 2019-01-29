@@ -48,7 +48,7 @@ public class ChamberController implements Serializable {
         Map<ChamberEvent, Pair<Integer, String>> events = new LinkedHashMap<>();
 
         int i = 0;
-        List<ChamberEvent> chamberEvents = chamber.getChamberEvents();
+        List<ChamberEvent> chamberEvents = chamber.getEvents();
         int totalTimeout = chamberEvents.get(chamberEvents.size() - 1).getTimeout();
         for (ChamberEvent chamberEvent : chamberEvents) {
             if (chamberEvent.getTimeout() == 0) {
@@ -56,7 +56,7 @@ public class ChamberController implements Serializable {
                 continue;
             }
 
-            ChamberEvent previousChamberEvent = chamber.getChamberEvents().get(i - 1);
+            ChamberEvent previousChamberEvent = chamber.getEvents().get(i - 1);
             int duration = chamberEvent.getTimeout() - previousChamberEvent.getTimeout();
             int percentage = Math.round((float) (duration) / totalTimeout * 100);
 

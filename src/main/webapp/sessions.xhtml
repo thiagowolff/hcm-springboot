@@ -5,7 +5,8 @@
 				xmlns:h="http://xmlns.jcp.org/jsf/html"
 				xmlns:p="http://primefaces.org/ui"
 				xmlns:lcf="http://litecode.com.br/functions"
-				xmlns:o="http://omnifaces.org/ui">
+				xmlns:o="http://omnifaces.org/ui"
+				xmlns:lc="http://xmlns.jcp.org/jsf/composite/components">
 
 	<script>
 		//<![CDATA[
@@ -336,12 +337,7 @@
 		</p:dialog>
 	</h:form>
 
-	<h:form>
-		<p:confirmDialog message="#{msg['confirmation.deleteSession']}" header="#{msg['title.deleteSession']}" severity="alert" widgetVar="confirmDeleteSessionDialog">
-			<p:commandButton value="#{msg['button.cancel']}" onclick="PF('confirmDeleteSessionDialog').hide()" styleClass="btn-primary pull-right"/>
-			<p:commandButton value="#{msg['button.delete']}" process="@this" update=":sessionsForm:chambersGrid" oncomplete="PF('confirmDeleteSessionDialog').hide(); track('Delete session');" actionListener="#{sessionController.deleteSession(sessionController.sessionData.session)}" styleClass="btn-danger pull-right"/>
-		</p:confirmDialog>
-	</h:form>
+	<lc:confirmDeleteDialog entity="Session" deleteAction="#{sessionController.deleteSession(sessionController.sessionData.session)}" update=":sessionsForm:chambersGrid" oncomplete="PF('confirmDeleteSessionDialog').hide(); track('Delete session');" />
 
 	<h:form id="duplicateSessionsForm">
 		<p:dialog header="#{msg['title.duplicateSessions']}" widgetVar="duplicateSessionDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">

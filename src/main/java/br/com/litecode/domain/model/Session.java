@@ -191,14 +191,14 @@ public class Session implements Comparable<Session>, Serializable {
 	}
 
 	public ChamberEvent getNextChamberEvent() {
-		for (Iterator<ChamberEvent> it = chamber.getChamberEvents().iterator(); it.hasNext();) {
+		for (Iterator<ChamberEvent> it = chamber.getEvents().iterator(); it.hasNext();) {
 			ChamberEvent chamberEvent = it.next();
 			if (chamberEvent.getEventType().getSessionStatus() == status) {
 				return it.hasNext() ? it.next() : null;
 			}
 		}
 
-		return chamber.getChamberEvents().get(1);
+		return chamber.getFirstEvent();
 	}
 
 	public LocalTime getNextChamberEventTime() {

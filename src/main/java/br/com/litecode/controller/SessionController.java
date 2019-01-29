@@ -148,7 +148,11 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@Caching(evict = { @CacheEvict(cacheNames = "patient", allEntries = true), @CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }") })
+	@Caching(evict = {
+			@CacheEvict(cacheNames = "patient", allEntries = true),
+			@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }"),
+			@CacheEvict(cacheNames = "chart", allEntries = true)
+	})
 	public void stopSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionTimer.stopSession(session);
@@ -158,7 +162,11 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@Caching(evict = { @CacheEvict(cacheNames = "patient", allEntries = true), @CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }") })
+	@Caching(evict = {
+			@CacheEvict(cacheNames = "patient", allEntries = true),
+			@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }"),
+			@CacheEvict(cacheNames = "chart", allEntries = true)
+	})
 	public void finishSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionTimer.stopSession(session);
