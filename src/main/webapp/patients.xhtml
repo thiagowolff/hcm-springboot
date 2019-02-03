@@ -12,6 +12,22 @@
 		if (inactivePatients && inactivePatients.valueOf()) {
 			setTimeout(function() {
 				PrimeFaces.widgets['inactivePatientsDialog'] && PF('inactivePatientsDialog').show();
+
+				var closeIcon = $('#inactivePatientsForm a.ui-dialog-titlebar-icon.ui-dialog-titlebar-close');
+				closeIcon.parent().append('<span id="countdown" style="font-size: 12px; float: right;" />');
+				var secondsText = $('#countdown');
+				closeIcon.hide();
+
+				var waitTime = 10 + Math.floor((Math.random() * 30) + 1);;
+				var timer = setInterval(function() {
+					secondsText.text(waitTime);
+					waitTime -= 1;
+					if (waitTime <= 0) {
+						clearInterval(timer);
+						closeIcon.show();
+						secondsText.hide();
+					}
+				}, 1000);
 			}, 2000);
 		}
 		//]]>
@@ -315,7 +331,7 @@
 	<lc:managePatientData messagePrefix="consultationReason" controller="#{consultationReasonController}" id="consultationReasonComponent" update=":patientsForm:patientsTable" ></lc:managePatientData>
 
 	<h:form id="inactivePatientsForm">
-		<p:dialog widgetVar="inactivePatientsDialog" width="60%" dynamic="true">
+		<p:dialog widgetVar="inactivePatientsDialog" width="60%" dynamic="true" modal="true" resizable="false">
 			<f:facet name="header">
 				#{msg['title.inactivePatients']}
 				<p style="font-size: 14px; font-weight: 500;">#{msg['title.paragraph.inactivePatients']}</p>
