@@ -262,4 +262,35 @@ public class Session implements Comparable<Session>, Serializable {
 			currentEvent = null;
 		}
 	}
+
+	public interface MonthlyStats {
+		int getYear();
+		int getMonth();
+		int getNumberOfSessions();
+		int getNumberOfAbsences();
+	}
+
+	public static MonthlyStats getEmptyMonthlyStats(LocalDate sessionDate) {
+		return new MonthlyStats() {
+			@Override
+			public int getYear() {
+				return sessionDate.getYear();
+			}
+
+			@Override
+			public int getMonth() {
+				return sessionDate.getMonthValue();
+			}
+
+			@Override
+			public int getNumberOfSessions() {
+				return 0;
+			}
+
+			@Override
+			public int getNumberOfAbsences() {
+				return 0;
+			}
+		};
+	}
 }

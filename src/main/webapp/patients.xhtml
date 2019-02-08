@@ -9,7 +9,11 @@
 		//<![CDATA[
 		var inactivePatients = new Boolean(#{fn:length(patientController.inactivePatients) gt 0});
 
-		if (inactivePatients && inactivePatients.valueOf()) {
+		var url = location.href;
+		var activePage = url.substring(url.lastIndexOf('/') + 1, url.length);
+		var smallScreen = window.innerWidth <= 1024 && window.innerHeight <= 768;
+
+		if (activePage == 'patients' && inactivePatients && inactivePatients.valueOf() && !smallScreen) {
 			setTimeout(function() {
 				PrimeFaces.widgets['inactivePatientsDialog'] && PF('inactivePatientsDialog').show();
 
@@ -28,7 +32,7 @@
 						secondsText.hide();
 					}
 				}, 1000);
-			}, 2000);
+			}, 1500);
 		}
 		//]]>
 	</script>
@@ -333,7 +337,9 @@
 	<h:form id="inactivePatientsForm">
 		<p:dialog widgetVar="inactivePatientsDialog" width="60%" dynamic="true" modal="true" resizable="false">
 			<f:facet name="header">
-				#{msg['title.inactivePatients']}
+				<h:outputFormat value="#{msg['title.inactivePatients']}">
+					<f:param value="#{fn:length(patientController.inactivePatients)}" />
+				</h:outputFormat>
 				<p style="font-size: 14px; font-weight: 500;">#{msg['title.paragraph.inactivePatients']}</p>
 			</f:facet>
 

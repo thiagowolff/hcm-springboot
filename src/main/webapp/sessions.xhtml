@@ -6,6 +6,7 @@
 				xmlns:p="http://primefaces.org/ui"
 				xmlns:lcf="http://litecode.com.br/functions"
 				xmlns:o="http://omnifaces.org/ui"
+				xmlns:of="http://omnifaces.org/functions"
 				xmlns:lc="http://xmlns.jcp.org/jsf/composite/components">
 
 	<script>
@@ -22,7 +23,7 @@
 
 	<div class="content-wrapper">
 		<h:form id="sessionsForm">
-			<p:panelGrid columns="9" layout="grid" styleClass="session-toolbar">
+			<p:panelGrid columns="10" layout="grid" styleClass="session-toolbar">
 				<h:panelGroup style="white-space: nowrap;">
 					<p:commandButton icon="fa fa-arrow-left" actionListener="#{sessionController.previousSessionDate()}" process="@this" update="chambersGrid, sessionDate" />
 					<h:panelGroup>
@@ -55,6 +56,14 @@
 				<p:tooltip for="printSession" value="#{msg['message.dailySessionsReport']}" position="right" escape="false" />
 
 				<p:messages id="messages"/>
+				<p:outputPanel id="statsPanel" autoUpdate="true" styleClass="stats-panel hidden-sm hidden-xs">
+					<div class="col-md-4 stats-label">#{msg['label.month']}</div>
+					<div class="col-md-4 stats-label">#{msg['label.sessions']}</div>
+					<div class="col-md-4 stats-label">#{msg['label.absences']}</div>
+					<div class="col-md-4 stats-data" style="color: #2d353a">#{of:getShortMonth(sessionController.getSessionMonthlyStats().month)}</div>
+					<div class="col-md-4 stats-data" style="color: #47af4c">#{sessionController.getSessionMonthlyStats().numberOfSessions}</div>
+					<div class="col-md-4 stats-data" style="color: #d52e28;">#{sessionController.getSessionMonthlyStats().numberOfAbsences}</div>
+				</p:outputPanel>
 			</p:panelGrid>
 
             <o:importFunctions type="br.com.litecode.util.TextUtil" var="textUtil" />

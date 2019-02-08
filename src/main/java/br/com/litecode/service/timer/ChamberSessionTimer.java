@@ -9,8 +9,8 @@ import br.com.litecode.domain.repository.SessionRepository;
 import br.com.litecode.domain.repository.UserRepository;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushService;
-import br.com.litecode.service.push.message.NotificationMessage;
-import br.com.litecode.service.push.message.ProgressMessage;
+import br.com.litecode.service.push.NotificationMessage;
+import br.com.litecode.service.push.ProgressMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +19,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -80,8 +81,12 @@ public class ChamberSessionTimer implements SessionTimer {
         Cache patientCache = cacheManager.getCache("patient");
         List<Integer> patientIds = session.getPatientSessions().stream().map(PatientSession::getPatientId).collect(Collectors.toList());
         patientIds.forEach(patientCache::evict);
+
 		Cache chartCache = cacheManager.getCache("chart");
 		chartCache.clear();
+
+		Cache sessionCache = cacheManager.getCache("session");
+		sessionCache.evict(Arrays.asList(session.getSessionDate().getYear(), session.getSessionDate().getMonthValue()));
     }
 
 	@Override

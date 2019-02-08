@@ -1,104 +1,103 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
 	  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-	  xmlns:h="http://xmlns.jcp.org/jsf/html"
->
-	
-	<ui:composition>
-		<h:outputScript>
-            //<![CDATA[
+	  xmlns:h="http://xmlns.jcp.org/jsf/html">
 
-            var loggedUser;
-            var socket;
-            var stompClient;
+<ui:composition>
+	<script>
+		//<![CDATA[
 
-            function initWebsocket() {
-                socket = SockJS('/push');
-                stompClient = Stomp.over(socket);
-                stompClient.debug = null;
+		var loggedUser;
+		var socket;
+		var stompClient;
 
-                console.log("Websocket initialized!")
-            }
+		function initWebsocket() {
+			socket = SockJS('/push');
+			stompClient = Stomp.over(socket);
+			stompClient.debug = null;
 
-            function register(registrations) {
-                stompClient.connect({}, function (frame) {
-                    loggedUser = frame.headers['user-name'];
-                    registrations.forEach(function (registration) {
-                        stompClient.subscribe(registration.route, registration.callback);
-                        console.log("Registered", registration.route);
-                    });
-                });
-            }
+			console.log("Websocket initialized!")
+		}
 
-            $().ready(function () {
-                initWebsocket();
-                register([
-                    {
-                        route: '/topic/progress',
-                        callback: function (data) {
-                            var sessionProgress = JSON.parse(data.body);
-                            if (typeof updateTimer !== 'undefined') {
-                                updateTimer(sessionProgress);
-                            }
-                        }
-                    },
-                    {
-                        route: '/topic/notify',
-                        callback: function (data) {
-                            var message = JSON.parse(data.body);
-                            handleMessage(message);
-                            if (typeof refreshSessions !== 'undefined') {
-                                refreshSessions([{name: "sessionId", value: message.sessionId}, {name: "eventType", value: message.eventType}]);
-                            }
-                        }
-                    },
-                    {
-                        route: '/topic/refresh',
-                        callback: function (data) {
-                            if (typeof refreshSessions !== 'undefined' && data.headers['user-name'] != loggedUser) {
-                                refreshSessions();
-                            }
-                        }
-                    },
-                    {
-                        route: '/topic/update',
-                        callback: function () {
-                            updateOnlineUsers();
-                        }
-                    }
-                ]);
-            });
+		function register(registrations) {
+			stompClient.connect({}, function (frame) {
+				loggedUser = frame.headers['user-name'];
+				registrations.forEach(function (registration) {
+					stompClient.subscribe(registration.route, registration.callback);
+					console.log("Registered", registration.route);
+				});
+			});
+		}
 
-            function handleMessage(notificationMessage) {
-                fetchUserSettings();
+		$().ready(function () {
+			initWebsocket();
+			register([
+				{
+					route: '/topic/progress',
+					callback: function (data) {
+						var sessionProgress = JSON.parse(data.body);
+						if (typeof updateTimer !== 'undefined') {
+							updateTimer(sessionProgress);
+						}
+					}
+				},
+				{
+					route: '/topic/notify',
+					callback: function (data) {
+						var message = JSON.parse(data.body);
+						handleMessage(message);
+						if (typeof refreshSessions !== 'undefined') {
+							refreshSessions([{name: "sessionId", value: message.sessionId}, {name: "eventType", value: message.eventType}]);
+						}
+					}
+				},
+				{
+					route: '/topic/refresh',
+					callback: function (data) {
+						if (typeof refreshSessions !== 'undefined' && data.headers['user-name'] != loggedUser) {
+							refreshSessions();
+						}
+					}
+				},
+				{
+					route: '/topic/update',
+					callback: function () {
+						updateOnlineUsers();
+					}
+				}
+			]);
+		});
 
-                window.getUserSettingsCallback = function (xhr, status, args) {
-                    var userSettings = args.userSettings ? JSON.parse(args.userSettings) : null;
+		function handleMessage(notificationMessage) {
+			fetchUserSettings();
 
-                    if (!userSettings || userSettings.notificationMessages) {
-                        var facesMessage = {
-                            summary: notificationMessage.messageSummary,
-                            detail: notificationMessage.messageDetail,
-                            severity: notificationMessage.eventType || 'info'
-                        };
-                        PF('growl').show([facesMessage]);
-                    }
+			window.getUserSettingsCallback = function (xhr, status, args) {
+				var userSettings = args.userSettings ? JSON.parse(args.userSettings) : null;
 
-                    if (userSettings && userSettings.notificationSounds) {
-                        playSound(notificationMessage.eventType);
-                    }
-                }
-            }
+				if (!userSettings || userSettings.notificationMessages) {
+					var facesMessage = {
+						summary: notificationMessage.messageSummary,
+						detail: notificationMessage.messageDetail,
+						severity: notificationMessage.eventType || 'info'
+					};
+					PF('growl').show([facesMessage]);
+				}
 
-            function playSound(eventType) {
-                var audio = document.getElementById('audio');
-                audio.src = '#{request.contextPath}/javax.faces.resource/sounds/' + eventType + '.mp3';
-                setTimeout(function () {
-                    audio.play();
-                }, 100);
-            }
+				if (userSettings && userSettings.notificationSounds) {
+					playSound(notificationMessage.eventType);
+				}
+			}
+		}
 
-            //]]>
-        </h:outputScript>
-	</ui:composition>
+		function playSound(eventType) {
+			var audio = document.getElementById('audio');
+			audio.src = '#{request.contextPath}/javax.faces.resource/sounds/' + eventType + '.mp3';
+			setTimeout(function () {
+				audio.play();
+			}, 100);
+		}
+
+		//]]>
+	</script>
+</ui:composition>
 </html>

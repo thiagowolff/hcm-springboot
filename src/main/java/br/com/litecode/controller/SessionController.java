@@ -6,10 +6,11 @@ import br.com.litecode.domain.repository.ChamberRepository;
 import br.com.litecode.domain.repository.SessionRepository;
 import br.com.litecode.security.UserPrincipal;
 import br.com.litecode.service.SessionReportService;
+import br.com.litecode.service.cache.SessionCacheEvict;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushRefresh;
 import br.com.litecode.service.push.PushService;
-import br.com.litecode.service.push.message.NotificationMessage;
+import br.com.litecode.service.push.NotificationMessage;
 import br.com.litecode.service.timer.SessionTimer;
 import br.com.litecode.util.MessageUtil;
 import com.google.common.base.Strings;
@@ -80,6 +81,8 @@ public class SessionController implements Serializable {
 
 	private enum ChamberPayloadStatus { AVAILABLE, OCCUPIED, ABSENT }
 
+	private Session.MonthlyStats sessionMonthlyStats;
+
 	@PostConstruct
 	private void init() {
 		sessionData = new SessionData();
@@ -148,11 +151,13 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@Caching(evict = {
-			@CacheEvict(cacheNames = "patient", allEntries = true),
-			@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }"),
-			@CacheEvict(cacheNames = "chart", allEntries = true)
-	})
+//	@Caching(evict = {
+//			@CacheEvict(cacheNames = "patient", allEntries = true),
+//			@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }"),
+//			@CacheEvict(cacheNames = "session", key = "{ #session.sessionDate.year, #session.sessionDate.monthValue }"),
+//			@CacheEvict(cacheNames = "chart", allEntries = true)
+//	})
+	@SessionCacheEvict
 	public void stopSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionTimer.stopSession(session);
@@ -165,6 +170,7 @@ public class SessionController implements Serializable {
 	@Caching(evict = {
 			@CacheEvict(cacheNames = "patient", allEntries = true),
 			@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }"),
+			@CacheEvict(cacheNames = "session", key = "{ #session.sessionDate.year, #session.sessionDate.monthValue }"),
 			@CacheEvict(cacheNames = "chart", allEntries = true)
 	})
 	public void finishSession(Session session) {
@@ -193,7 +199,12 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@Caching(evict = { @CacheEvict(cacheNames = "patient", allEntries = true), @CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }") })
+	@Caching(evict = {
+			@CacheEvict(cacheNames = "patient", allEntries = true),
+			@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }"),
+			@CacheEvict(cacheNames = "session", key = "{ #session.sessionDate.year, #session.sessionDate.monthValue }"),
+			@CacheEvict(cacheNames = "chart", allEntries = true)
+	})
 	public void deleteSession(Session session) {
 		sessionTimer.stopSession(session);
 		sessionRepository.delete(session);
@@ -204,7 +215,12 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@CacheEvict(cacheNames = "patient", allEntries = true)
+	@Caching(evict = {
+			@CacheEvict(cacheNames = "patient", allEntries = true),
+			@CacheEvict(cacheNames = "session", key = "{ #patientSession.session.chamber.chamberId, #patientSession.session.sessionDate }"),
+			@CacheEvict(cacheNames = "session", key = "{ #patientSession.session.sessionDate.year, #patientSession.session.sessionDate.monthValue }"),
+			@CacheEvict(cacheNames = "chart", allEntries = true)
+	})
 	public void setPatientSessionStatus(PatientSession patientSession, boolean absent) {
 		patientSession.setAbsent(absent);
 		sessionRepository.save(patientSession.getSession());
@@ -227,7 +243,12 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@Caching(evict = { @CacheEvict(cacheNames = "patient", allEntries = true), @CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }") })
+	@Caching(evict = {
+			@CacheEvict(cacheNames = "patient", allEntries = true),
+			@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }"),
+			@CacheEvict(cacheNames = "session", key = "{ #session.sessionDate.year, #session.sessionDate.monthValue }"),
+			@CacheEvict(cacheNames = "chart", allEntries = true)
+	})
 	public void addPatientsToSession(Session session) {
 		if (sessionData.getPatients().size() + session.getPatientSessions().size() > session.getChamber().getCapacity()) {
 			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", session.getChamber().getCapacity()));
@@ -241,6 +262,19 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
+	@Caching(evict = {
+			@CacheEvict(cacheNames = "patient", allEntries = true),
+			@CacheEvict(cacheNames = "session", key = "{ #patientSession.session.chamber.chamberId, #patientSession.session.sessionDate }"),
+			@CacheEvict(cacheNames = "session", key = "{ #patientSession.session.sessionDate.year, #patientSession.session.sessionDate.monthValue }"),
+			@CacheEvict(cacheNames = "chart", allEntries = true)
+	})
+	public void removePatientFromSession(PatientSession patientSession) {
+		sessionData.getSession().getPatientSessions().remove(patientSession);
+		sessionData.setSession(sessionRepository.save(patientSession.getSession()));
+	}
+
+	@PushRefresh
+	@Transactional
 	@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }")
 	public void resetVitalSigns(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
@@ -249,17 +283,6 @@ public class SessionController implements Serializable {
 			patientSession.setBloodPressure(null);
 		}
 		sessionData.setSession(sessionRepository.save(session));
-	}
-
-	@PushRefresh
-	@Transactional
-	@Caching(evict = {
-			@CacheEvict(cacheNames = "patient", allEntries = true),
-			@CacheEvict(cacheNames = "session", key = "{ #patientSession.session.chamber.chamberId, #patientSession.session.sessionDate }")
-	})
-	public void removePatientFromSession(PatientSession patientSession) {
-		sessionData.getSession().getPatientSessions().remove(patientSession);
-		sessionData.setSession(sessionRepository.save(patientSession.getSession()));
 	}
 
 	@PushRefresh
@@ -300,13 +323,26 @@ public class SessionController implements Serializable {
 	}
 
 	public void previousSessionDate() {
-		int daysToSubtract = sessionData.getSessionDate().getDayOfWeek() == DayOfWeek.MONDAY ? 2 : 1;
-		sessionData.setSessionDate(sessionData.getSessionDate().minusDays(daysToSubtract));
+		LocalDate sessionDate = sessionData.getSessionDate();
+		int daysToSubtract = sessionDate.getDayOfWeek() == DayOfWeek.MONDAY ? 2 : 1;
+		sessionData.setSessionDate(sessionDate.minusDays(daysToSubtract));
 	}
 
 	public void nextSessionDate() {
-		int daysToAdd = sessionData.getSessionDate().getDayOfWeek() == DayOfWeek.SATURDAY ? 2 : 1;
-		sessionData.setSessionDate(sessionData.getSessionDate().plusDays(daysToAdd));
+		LocalDate sessionDate = sessionData.getSessionDate();
+		int daysToAdd = sessionDate.getDayOfWeek() == DayOfWeek.SATURDAY ? 2 : 1;
+		sessionData.setSessionDate(sessionDate.plusDays(daysToAdd));
+	}
+
+	public Session.MonthlyStats getSessionMonthlyStats() {
+		LocalDate sessionDate = sessionData.getSessionDate();
+
+		sessionMonthlyStats = sessionRepository.findMonthlyStats(sessionDate.getYear(), sessionDate.getMonthValue());
+		if (sessionMonthlyStats == null) {
+			sessionMonthlyStats = Session.getEmptyMonthlyStats(sessionDate);
+		}
+
+		return sessionMonthlyStats;
 	}
 
 	public ChamberPayloadStatus[] getChamberPayload(Session session) {

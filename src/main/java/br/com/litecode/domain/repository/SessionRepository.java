@@ -1,6 +1,8 @@
 package br.com.litecode.domain.repository;
 
 import br.com.litecode.domain.model.Session;
+import br.com.litecode.domain.model.Session.MonthlyStats;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
@@ -25,4 +27,13 @@ public interface SessionRepository extends CrudRepository<Session, Integer> {
 
 	@Query("select s.scheduledTime from Session s order by s.scheduledTime desc")
 	List<LocalDateTime> findScheduledSessionDates();
+
+	@Cacheable(cacheNames = "session", key = "{ #year, #month }")
+	@Query(value = "select year(ps.session.scheduledTime) as year, month(ps.session.scheduledTime) as month, " +
+			"sum(case when ps.session.status = 'FINISHED' and ps.absent = false then 1 else 0 end) as numberOfSessions, " +
+			"sum(case when ps.session.status = 'FINISHED' and ps.absent = true then 1 else 0 end) as numberOfAbsences " +
+			"from PatientSession ps " +
+			"where year(ps.session.scheduledTime) = :year and month(ps.session.scheduledTime) = :month " +
+			"group by year(ps.session.scheduledTime), month(ps.session.scheduledTime)")
+	MonthlyStats findMonthlyStats(int year, int month);
 }

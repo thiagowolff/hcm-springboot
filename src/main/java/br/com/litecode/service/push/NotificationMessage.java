@@ -1,4 +1,4 @@
-package br.com.litecode.service.push.message;
+package br.com.litecode.service.push;
 
 import br.com.litecode.domain.model.EventType;
 import br.com.litecode.domain.model.Session;

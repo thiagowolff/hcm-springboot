@@ -534,6 +534,30 @@ a.form-link {
 	opacity: .75 !important;
 }
 
+.stats-panel {
+	border: 1px solid @grey-300;
+	float: right;
+	width: 250px;
+	position: absolute;
+	border-radius: 6px;
+	top: 70px;
+	height: 55px;
+	background: @grey-100;
+	right: 32px;
+	text-align: center;
+
+	div.stats-data {
+		font-size: 24px;
+		margin-top: -4px;
+		text-transform: uppercase;
+	}
+
+	div.stats-label {
+		color: #456a8f;
+		text-transform: lowercase;
+	}
+}
+
 @media screen and (max-width: 640px) {
 	.ui-datatable td[role="gridcell"] {
 		font-size: 10px;

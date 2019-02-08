@@ -89,15 +89,15 @@
 				}, 100);
 
 				var username = $('#username').val().trim().toLowerCase();
-                var autoRememberedUsers = [ 'painel' ];
-                var rememberMe = false;
+                // var autoRememberedUsers = [ 'painel' ];
+                // var rememberMe = false;
+				//
+				// if (autoRememberedUsers.includes(username)) {
+				// 	PF('rememberMe').check();
+				// 	rememberMe = true;
+				// }
 
-				if (autoRememberedUsers.includes(username)) {
-					PF('rememberMe').check();
-					rememberMe = true;
-				}
-
-				track('Sign-in', { 'username': username, 'rememberMe': rememberMe },
+				track('Sign-in', { 'username': username },
 					function() {
                         mixpanel.register({ 'username': username });
 					}
