@@ -151,12 +151,6 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-//	@Caching(evict = {
-//			@CacheEvict(cacheNames = "patient", allEntries = true),
-//			@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }"),
-//			@CacheEvict(cacheNames = "session", key = "{ #session.sessionDate.year, #session.sessionDate.monthValue }"),
-//			@CacheEvict(cacheNames = "chart", allEntries = true)
-//	})
 	@SessionCacheEvict
 	public void stopSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
@@ -167,12 +161,7 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@Caching(evict = {
-			@CacheEvict(cacheNames = "patient", allEntries = true),
-			@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }"),
-			@CacheEvict(cacheNames = "session", key = "{ #session.sessionDate.year, #session.sessionDate.monthValue }"),
-			@CacheEvict(cacheNames = "chart", allEntries = true)
-	})
+	@SessionCacheEvict
 	public void finishSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionTimer.stopSession(session);
@@ -199,12 +188,7 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@Caching(evict = {
-			@CacheEvict(cacheNames = "patient", allEntries = true),
-			@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }"),
-			@CacheEvict(cacheNames = "session", key = "{ #session.sessionDate.year, #session.sessionDate.monthValue }"),
-			@CacheEvict(cacheNames = "chart", allEntries = true)
-	})
+	@SessionCacheEvict
 	public void deleteSession(Session session) {
 		sessionTimer.stopSession(session);
 		sessionRepository.delete(session);
@@ -215,12 +199,7 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@Caching(evict = {
-			@CacheEvict(cacheNames = "patient", allEntries = true),
-			@CacheEvict(cacheNames = "session", key = "{ #patientSession.session.chamber.chamberId, #patientSession.session.sessionDate }"),
-			@CacheEvict(cacheNames = "session", key = "{ #patientSession.session.sessionDate.year, #patientSession.session.sessionDate.monthValue }"),
-			@CacheEvict(cacheNames = "chart", allEntries = true)
-	})
+	@SessionCacheEvict
 	public void setPatientSessionStatus(PatientSession patientSession, boolean absent) {
 		patientSession.setAbsent(absent);
 		sessionRepository.save(patientSession.getSession());
@@ -243,12 +222,7 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@Caching(evict = {
-			@CacheEvict(cacheNames = "patient", allEntries = true),
-			@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }"),
-			@CacheEvict(cacheNames = "session", key = "{ #session.sessionDate.year, #session.sessionDate.monthValue }"),
-			@CacheEvict(cacheNames = "chart", allEntries = true)
-	})
+	@SessionCacheEvict
 	public void addPatientsToSession(Session session) {
 		if (sessionData.getPatients().size() + session.getPatientSessions().size() > session.getChamber().getCapacity()) {
 			Messages.addGlobalError(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", session.getChamber().getCapacity()));
@@ -262,12 +236,7 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@Caching(evict = {
-			@CacheEvict(cacheNames = "patient", allEntries = true),
-			@CacheEvict(cacheNames = "session", key = "{ #patientSession.session.chamber.chamberId, #patientSession.session.sessionDate }"),
-			@CacheEvict(cacheNames = "session", key = "{ #patientSession.session.sessionDate.year, #patientSession.session.sessionDate.monthValue }"),
-			@CacheEvict(cacheNames = "chart", allEntries = true)
-	})
+	@SessionCacheEvict
 	public void removePatientFromSession(PatientSession patientSession) {
 		sessionData.getSession().getPatientSessions().remove(patientSession);
 		sessionData.setSession(sessionRepository.save(patientSession.getSession()));

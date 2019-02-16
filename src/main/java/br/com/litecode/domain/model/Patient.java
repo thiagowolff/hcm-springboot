@@ -22,7 +22,7 @@ import java.util.TreeSet;
 @Getter
 @Setter
 public class Patient {
-	public enum Gender { M, F };
+	public enum Gender { M, F }
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

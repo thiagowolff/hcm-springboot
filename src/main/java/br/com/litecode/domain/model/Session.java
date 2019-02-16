@@ -74,7 +74,7 @@ public class Session implements Comparable<Session>, Serializable {
 	}
 
 	public String getPatientNames() {
-		StringBuffer patients = new StringBuffer();
+		StringBuilder patients = new StringBuilder();
 		for (PatientSession patientSession : patientSessions) {
 			String style = patientSession.isAbsent() ? "style=\"color: #ff7043;\"" : "";
 			patients.append("<span " + style + ">").append(patientSession.getPatient().getName()).append("</span> <br />");

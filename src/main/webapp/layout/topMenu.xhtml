@@ -18,12 +18,12 @@
 						<p:tooltip for="sessionsMenuButton" value="#{msg['menu.sessions']}" position="bottom"/>
 					</li>
 					<li>
-						<p:button id="patientsMenuButton" pt:url="/patients" icon="fa fa-id-badge" styleClass="btn-flat" onclick="return false" />
+						<p:button id="patientsMenuButton" pt:url="/patients" icon="fa fa-users" styleClass="btn-flat" onclick="return false" />
 						<p:tooltip for="patientsMenuButton" value="#{msg['menu.patients']}" position="bottom"/>
 					</li>
 					<ui:fragment rendered="#{loginController.hasAdminRights()}">
 					<li>
-						<p:button id="chambersMenuButton" pt:url="/chambers" icon="fa fa-columns" onclick="return false" />
+						<p:button id="chambersMenuButton" pt:url="/chambers" icon="fa fa-universal-access" onclick="return false" />
 						<p:tooltip for="chambersMenuButton" value="#{msg['menu.chambers']}" position="bottom"/>
 					</li>
 					</ui:fragment>
@@ -42,7 +42,7 @@
 						</p:menuButton>
 					</li>
 					<li>
-						<p:menuButton value="#{''}" styleClass="header-menu" icon="fa fa-user">
+						<p:menuButton value="#{''}" styleClass="header-menu" icon="fa fa-user-md">
 							<p:menuitem value="#{loggedUser.name}" icon="fa fa-user-md" disabled="true" />
 							<p:separator/>
 							<p:menuitem value="#{msg['menu.users']}" url="/users" icon="fa fa-user" onclick="return false" rendered="#{loginController.hasAdminRights()}" />

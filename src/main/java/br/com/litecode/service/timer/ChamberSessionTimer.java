@@ -7,6 +7,7 @@ import br.com.litecode.domain.model.Session.SessionStatus;
 import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.SessionRepository;
 import br.com.litecode.domain.repository.UserRepository;
+import br.com.litecode.service.cache.SessionCacheEvict;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushService;
 import br.com.litecode.service.push.NotificationMessage;
@@ -38,9 +39,6 @@ public class ChamberSessionTimer implements SessionTimer {
 	private PushService pushService;
 
 	@Autowired
-	private CacheManager cacheManager;
-
-	@Autowired
 	@Getter
 	private TimeTicker<Session> sessionTimeTicker;
 
@@ -70,32 +68,21 @@ public class ChamberSessionTimer implements SessionTimer {
 
 		if (session.getStatus() == SessionStatus.FINISHED) {
 			sessionTimeTicker.stop(session);
-            onSessionComplete(session);
+			stopSession(session);
 		}
 
 		User user = userRepository.findByUsername(session.getExecutionMetadata().getStartedBy());
 		pushService.publish(PushChannel.NOTIFY, NotificationMessage.create(session, chamberEvent.getEventType()), user);
 	}
 
-	private void onSessionComplete(Session session) {
-        Cache patientCache = cacheManager.getCache("patient");
-        List<Integer> patientIds = session.getPatientSessions().stream().map(PatientSession::getPatientId).collect(Collectors.toList());
-        patientIds.forEach(patientCache::evict);
-
-		Cache chartCache = cacheManager.getCache("chart");
-		chartCache.clear();
-
-		Cache sessionCache = cacheManager.getCache("session");
-		sessionCache.evict(Arrays.asList(session.getSessionDate().getYear(), session.getSessionDate().getMonthValue()));
-    }
-
 	@Override
+	@SessionCacheEvict
 	public void stopSession(Session session) {
 		sessionTimeTicker.stop(session);
 	}
 
 	@Scheduled(fixedRate = 1000)
-	private void clockTimeout() {
+	void clockTimeout() {
 		for (Session session : sessionTimeTicker.getActiveListeners()) {
 			session.updateProgress();
 			pushService.publish(PushChannel.PROGRESS, ProgressMessage.create(session), null);

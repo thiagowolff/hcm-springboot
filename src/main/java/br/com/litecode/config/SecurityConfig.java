@@ -93,7 +93,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public JsfRedirectStrategy jsfRedirectStrategy() {
-        JsfRedirectStrategy jsfRedirectStrategy = new JsfRedirectStrategy(LOGIN_PAGE);
-        return jsfRedirectStrategy;
+        return new JsfRedirectStrategy(LOGIN_PAGE);
     }
 }
