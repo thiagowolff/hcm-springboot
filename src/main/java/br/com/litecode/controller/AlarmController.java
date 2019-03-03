@@ -6,7 +6,9 @@ import br.com.litecode.service.AlarmService;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -15,6 +17,7 @@ import java.io.Serializable;
 
 @ViewScoped
 @Component
+@CacheConfig(cacheNames = "alarm")
 public class AlarmController implements Serializable {
 	@Autowired
 	private AlarmRepository alarmRepository;
@@ -26,19 +29,14 @@ public class AlarmController implements Serializable {
 	@Setter
 	private Alarm alarm;
 
-	@Setter
-	private Iterable<Alarm> alarms;
-
 	@PostConstruct
 	public void init() {
     	alarm = new Alarm();
 	}
 
+	@Cacheable(key = "#root.methodName")
 	public Iterable<Alarm> getAlarms() {
-		if (alarms == null) {
-			alarms = alarmRepository.findAll();
-		}
-		return alarms;
+		return alarmRepository.findAll();
 	}
 
 	@CacheEvict(cacheNames = "alarm", allEntries = true)
@@ -52,14 +50,12 @@ public class AlarmController implements Serializable {
 				alarmService.cancelAlarm(alarm);
 			}
 		}
-
-		alarms = null;
 	}
-	
+
+	@CacheEvict(cacheNames = "alarm", allEntries = true)
 	public void deleteAlarm() {
 		alarm.setActive(false);
 		alarmRepository.save(alarm);
-		alarms = null;
 	}
 
 	public void newAlarm() {

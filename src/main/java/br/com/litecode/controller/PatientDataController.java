@@ -21,7 +21,6 @@ public abstract class PatientDataController<T extends PatientData> {
 	protected PatientController patientController;
 
 	private String name;
-	private Iterable<T> patientData;
 
 	protected abstract PatientDataRepository<T> getRepository();
 	protected abstract T createPatientData();
@@ -31,17 +30,13 @@ public abstract class PatientDataController<T extends PatientData> {
 
 	@Cacheable(key = "#root.targetClass")
 	public Iterable<T> getPatientData() {
-		if (patientData == null) {
-			patientData = getRepository().findAllByOrderByNameAsc();
-		}
-		return patientData;
+		return getRepository().findAllByOrderByNameAsc();
 	}
 
 	@CacheEvict(key = "#root.targetClass")
 	public void deletePatientData(T patientData) {
 		try {
 			getRepository().delete(patientData);
-			refresh();
 		} catch (DataIntegrityViolationException e) {
 			Messages.addGlobalError(MessageUtil.getMessage("error.registerInUse"));
 		}
@@ -53,7 +48,7 @@ public abstract class PatientDataController<T extends PatientData> {
 		patientData.setName(name);
 		try {
             getRepository().save(patientData);
-			refresh();
+            name = null;
         } catch (DataIntegrityViolationException e) {
             Messages.addGlobalError(MessageUtil.getMessage("error.dataAlreadyExists"));
         }
@@ -62,12 +57,5 @@ public abstract class PatientDataController<T extends PatientData> {
 	@CacheEvict(key = "#root.targetClass")
 	public void onRowEdit(RowEditEvent event) {
 		getRepository().save((T) event.getObject());
-		refresh();
-	}
-
-	public void refresh() {
-		name = null;
-		patientData = null;
-		patientController.refresh();
 	}
 }

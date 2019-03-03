@@ -2,9 +2,9 @@ package br.com.litecode.service;
 
 import br.com.litecode.domain.model.Alarm;
 import br.com.litecode.domain.repository.AlarmRepository;
+import br.com.litecode.service.push.NotificationMessage;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushService;
-import br.com.litecode.service.push.NotificationMessage;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

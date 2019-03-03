@@ -28,7 +28,7 @@ public interface SessionRepository extends CrudRepository<Session, Integer> {
 	@Query("select s.scheduledTime from Session s order by s.scheduledTime desc")
 	List<LocalDateTime> findScheduledSessionDates();
 
-	@Cacheable(cacheNames = "session", key = "{ #year, #month }")
+	@Cacheable("session")
 	@Query(value = "select year(ps.session.scheduledTime) as year, month(ps.session.scheduledTime) as month, " +
 			"sum(case when ps.session.status = 'FINISHED' and ps.absent = false then 1 else 0 end) as numberOfSessions, " +
 			"sum(case when ps.session.status = 'FINISHED' and ps.absent = true then 1 else 0 end) as numberOfAbsences " +

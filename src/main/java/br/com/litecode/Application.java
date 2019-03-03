@@ -40,12 +40,12 @@ public class Application {
 
 	@Bean
 	public CacheManager cacheManager(Ticker ticker) {
-		CaffeineCache chamberCache = buildCache("chamber", ticker, 1440);
+		CaffeineCache chamberCache = buildCache("chamber", ticker, 60 * 24 * 7);
 		CaffeineCache sessionCache = buildCache("session", ticker, 60);
 		CaffeineCache patientCache = buildCache("patient", ticker, 60);
-		CaffeineCache patientDataCache = buildCache("patientData", ticker, 120);
-		CaffeineCache chartCache = buildCache("chart", ticker, 120);
-		CaffeineCache alarmCache = buildCache("alarm", ticker, 120);
+		CaffeineCache patientDataCache = buildCache("patientData", ticker, 60 * 24);
+		CaffeineCache chartCache = buildCache("chart", ticker, 60 * 4);
+		CaffeineCache alarmCache = buildCache("alarm", ticker, 60 * 24);
 
 		SimpleCacheManager cacheManager = new SimpleCacheManager();
 		cacheManager.setCaches(Arrays.asList(chamberCache, sessionCache, patientCache, patientDataCache, chartCache, alarmCache));

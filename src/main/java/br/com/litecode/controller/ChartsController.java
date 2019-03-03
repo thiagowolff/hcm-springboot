@@ -58,7 +58,7 @@ public class ChartsController {
 		return loadChartData(chartsRepository::findMonthlyNewPatients, "Mês", "Pacientes");
 	}
 
-	@Cacheable(cacheNames = "chart", key = "#patientId")
+	@Cacheable
 	public String getPatientAttendance(Integer patientId) {
 		return loadChartData(chartsRepository::findPatientAttendance, patientId);
 	}

@@ -8,7 +8,7 @@
 	<script>
 		//<![CDATA[
 		var inactivePatients = new Boolean(#{fn:length(patientController.inactivePatients) gt 0});
-		var isDeveloper = #{loginController.hasDevRights()};
+		var isDeveloper = new Boolean(#{loginController.hasDevRights()}).valueOf();
 
 		var url = location.href;
 		var activePage = url.substring(url.lastIndexOf('/') + 1, url.length);
@@ -46,10 +46,10 @@
 				<div class="col-lg-2 col-md-2">
 					<span style="font-size: 12px; font-weight: bold;">#{msg['label.action']}</span>
 					<ul style="font-size: 12px; padding-left: 15px;">
-						<li><p:commandLink value="#{msg['title.manageHealthInsurance']}" process="@this" update=":healthInsuranceComponent:healthInsuranceForm" actionListener="#{healthInsuranceController.refresh()}" oncomplete="PF('healthInsuranceDialog').show();" global="false" onclick="track('Manage health insurance', { 'source': 'link' })"/></li>
-						<li><p:commandLink value="#{msg['title.manageConsultationReason']}" process="@this" update=":consultationReasonComponent:consultationReasonForm" actionListener="#{consultationReasonController.refresh()}" oncomplete="PF('consultationReasonDialog').show();" global="false" onclick="track('Manage consultation reason', { 'source': 'link' })" /></li>
-						<li><p:commandLink value="#{msg['title.managePhysicianAssistant']}" process="@this" update=":physicianAssistantComponent:physicianAssistantForm" actionListener="#{physicianAssistantController.refresh()}" oncomplete="PF('physicianAssistantDialog').show();" global="false" onclick="track('Manage physician assistant', { 'source': 'link' })" /></li>
-						<li><p:commandLink value="#{msg['title.managePatientStatus']}" process="@this" update=":patientStatusComponent:patientStatusForm" actionListener="#{patientStatusController.refresh()}" oncomplete="PF('patientStatusDialog').show();" global="false" onclick="track('Manage patient status', { 'source': 'link' })" /></li>
+						<li><p:commandLink value="#{msg['title.manageHealthInsurance']}" process="@this" update=":healthInsuranceComponent:healthInsuranceForm" oncomplete="PF('healthInsuranceDialog').show();" global="false" onclick="track('Manage health insurance', { 'source': 'link' })"/></li>
+						<li><p:commandLink value="#{msg['title.manageConsultationReason']}" process="@this" update=":consultationReasonComponent:consultationReasonForm" oncomplete="PF('consultationReasonDialog').show();" global="false" onclick="track('Manage consultation reason', { 'source': 'link' })" /></li>
+						<li><p:commandLink value="#{msg['title.managePhysicianAssistant']}" process="@this" update=":physicianAssistantComponent:physicianAssistantForm" oncomplete="PF('physicianAssistantDialog').show();" global="false" onclick="track('Manage physician assistant', { 'source': 'link' })" /></li>
+						<li><p:commandLink value="#{msg['title.managePatientStatus']}" process="@this" update=":patientStatusComponent:patientStatusForm" oncomplete="PF('patientStatusDialog').show();" global="false" onclick="track('Manage patient status', { 'source': 'link' })" /></li>
 					</ul>
 				</div>
 				<div class="col-lg-10 col-md-10">
@@ -86,7 +86,7 @@
 				<p:column styleClass="text-left medium-column hidden-xs">
 					<f:facet name="header">
 						<h:outputText value="#{msg['label.healthInsurance']}" />
-						<p:commandButton process="@this" update=":healthInsuranceComponent:healthInsuranceForm" actionListener="#{healthInsuranceController.refresh()}" oncomplete="PF('healthInsuranceDialog').show();" icon="fa fa-ellipsis-h" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage health insurance', { 'source': 'icon'})" />
+						<p:commandButton process="@this" update=":healthInsuranceComponent:healthInsuranceForm" oncomplete="PF('healthInsuranceDialog').show();" icon="fa fa-ellipsis-h" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage health insurance', { 'source': 'icon'})" />
 					</f:facet>
 					<h:outputText value="#{patient.healthInsurance.name}" />
 				</p:column>
@@ -103,7 +103,7 @@
 				<p:column styleClass="text-left medium-column hidden-xs hidden-sm">
 					<f:facet name="header">
 						<h:outputText value="#{msg['label.consultationReason']}" />
-						<p:commandButton process="@this" update=":consultationReasonComponent:consultationReasonForm" actionListener="#{consultationReasonController.refresh()}" oncomplete="PF('consultationReasonDialog').show();" icon="fa fa-ellipsis-h" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage consultation reason', { 'source': 'icon'})" />
+						<p:commandButton process="@this" update=":consultationReasonComponent:consultationReasonForm" oncomplete="PF('consultationReasonDialog').show();" icon="fa fa-ellipsis-h" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage consultation reason', { 'source': 'icon'})" />
 					</f:facet>
 					<h:outputText id="consultReason" value="#{patient.consultationReason.name}" />
                     <p:tooltip for="#{p:component('consultReason')}" position="bottom" escape="false">
@@ -113,7 +113,7 @@
 				<p:column styleClass="text-left medium-column hidden-xs hidden-sm">
 					<f:facet name="header">
 						<h:outputText value="#{msg['label.physicianAssistant']}" />
-						<p:commandButton process="@this" update=":physicianAssistantComponent:physicianAssistantForm" actionListener="#{physicianAssistantController.refresh()}" oncomplete="PF('physicianAssistantDialog').show();" icon="fa fa-ellipsis-h" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage physician assistant', { 'source': 'icon'})" />
+						<p:commandButton process="@this" update=":physicianAssistantComponent:physicianAssistantForm" oncomplete="PF('physicianAssistantDialog').show();" icon="fa fa-ellipsis-h" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage physician assistant', { 'source': 'icon'})" />
 					</f:facet>
 					<h:outputText value="#{patient.physicianAssistant.name}" />
 				</p:column>
@@ -134,7 +134,7 @@
 				<p:column headerText="#{msg['label.status']}" styleClass="text-left medium-column hidden-xs">
 					<f:facet name="header">
 						<h:outputText value="#{msg['label.patientStatus']}" />
-						<p:commandButton process="@this" update=":patientStatusComponent:patientStatusForm" actionListener="#{patientStatusController.refresh()}" oncomplete="PF('patientStatusDialog').show();" icon="fa fa-ellipsis-h" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage patient status', { 'source': 'icon'})" />
+						<p:commandButton process="@this" update=":patientStatusComponent:patientStatusForm" oncomplete="PF('patientStatusDialog').show();" icon="fa fa-ellipsis-h" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage patient status', { 'source': 'icon'})" />
 					</f:facet>
 					<h:outputText value="#{patient.patientStatus.name}" rendered="#{patient.finalSessionDate ne null}" />
 					<h:outputText value="#{msg['label.inTreatment']}" style="color: #1976d2;" rendered="#{patient.finalSessionDate eq null}" />
@@ -180,7 +180,7 @@
 					<f:selectItems value="#{healthInsuranceController.patientData}" var="healthInsurance" itemValue="#{healthInsurance}" itemLabel="#{healthInsurance.name}"/>
 				</p:selectOneMenu>
                 <h:panelGroup style="display: flex;">
-                    <p:commandLink value="#{msg['button.add']}" process="@this" update=":healthInsuranceComponent:healthInsuranceForm" actionListener="#{healthInsuranceController.refresh()}" oncomplete="PF('healthInsuranceDialog').show();" global="false" onclick="track('Manage health insurance', { 'source': 'form' })" styleClass="btn btn-sm btn-default btn-flat" />
+                    <p:commandLink value="#{msg['button.add']}" process="@this" update=":healthInsuranceComponent:healthInsuranceForm" oncomplete="PF('healthInsuranceDialog').show();" global="false" onclick="track('Manage health insurance', { 'source': 'form' })" styleClass="btn btn-sm btn-default btn-flat" />
 				    <p:message for="healthInsurance" display="text" />
                 </h:panelGroup>
 
@@ -205,7 +205,7 @@
 					<f:selectItems value="#{consultationReasonController.patientData}" var="consultationReason" itemValue="#{consultationReason}" itemLabel="#{consultationReason.name}"/>
 				</p:selectOneMenu>
                 <h:panelGroup style="display: flex;">
-                    <p:commandLink value="#{msg['button.add']}" process="@this" update=":consultationReasonComponent:consultationReasonForm" actionListener="#{consultationReasonController.refresh()}" oncomplete="PF('consultationReasonDialog').show();" global="false" onclick="track('Manage consultation reason', { 'source': 'form' })" styleClass="btn btn-sm btn-default btn-flat" />
+                    <p:commandLink value="#{msg['button.add']}" process="@this" update=":consultationReasonComponent:consultationReasonForm" oncomplete="PF('consultationReasonDialog').show();" global="false" onclick="track('Manage consultation reason', { 'source': 'form' })" styleClass="btn btn-sm btn-default btn-flat" />
 				    <p:message for="consultationReason" display="text" />
                 </h:panelGroup>
 
@@ -221,7 +221,7 @@
 					<f:selectItem itemValue="" itemLabel=""/>
 					<f:selectItems value="#{physicianAssistantController.patientData}" var="physicianAssistant" itemValue="#{physicianAssistant}" itemLabel="#{physicianAssistant.name}"/>
 				</p:selectOneMenu>
-				<p:commandLink value="#{msg['button.add']}" process="@this" update=":physicianAssistantComponent:physicianAssistantForm" actionListener="#{physicianAssistantController.refresh()}" oncomplete="PF('physicianAssistantDialog').show();" global="false" onclick="track('Manage physician assistant', { 'source': 'form' })" styleClass="btn btn-sm btn-default btn-flat" />
+				<p:commandLink value="#{msg['button.add']}" process="@this" update=":physicianAssistantComponent:physicianAssistantForm" oncomplete="PF('physicianAssistantDialog').show();" global="false" onclick="track('Manage physician assistant', { 'source': 'form' })" styleClass="btn btn-sm btn-default btn-flat" />
 
 				<p:outputLabel value="#{msg['label.email']}" for="patientEmail" />
 				<p:inputText id="patientEmail" value="#{patient.email}" maxlength="75" size="50" />
@@ -340,6 +340,7 @@
 			<f:facet name="header">
 				<h:outputFormat value="#{msg['title.inactivePatients']}">
 					<f:param value="#{fn:length(patientController.inactivePatients)}" />
+					<f:param value="6" />
 				</h:outputFormat>
 				<p style="font-size: 14px; font-weight: 500;">#{msg['title.paragraph.inactivePatients']}</p>
 			</f:facet>

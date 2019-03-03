@@ -56,7 +56,8 @@
 				<p:tooltip for="printSession" value="#{msg['message.dailySessionsReport']}" position="right" escape="false" />
 
 				<p:messages id="messages"/>
-				<p:outputPanel id="statsPanel" autoUpdate="true" styleClass="stats-panel hidden-sm hidden-xs">
+				<p:outputPanel id="statsPanel" styleClass="stats-panel hidden-sm hidden-xs">
+                    <p:autoUpdate />
 					<div class="col-md-4 stats-label">#{msg['label.month']}</div>
 					<div class="col-md-4 stats-label">#{msg['label.sessions']}</div>
 					<div class="col-md-4 stats-label">#{msg['label.absences']}</div>
@@ -367,7 +368,7 @@
     <script>
 		//<![CDATA[
 		$().ready(function() {
-			refreshSessions();
+			//refreshSessions();
 			track('Sessions page');
 		});
 

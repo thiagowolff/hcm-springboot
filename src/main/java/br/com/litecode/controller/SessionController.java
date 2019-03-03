@@ -7,14 +7,13 @@ import br.com.litecode.domain.repository.SessionRepository;
 import br.com.litecode.security.UserPrincipal;
 import br.com.litecode.service.SessionReportService;
 import br.com.litecode.service.cache.SessionCacheEvict;
+import br.com.litecode.service.push.NotificationMessage;
 import br.com.litecode.service.push.PushChannel;
 import br.com.litecode.service.push.PushRefresh;
 import br.com.litecode.service.push.PushService;
-import br.com.litecode.service.push.NotificationMessage;
 import br.com.litecode.service.timer.SessionTimer;
 import br.com.litecode.util.MessageUtil;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.itextpdf.text.DocumentException;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,7 +27,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
+import org.springframework.cache.interceptor.SimpleKey;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -93,13 +92,14 @@ public class SessionController implements Serializable {
 		patientCache.clear();
 	}
 
-	@Transactional(readOnly = true)
-	@Cacheable(key = "{ #chamberId, #sessionDate }", sync = true)
+	@Cacheable
 	public List<Session> getSessions(Integer chamberId, LocalDate sessionDate) {
 		return sessionRepository.findSessionsByChamberAndDate(chamberId, sessionDate);
 	}
 
 	@Transactional
+	@SessionCacheEvict
+	@CacheEvict(key = "'getScheduledSessionDates'")
 	public void addSession() {
 		int sessionDuration = sessionData.getChamber().getLastEvent().getTimeout();
 		LocalDateTime scheduledTime = sessionData.getSessionDate().atTime(sessionData.getSessionTime());
@@ -128,7 +128,6 @@ public class SessionController implements Serializable {
 
 		sessionData.getPatients().forEach(session::addPatient);
 		sessionRepository.save(session);
-		invalidateSessionCache();
 
 		NotificationMessage notificationMessage = NotificationMessage.create(session, new EventType("create_session"));
 		pushService.publish(PushChannel.NOTIFY, notificationMessage, UserPrincipal.getLoggedUser());
@@ -189,6 +188,7 @@ public class SessionController implements Serializable {
 	@PushRefresh
 	@Transactional
 	@SessionCacheEvict
+	@CacheEvict(key = "'getScheduledSessionDates'")
 	public void deleteSession(Session session) {
 		sessionTimer.stopSession(session);
 		sessionRepository.delete(session);
@@ -256,6 +256,7 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
+	@CacheEvict(key = "'getScheduledSessionDates'")
 	public void duplicateSessions() {
 		List<Session> fromSessions = sessionRepository.findSessionsByDate(fromSessionsDate);
 		for (Session fromSession : fromSessions) {
@@ -273,7 +274,6 @@ public class SessionController implements Serializable {
 			fromSession.getPatientSessions().forEach(ps -> session.addPatient(ps.getPatient()));
 			sessionRepository.save(session);
 		}
-		evictSessionCacheByDate(toSessionsDate);
 		invalidateSessionCache();
 	}
 
@@ -342,16 +342,16 @@ public class SessionController implements Serializable {
 		String sessionId = Faces.getRequestParameter("sessionId");
 
 		if (!Strings.isNullOrEmpty(sessionId)) {
-			patientCache.evict(Arrays.asList(Integer.valueOf(sessionId), sessionData.getSessionDate()));
+			patientCache.evict(new SimpleKey(Integer.valueOf(sessionId), sessionData.getSessionDate()));
 		}
 
 		sessionData.reset();
 	}
 
 	private void evictSessionCacheByDate(LocalDate date) {
-		List<List<Object>> keys = new ArrayList<>();
+		List<SimpleKey> keys = new ArrayList<>();
 		for (Chamber chamber : chamberRepository.findAll()) {
-			keys.add(Lists.newArrayList(chamber.getChamberId(), date));
+			keys.add(new SimpleKey(chamber.getChamberId(), date));
 		}
 		keys.forEach(sessionCache::evict);
 	}
@@ -366,6 +366,7 @@ public class SessionController implements Serializable {
 		}
 	}
 
+	@Cacheable(key = "#root.methodName")
 	public String getScheduledSessionDates() {
 		Set<LocalDate> sessionDates = scheduledSessionDates.stream().map(LocalDateTime::toLocalDate).collect(Collectors.toSet());
 		return sessionDates.stream().map(date -> "'" + date + "'").collect(Collectors.joining(","));

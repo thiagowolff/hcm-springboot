@@ -17,9 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.faces.view.ViewScoped;
 import java.io.Serializable;
@@ -49,25 +49,21 @@ public class PatientController implements Serializable {
 	@Getter @Setter
 	private String attendanceChartData;
 
-	private List<Patient> patients;
-
 	public PatientController() {
 		patient = new Patient();
 	}
 
-	@Transactional
+    @Cacheable(key = "#root.methodName")
 	public List<Patient> getPatients() {
- 		if (patients == null) {
-			patients = patientRepository.findActivePatients();
-		}
-		return patients;
+	    return patientRepository.findActivePatients();
 	}
 
+    @Cacheable(key = "#root.methodName")
 	public List<Patient> getAvailablePatients() {
 		return patientRepository.findAvailablePatients();
 	}
 
-	@Cacheable(key = "{ #session.sessionId, #date }", sync = true)
+	@Cacheable
 	public Map<Integer, PatientStats> getPatientStats(Session session, LocalDate date) {
 		List<PatientStats> stats = patientRepository.findPatienStats(session.getSessionId(), date.plusDays(1).atStartOfDay());
 
@@ -80,7 +76,7 @@ public class PatientController implements Serializable {
 		return patientStats;
 	}
 
-	@Cacheable(key = "#patientId", sync = true)
+	@Cacheable
 	public PatientStats getPatientStats(Integer patientId) {
 		return patientRepository.findPatienStats(patientId);
 	}
@@ -88,12 +84,12 @@ public class PatientController implements Serializable {
 	public List<Patient> getAvailablePatientsForSession(Integer sessionId) {
 		return patientRepository.findPatientsNotInSession(sessionId);
 	}
-	
+
+    @CacheEvict(allEntries = true)
 	public void deletePatient() {
 		patient.setActive(false);
 		patient.audit(UserPrincipal.getLoggedUser());
 		patientRepository.save(patient);
-		refresh();
 	}
 
 	@CacheEvict(allEntries = true)
@@ -112,23 +108,22 @@ public class PatientController implements Serializable {
 			Faces.validationFailed();
 			Messages.addGlobalError(MessageUtil.getMessage("error.patientRecord"));
 		}
-		refresh();
 	}
 
+    @CacheEvict(allEntries = true)
 	public void finishTreatment() {
 		patient.setFinalSessionDate(LocalDate.now());
 		patientRepository.save(patient);
-		refresh();
 	}
 
+    @CacheEvict(allEntries = true)
 	public void restartTreatment(Patient patient) {
 		patient.setFinalSessionDate(null);
 		patient.setPatientStatus(null);
 		patientRepository.save(patient);
-		refresh();
 	}
 
-	@Cacheable(key = "{ #patientStats.patientId, #patientStats.completedSessions }")
+	@Cacheable(key = "{ #patient.patientId, #patientStats.completedSessions }")
 	public String getWarning(Patient patient, PatientStats patientStats) {
 		if (patientStats == null) {
 			return "";
@@ -145,18 +140,18 @@ public class PatientController implements Serializable {
 
 	@Cacheable(key = "#root.methodName")
 	public List<Patient> getInactivePatients() {
-		return patientRepository.findInactivePatients(LocalDate.now().minusMonths(12).atStartOfDay());
+		return patientRepository.findInactivePatients(LocalDate.now().minusMonths(6).atStartOfDay());
 	}
 
 	@CacheEvict(key = "'getInactivePatients'")
+    	@Caching(evict = {
+			@CacheEvict(key = "'getPatients'"),
+			@CacheEvict(key = "'getInactivePatients'")
+	})
+
 	public void finishInactivePatientTreatment(Patient patient) {
 		patient.setFinalSessionDate(LocalDate.now());
 		patientRepository.save(patient);
-		refresh();
-	}
-
-	public void refresh() {
-		this.patients = null;
 	}
 
 	public void newPatient() {

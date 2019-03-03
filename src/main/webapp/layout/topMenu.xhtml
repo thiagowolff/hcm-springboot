@@ -23,7 +23,7 @@
 					</li>
 					<ui:fragment rendered="#{loginController.hasAdminRights()}">
 					<li>
-						<p:button id="chambersMenuButton" pt:url="/chambers" icon="fa fa-universal-access" onclick="return false" />
+						<p:button id="chambersMenuButton" pt:url="/chambers" icon="fa fa-server" onclick="return false" />
 						<p:tooltip for="chambersMenuButton" value="#{msg['menu.chambers']}" position="bottom"/>
 					</li>
 					</ui:fragment>
@@ -37,8 +37,10 @@
 							<p:menuitem value="#{msg['menu.disableSounds']}" icon="fa #{loggedUser.userSettings.notificationSounds ? 'fa-toggle-on' : 'fa-toggle-off'}" actionListener="#{userController.setUser(loggedUser)}" action="#{userController.toggleNotificationSounds}" update="@form" />
 							<p:separator/>
 							<p:menuitem value="#{msg['menu.alarms']}" url="/alarms" icon="fa fa-bell" onclick="return false" rendered="#{loginController.hasDevRights()}" />
-							<p:menuitem value="#{msg['menu.refreshMessages']}" actionListener="${systemController.reloadMessagesResourceBundle()}" process="@this" update="@form :content" icon="fa fa-refresh" endered="#{loginController.hasDevRights()}" />
-							<p:menuitem value="#{msg['menu.invalidateCaches']} (#{systemController.getCacheSize()})" actionListener="${systemController.invalidateCaches()}" process="@this" update="@form :content" icon="fa fa-refresh" endered="#{loginController.hasDevRights()}" />
+							<p:menuitem value="#{msg['menu.system']}" url="/system" onclick="return false" icon="fa fa-desktop" rendered="#{loginController.hasDevRights()}" />
+							<p:separator/>
+							<p:menuitem value="#{msg['menu.refreshMessages']}" actionListener="${systemController.reloadMessagesResourceBundle()}" process="@this" update="@form :content" icon="fa fa-refresh" rendered="#{loginController.hasDevRights()}" />
+							<p:menuitem value="#{msg['menu.invalidateCaches']} (#{systemController.getCacheSize()})" actionListener="${systemController.invalidateCaches()}" process="@this" update="@form :content" icon="fa fa-refresh" rendered="#{loginController.hasDevRights()}" />
 						</p:menuButton>
 					</li>
 					<li>

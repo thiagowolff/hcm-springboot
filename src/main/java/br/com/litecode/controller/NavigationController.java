@@ -23,6 +23,7 @@ public class NavigationController implements Serializable {
 		pageLinkMapping.put("/charts", "/charts.xhtml");
 		pageLinkMapping.put("/users", "/users.xhtml");
 		pageLinkMapping.put("/alarms", "/alarms.xhtml");
+		pageLinkMapping.put("/system", "/system.xhtml");
 	}
 
 	private String activePage = "/sessions.xhtml";

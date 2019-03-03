@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 import javax.enterprise.context.RequestScoped;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RequestScoped
@@ -19,6 +21,19 @@ import java.util.List;
 public class SystemController {
     @Autowired
     private CacheManager cacheManager;
+
+    private  Map<String, Map<Object, Object>> caches;
+
+    public Map<String, Map<Object, Object>> getCaches() {
+       if (caches == null) {
+           caches = new HashMap<>();
+           for (String cacheName : cacheManager.getCacheNames()) {
+               CaffeineCache cache = (CaffeineCache) cacheManager.getCache(cacheName);
+               caches.put(cacheName, cache.getNativeCache().asMap());
+           }
+       }
+        return caches;
+    }
 
     public boolean isNewVersion() {
         LocalDate versionDate = Faces.getApplicationAttribute("versionDate");

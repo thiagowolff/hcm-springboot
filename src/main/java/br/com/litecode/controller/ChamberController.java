@@ -27,7 +27,6 @@ public class ChamberController implements Serializable {
 	@Autowired
 	private ChamberRepository chamberRepository;
 
-	private Iterable<Chamber> chambers;
 	private Chamber chamber;
 
 	public ChamberController() {
@@ -36,13 +35,10 @@ public class ChamberController implements Serializable {
 
 	@Cacheable(key = "#root.methodName")
 	public Iterable<Chamber> getChambers() {
-		if (chambers == null) {
-			chambers = chamberRepository.findAll();
-		}
-		return chambers;
+		return chamberRepository.findAll();
 	}
 
-	@Cacheable(key = "#chamberId")
+	@Cacheable
 	public Map<ChamberEvent, Pair<Integer, String>> getChamberEventsChartData(Integer chamberId) {
 		Chamber chamber = chamberRepository.findOne(chamberId);
         Map<ChamberEvent, Pair<Integer, String>> events = new LinkedHashMap<>();
