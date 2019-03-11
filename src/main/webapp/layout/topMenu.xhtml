@@ -40,7 +40,6 @@
 							<p:menuitem value="#{msg['menu.system']}" url="/system" onclick="return false" icon="fa fa-desktop" rendered="#{loginController.hasDevRights()}" />
 							<p:separator/>
 							<p:menuitem value="#{msg['menu.refreshMessages']}" actionListener="${systemController.reloadMessagesResourceBundle()}" process="@this" update="@form :content" icon="fa fa-refresh" rendered="#{loginController.hasDevRights()}" />
-							<p:menuitem value="#{msg['menu.invalidateCaches']} (#{systemController.getCacheSize()})" actionListener="${systemController.invalidateCaches()}" process="@this" update="@form :content" icon="fa fa-refresh" rendered="#{loginController.hasDevRights()}" />
 						</p:menuButton>
 					</li>
 					<li>

@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 @EnableCaching
 @EntityScan(basePackageClasses = { Application.class, Jsr310JpaConverters.class })
 public class Application {
-
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
@@ -40,22 +39,24 @@ public class Application {
 
 	@Bean
 	public CacheManager cacheManager(Ticker ticker) {
-		CaffeineCache chamberCache = buildCache("chamber", ticker, 60 * 24 * 7);
-		CaffeineCache sessionCache = buildCache("session", ticker, 60);
-		CaffeineCache patientCache = buildCache("patient", ticker, 60);
-		CaffeineCache patientDataCache = buildCache("patientData", ticker, 60 * 24);
-		CaffeineCache chartCache = buildCache("chart", ticker, 60 * 4);
-		CaffeineCache alarmCache = buildCache("alarm", ticker, 60 * 24);
+		CaffeineCache chamberCache = buildCache("chamber", ticker, 15, TimeUnit.DAYS);
+		CaffeineCache sessionCache = buildCache("session", ticker, 1, TimeUnit.HOURS);
+		CaffeineCache patientCache = buildCache("patient", ticker, 2, TimeUnit.HOURS);
+		CaffeineCache patientDataCache = buildCache("patientData", ticker, 7, TimeUnit.DAYS);
+		CaffeineCache chartCache = buildCache("chart", ticker, 8, TimeUnit.HOURS);
+		CaffeineCache alarmCache = buildCache("alarm", ticker, 1, TimeUnit.DAYS);
 
 		SimpleCacheManager cacheManager = new SimpleCacheManager();
 		cacheManager.setCaches(Arrays.asList(chamberCache, sessionCache, patientCache, patientDataCache, chartCache, alarmCache));
 		return cacheManager;
 	}
 
-	private CaffeineCache buildCache(String name, Ticker ticker, int minutesToExpire) {
+	private CaffeineCache buildCache(String name, Ticker ticker, int duration, TimeUnit unit) {
 		return new CaffeineCache(name, Caffeine.newBuilder()
-				.expireAfterWrite(minutesToExpire, TimeUnit.MINUTES)
+				.expireAfterWrite(duration, unit)
+				.maximumSize(10_000)
 				.ticker(ticker)
+				.recordStats()
 				.build());
 	}
 

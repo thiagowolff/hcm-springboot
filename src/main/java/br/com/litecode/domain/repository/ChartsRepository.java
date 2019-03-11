@@ -8,22 +8,22 @@ import java.io.Serializable;
 import java.util.List;
 
 public interface ChartsRepository extends Repository<Session, Serializable> {
-	@Query(value = "select date_format(scheduled_time, '%Y-%m') month, count(*) from session s join patient_session ps using (session_id) where s.status = 'FINISHED' and ps.absent = 0 group by month order by month", nativeQuery = true)
+	@Query(value = "select year(scheduled_time) year, month(scheduled_time) month, count(*) from session s join patient_session ps using (session_id) where s.status = 'FINISHED' and ps.absent = 0 group by year, month order by year, month", nativeQuery = true)
 	List<Object[]> findMonthlyPresences();
 
-	@Query(value = "select date_format(scheduled_time, '%Y') year, count(*) from session s join patient_session ps using (session_id) where s.status = 'FINISHED' and ps.absent = 0 group by year order by year", nativeQuery = true)
-	List<Object[]> findYearlyPresences();
-
-	@Query(value = "select date_format(scheduled_time, '%Y-%m') month, count(*) from session s join patient_session ps using (session_id) where s.status = 'FINISHED' and ps.absent = 1 group by month order by month", nativeQuery = true)
+	@Query(value = "select year(scheduled_time) year, month(scheduled_time) month, count(*) from session s join patient_session ps using (session_id) where s.status = 'FINISHED' and ps.absent = 1 group by year, month order by year, month", nativeQuery = true)
 	List<Object[]> findMonthlyAbsences();
 
-	@Query(value = "select date_format(scheduled_time, '%Y') year, count(*) from session s join patient_session ps using (session_id) where s.status = 'FINISHED' and ps.absent = 1 group by year order by year", nativeQuery = true)
+	@Query(value = "select year(scheduled_time) year, count(*) from session s join patient_session ps using (session_id) where s.status = 'FINISHED' and ps.absent = 0 group by year order by year", nativeQuery = true)
+	List<Object[]> findYearlyPresences();
+
+	@Query(value = "select year(scheduled_time) year, count(*) from session s join patient_session ps using (session_id) where s.status = 'FINISHED' and ps.absent = 1 group by year order by year", nativeQuery = true)
 	List<Object[]> findYearlyAbsences();
 
-	@Query(value = "select date_format(consultation_date, '%Y-%m') month, count(*) from patient group by month order by month;", nativeQuery = true)
+	@Query(value = "select year(consultation_date) year, month(consultation_date) month, count(*) from patient group by year, month order by year, month", nativeQuery = true)
 	List<Object[]> findMonthlyConsultations();
 
-	@Query(value = "select date_format(consultation_date, '%Y') year, count(*) from patient group by year order by year;", nativeQuery = true)
+	@Query(value = "select year(consultation_date) year, count(*) from patient group by year order by year", nativeQuery = true)
 	List<Object[]> findYearlyConsultations();
 
 	@Query(value = "select ifnull(hs.name, 'N/D'), count(*) from patient_session join patient using (patient_id) left join patient_data hs on patient_data_id = health_insurance_id group by hs.name order by count(*) desc", nativeQuery = true)

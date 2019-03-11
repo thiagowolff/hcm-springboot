@@ -1,6 +1,7 @@
 package br.com.litecode.controller;
 
 import br.com.litecode.util.MessageUtil;
+import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import org.omnifaces.util.Faces;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +11,7 @@ import org.springframework.stereotype.Component;
 
 import javax.enterprise.context.RequestScoped;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @RequestScoped
@@ -22,17 +20,27 @@ public class SystemController {
     @Autowired
     private CacheManager cacheManager;
 
-    private  Map<String, Map<Object, Object>> caches;
+    private Map<String, Cache> caches;
 
-    public Map<String, Map<Object, Object>> getCaches() {
+    public Map<String, Cache> getCaches() {
        if (caches == null) {
-           caches = new HashMap<>();
+           caches = new TreeMap<>();
            for (String cacheName : cacheManager.getCacheNames()) {
                CaffeineCache cache = (CaffeineCache) cacheManager.getCache(cacheName);
-               caches.put(cacheName, cache.getNativeCache().asMap());
+               caches.put(cacheName, cache.getNativeCache());
            }
        }
-        return caches;
+       return caches;
+    }
+
+    public int getCacheNumberOfElements(String cacheName)  {
+        CaffeineCache cache = (CaffeineCache) cacheManager.getCache(cacheName);
+        int numberOfElements = 0;
+
+        for (Map.Entry<Object, Object> entry :cache.getNativeCache().asMap().entrySet()) {
+            numberOfElements += entry.getValue() instanceof Collection ? ((Collection) entry.getValue()).size() : 1;
+        }
+        return numberOfElements;
     }
 
     public boolean isNewVersion() {
@@ -47,7 +55,6 @@ public class SystemController {
     public void invalidateCaches() {
         for (String cacheName : cacheManager.getCacheNames()) {
             CaffeineCache cache = (CaffeineCache) cacheManager.getCache(cacheName);
-            log.info("Cache {} ({}) invalidated", cacheName, cache.getNativeCache().estimatedSize());
             cache.clear();
         }
     }

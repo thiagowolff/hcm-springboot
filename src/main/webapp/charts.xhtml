@@ -5,17 +5,21 @@
 
 	<h:outputScript library="js" name="charts.js" target="head" />
 
-	<script type="text/javascript">
+	<script>
 		function drawCharts() {
-			drawChart('Sessões por mês', '#{chartsController.presencesPerMonthModel}', 'presencesPerMonthChart', google.visualization.LineChart, { colors: ['#3949ab'] });
-			drawChart('Sessões por ano', '#{chartsController.presencesPerYearModel}', 'presencesPerYearChart', google.visualization.ColumnChart, { colors: ['#3949ab'] });
-			drawChart('Ausências por mês', '#{chartsController.absencesPerMonthModel}', 'absencesPerMonthChart', google.visualization.LineChart, { colors: ['#e53935'] });
-			drawChart('Ausências por ano', '#{chartsController.absencesPerYearModel}', 'absencesPerYearChart', google.visualization.ColumnChart, { colors: ['#e53935'] });
-			drawChart('Consultas por mês', '#{chartsController.consultationsPerMonthModel}', 'consultationsPerMonthChart', google.visualization.LineChart, { colors: ['#43a047'] });
-			drawChart('Consultas por ano', '#{chartsController.consultationsPerYearModel}', 'consultationsPerYearChart', google.visualization.ColumnChart, { colors: ['#43a047'] });
-			drawChart('Sessões por convênio', '#{chartsController.sessionsPerHealthInsuranceModel}', 'sessionsPerHealthInsuranceChart', google.visualization.PieChart, { legend: { position: 'right' }});
-			drawChart('Pacientes por indicação médica', '#{chartsController.patientsPerMedicalIndicationModel}', 'patientsPerMedicalIndicationChart', google.visualization.PieChart, { sliceVisibilityThreshold: 0.0, pieHole: 0.4, colors: ['#e53935', '#3949ab', '#43a047'], legend: { position: 'right' } });
-			drawChart('Pacientes por motivos consulta', '#{chartsController.patientsPerConsultationReasonModel}', 'patientsPerConsultationReasonChart', google.visualization.ColumnChart, { colors: ['#00897b'] });
+			var sessionChartColors = ['#ad1457', '#1565c0', '#4527a0', '#283593', '#1565c0'];
+			var consultationChartColors = ['#00acc1', '#2e7d32', '#00695c', '#43a047', '#c0ca33'];
+			var absencesChartColors = ['#fdd835', '#e53935', '#ffa000', '#d84315', '#f57c00'];
+
+			drawChart('Sessões por mês', '#{chartsController.presencesPerMonthModel}', 'presencesPerMonthChart', 'bar', sessionChartColors);
+			drawChart('Sessões por ano', '#{chartsController.presencesPerYearModel}', 'presencesPerYearChart', 'bar', '#1565c0', { legend: { display: false }});
+			drawChart('Consultas por mês', '#{chartsController.consultationsPerMonthModel}', 'consultationsPerMonthChart', 'bar', consultationChartColors);
+			drawChart('Consultas por ano', '#{chartsController.consultationsPerYearModel}', 'consultationsPerYearChart', 'bar', '#2e7d32', { legend: { display: false }});
+			drawChart('Ausências por mês', '#{chartsController.absencesPerMonthModel}', 'absencesPerMonthChart', 'bar', absencesChartColors);
+			drawChart('Ausências por ano', '#{chartsController.absencesPerYearModel}', 'absencesPerYearChart', 'bar', '#e53935', { legend: { display: false }});
+			// drawChart('Sessões por convênio', '#{chartsController.sessionsPerHealthInsuranceModel}', 'sessionsPerHealthInsuranceChart', 'pie', null, { legend: { display: false }});
+			// drawChart('Pacientes por indicação médica', '#{chartsController.patientsPerMedicalIndicationModel}', 'patientsPerMedicalIndicationChart', 'doughnut', ['#2e7d32', '#e53935'], { legend: { display: true }});
+			// drawChart('Pacientes por motivos consulta', '#{chartsController.patientsPerConsultationReasonModel}', 'patientsPerConsultationReasonChart', 'horizontalBar', null, { legend: { display: false }});
 		}
 	</script>
 
@@ -24,37 +28,41 @@
 
 		<div class="content-wrapper">
 			<div class="container-fluid">
-				<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
-					<div id="presencesPerMonthChart" class="chart"></div>
+				<div class="col-md-8 col-sm-6 col-xs-12">
+					<canvas id="presencesPerMonthChart" style="height: 250px;" />
 				</div>
-				<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
-					<div id="presencesPerYearChart" class="chart"></div>
+				<div class="col-md-4 col-sm-6 col-xs-12">
+					<canvas id="presencesPerYearChart" style="height: 250px;" />
 				</div>
-				<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
-					<div id="patientsPerConsultationReasonChart" class="chart"></div>
+				<div class="col-md-8 col-sm-6 col-xs-12">
+					<canvas id="consultationsPerMonthChart" style="height: 250px;" />
 				</div>
-				<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
-					<div id="consultationsPerMonthChart" class="chart"></div>
+				<div class="col-md-4 col-sm-6 col-xs-12">
+					<canvas id="consultationsPerYearChart" style="height: 250px;" />
 				</div>
-				<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
-					<div id="consultationsPerYearChart" class="chart"></div>
+				<div class="col-md-8 col-sm-6 col-xs-12">
+					<canvas id="absencesPerMonthChart" style="height: 250px;" />
 				</div>
-				<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
-					<div id="patientsPerMedicalIndicationChart" class="chart"></div>
+				<div class="col-md-4 col-sm-6 col-xs-12">
+					<canvas id="absencesPerYearChart" style="height: 250px;" />
 				</div>
-				<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
-					<div id="absencesPerMonthChart" class="chart"></div>
-				</div>
-				<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
-					<div id="absencesPerYearChart" class="chart"></div>
-				</div>
-				<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
-					<div id="sessionsPerHealthInsuranceChart" class="chart"></div>
-				</div>
+				<!--<div class="col-md-4 col-sm-4 col-xs-12">-->
+					<!--<canvas id="patientsPerConsultationReasonChart" style="height: 300px;" />-->
+				<!--</div>-->
+				<!--<div class="col-md-4 col-sm-4 col-xs-12">-->
+					<!--<canvas id="patientsPerMedicalIndicationChart" style="height: 300px;" />-->
+				<!--</div>-->
+				<!--<div class="col-md-4 col-sm-4 col-xs-12">-->
+					<!--<canvas id="sessionsPerHealthInsuranceChart" style="height: 300px;" />-->
+				<!--</div>-->
 			</div>
 		</div>
 	</h:form>
-	<script type="text/javascript">
-		track('Charts page');
+
+	<script>
+		$().ready(function() {
+			drawCharts();
+			track('Charts page');
+		});
 	</script>
 </ui:composition>

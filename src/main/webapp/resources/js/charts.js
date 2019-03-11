@@ -1,34 +1,39 @@
 
-if (typeof google !== 'undefined') {
-	google.charts.load('current', {'packages':['corechart', 'calendar', 'timeline'], 'language': 'pt'});
+function drawChart(title, jsonData, elementId, chartType, colors, additionalOptions) {
+	var data = JSON.parse(jsonData);
+	var defaultColors = ['#455a64', '#303f9f', '#5d4037', '#512da8', '#00796b', '#d32f2f', '#1976d2', '#388e3c', '#ffa000'];
 
-	if (typeof drawCharts !== 'undefined') {
-		google.charts.setOnLoadCallback(drawCharts);
+	if (!colors) {
+		colors = defaultColors;
 	}
-}
 
-function drawChart(title, dataArray, elementId, chartType, additionalOptions) {
-	if (typeof google === 'undefined' || !dataArray) {
-		return;
+	if (data.datasets.length === 1) {
+		data.datasets[0].backgroundColor = colors;
+		data.datasets[0].borderColor = colors;
+		data.datasets[0].fill = false;
+	} else {
+		for (var i = 0; i < data.datasets.length; i++) {
+			data.datasets[i].backgroundColor = colors[i];
+			data.datasets[i].borderColor = colors[i];
+			data.datasets[i].fill = false;
+		}
 	}
 
 	var options = {
-		title: title,
-		legend: { position: 'none' },
-		sliceVisibilityThreshold: 0.04,
-		pieResidueSliceColor: '#2f353e',
-		pieResidueSliceLabel: "Outros",
-		animation:{
-			startup: true,
-			duration: 1000,
-			easing: 'out'
+		title: {
+			display: true,
+				text: title,
+				position: 'top'
 		},
-		colors: [ '#d81b60', '#3949ab', '#00897b', '#e53935', '#546e7a', '#5e35b1', '#f06292', '#7986cb', '#4db6ac', '#e57373', '#e0e0e0', '#9575cd' ]
+		maintainAspectRatio: false
 	};
 
 	options = $.extend({}, options, additionalOptions);
 
-	var data = google.visualization.arrayToDataTable(JSON.parse(dataArray));
-	var chart = new chartType(document.getElementById(elementId));
-	chart.draw(data, options);
+	var context = document.getElementById(elementId).getContext('2d');
+	var chart = new Chart(context, {
+		type: chartType,
+		data: data,
+		options: options
+	});
 }
