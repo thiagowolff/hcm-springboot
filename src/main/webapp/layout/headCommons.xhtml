@@ -2,8 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 	  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 	  xmlns:h="http://xmlns.jcp.org/jsf/html"
-	  xmlns:f="http://xmlns.jcp.org/jsf/core"
->
+	  xmlns:f="http://xmlns.jcp.org/jsf/core">
 	
 	<ui:composition>
 		<f:loadBundle basename="application-#{facesContext.application.projectStage.toString().toLowerCase()}" var="config"/>
@@ -30,6 +29,7 @@
 		<h:outputScript library="js" name="theme-eclipse.js" target="body" />
 		<h:outputScript library="js" name="jquery.sparkline.min.js" target="body" />
 		<h:outputScript library="js" name="chart.min.js" target="body" />
+		<h:outputScript library="js" name="charts.js" target="head" />
 
 		<ui:fragment rendered="#{config['mixpanel.enabled']}">
 		<script>

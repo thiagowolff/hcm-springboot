@@ -26,7 +26,7 @@
 					<h:outputText value="#{cache.key}" styleClass="text-uppercase" />
 				</p:column>
 				<p:column headerText="Performance" width="100">
-					<span class="cachePerformance">
+					<span class="cache-performance">
 						<h:outputText value="#{stats.hitRate()}">
 							<f:convertNumber locale="en" maxFractionDigits="2" />
 						</h:outputText>
@@ -71,10 +71,10 @@
 				type: 'pie',
 				width: '30px',
 				height: '30px',
-				sliceColors: ['#3949ab', '#e53935']
+				sliceColors: ['#455a64', '#e53935']
 			}
 
-			$('.cachePerformance').sparkline('html', chartOptions);
+			$('.cache-performance').sparkline('html', chartOptions);
 		});
 	</script>
 

@@ -112,7 +112,6 @@ public class PatientController implements Serializable {
 
     @CacheEvict(allEntries = true)
 	public void finishTreatment() {
-		patient.setFinalSessionDate(LocalDate.now());
 		patientRepository.save(patient);
 	}
 

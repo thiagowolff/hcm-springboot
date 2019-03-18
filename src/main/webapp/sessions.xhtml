@@ -56,14 +56,30 @@
 				<p:tooltip for="printSession" value="#{msg['message.dailySessionsReport']}" position="right" escape="false" />
 
 				<p:messages id="messages"/>
+
 				<p:outputPanel id="statsPanel" styleClass="stats-panel hidden-sm hidden-xs">
                     <p:autoUpdate />
 					<div class="col-md-4 stats-label">#{msg['label.month']}</div>
 					<div class="col-md-4 stats-label">#{msg['label.sessions']}</div>
 					<div class="col-md-4 stats-label">#{msg['label.absences']}</div>
-					<div class="col-md-4 stats-data" style="color: #2d353a">#{of:getShortMonth(sessionController.getSessionMonthlyStats().month)}</div>
+					<div class="col-md-4 stats-month" style="color: #2d353a">#{of:getShortMonth(sessionController.getSessionMonthlyStats().month)}</div>
 					<div class="col-md-4 stats-data" style="color: #47af4c">#{sessionController.getSessionMonthlyStats().numberOfSessions}</div>
 					<div class="col-md-4 stats-data" style="color: #d52e28;">#{sessionController.getSessionMonthlyStats().numberOfAbsences}</div>
+
+					<div class="col-md-4 stats-month" />
+					<div class="col-md-4 monthly-attendance">
+						<!--#{chartsController.getMonthlyAttendance(sessionController.sessionData.sessionDate.year, sessionController.sessionData.sessionDate.monthValue, false)}-->
+					</div>
+					<div class="col-md-4 monthly-absence">
+						<!--#{chartsController.getMonthlyAttendance(sessionController.sessionData.sessionDate.year, sessionController.sessionData.sessionDate.monthValue, true)}-->
+					</div>
+					<script>
+						$(document).ready(function() {
+							if (typeof drawSparkline !== 'undefined') {
+								drawSparkline();
+							}
+						});
+					</script>
 				</p:outputPanel>
 			</p:panelGrid>
 
@@ -369,8 +385,29 @@
 		//<![CDATA[
 		$().ready(function() {
 			//refreshSessions();
+			//drawSparkline();
 			track('Sessions page');
 		});
+
+		function drawSparkline() {
+			var sparklineOptions = {
+				type: 'line',
+				width: 50,
+				lineColor: '#47af4c',
+				fillColor: null,
+				spotColor: null,
+				minSpotColor: null,
+				maxSpotColor: null,
+				tooltipFormatter: function(sparkline, options, fields) {
+					return 'Dia ' + (fields.x + 1) + ': ' + fields.y;
+				}
+			}
+
+			$('.monthly-attendance').sparkline('html', sparklineOptions);
+
+			sparklineOptions.lineColor = '#d52e28';
+			$('.monthly-absence').sparkline('html', sparklineOptions);
+		}
 
 		function updateTimer(session) {
 			$('#currentTime-' + session.sessionId).text(session.timeRemaining);

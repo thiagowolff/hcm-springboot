@@ -3,6 +3,7 @@
 	  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 	  xmlns:h="http://xmlns.jcp.org/jsf/html"
 	  xmlns:f="http://xmlns.jcp.org/jsf/core"
+	  xmlns:fn="http://java.sun.com/jsp/jstl/functions"
 	  xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
 	  xmlns:o="http://omnifaces.org/ui"
 	  xmlns:p="http://primefaces.org/ui">
@@ -43,7 +44,39 @@
 					<div class="inner-container">
 						<h:panelGroup id="content" layout="block">
 							<ui:include src="#{navigationController.activePage}" />
-						</h:panelGroup>
+
+							<h:outputScript>
+								//<![CDATA[
+								var inactivePatients = new Boolean(#{fn:length(patientController.inactivePatients) gt 0});
+								var isDeveloper = new Boolean(#{loginController.hasDevRights()}).valueOf();
+
+								var url = location.href;
+								var activePage = url.substring(url.lastIndexOf('/') + 1, url.length);
+								var smallScreen = window.innerWidth <= 1024 && window.innerHeight <= 768;
+
+								if ((activePage === '' || activePage === 'patients') && inactivePatients && inactivePatients.valueOf() && !smallScreen) {
+									setTimeout(function() {
+										PrimeFaces.widgets['inactivePatientsDialog'] && PF('inactivePatientsDialog').show();
+
+										var closeIcon = $('#inactivePatientsForm a.ui-dialog-titlebar-icon.ui-dialog-titlebar-close');
+										closeIcon.parent().append('<span id="countdown" style="font-size: 12px; float: right;" />');
+										var secondsText = $('#countdown');
+										closeIcon.hide();
+
+										var waitTime = isDeveloper ? 1 : 30 + Math.floor((Math.random() * 30) + 1);
+										var timer = setInterval(function() {
+											secondsText.text(waitTime);
+											waitTime -= 1;
+											if (waitTime <= 0) {
+												clearInterval(timer);
+												closeIcon.show();
+												secondsText.hide();
+											}
+										}, 1000);
+									}, 1500);
+								}
+								//]]>
+							</h:outputScript>						</h:panelGroup>
 					</div>
 				</div>
 			</div>
@@ -82,6 +115,38 @@
 			<p:remoteCommand name="refreshNavigation" process="@this" actionListener="#{navigationController.updateNavigation()}" />
             <p:remoteCommand name="fetchUserSettings" oncomplete="getUserSettingsCallback(xhr, status, args)" actionListener="#{userController.getUserSettings()}" process="@this" global="false" />
             <p:remoteCommand name="updateOnlineUsers" process="@this" update="onlineUsers" global="false" />
+		</h:form>
+
+		<h:form id="inactivePatientsForm">
+			<p:dialog widgetVar="inactivePatientsDialog" width="60%" dynamic="true" modal="true" resizable="false">
+				<f:facet name="header">
+					<h:outputFormat id="inactivePatientsCount" value="#{msg['title.inactivePatients']}">
+						<f:param value="#{fn:length(patientController.inactivePatients)}" />
+						<f:param value="6" />
+					</h:outputFormat>
+					<p style="font-size: 14px; font-weight: 500;">#{msg['title.paragraph.inactivePatients']}</p>
+				</f:facet>
+
+				<ui:param name="patientStats" value="#{patientController.getPatientStats(inactivePatient.patientId)}" />
+				<p:dataTable id="inactivePatientsTable" widgetVar="inactivePatientsTable" value="#{patientController.inactivePatients}" var="inactivePatient" rows="10" paginator="true" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
+					<p:column headerText="#{msg['label.name']}" styleClass="text-left">
+						<h:outputText value="#{inactivePatient.name}" />
+					</p:column>
+					<p:column headerText="#{msg['label.patientRecord']}" width="75">
+						<h:outputText value="#{inactivePatient.patientRecord}" />
+					</p:column>
+					<p:column headerText="#{msg['label.lastSessionDate']}" width="100">
+						<h:outputText value="#{patientStats.lastSessionDate}" converter="localDateTimeConverter" />
+					</p:column>
+					<p:column headerText="#{msg['label.finishTreatment']}" width="265">
+						<p:selectOneMenu id="treatmentStatus" value="#{inactivePatient.patientStatus}" placeholder="#{msg['label.selectTreatmentResult']}" converter="omnifaces.SelectItemsConverter" styleClass="red-placeholder">
+							<f:selectItem itemLabel="" itemValue="" />
+							<f:selectItems value="#{patientStatusController.patientData}" var="patientStatus" itemValue="#{patientStatus}" itemLabel="#{patientStatus.name}"/>
+							<p:ajax event="change" listener="#{patientController.finishInactivePatientTreatment(inactivePatient)}" process="treatmentStatus" update="inactivePatientsTable, inactivePatientsForm:inactivePatientsCount" oncomplete="track('Finish treatment');" />
+						</p:selectOneMenu>
+					</p:column>
+				</p:dataTable>
+			</p:dialog>
 		</h:form>
 
 		<script>

@@ -3,46 +3,13 @@
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:p="http://primefaces.org/ui"
-				xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+                xmlns:o="http://omnifaces.org/ui"
                 xmlns:lc="http://xmlns.jcp.org/jsf/composite/components">
 
-	<h:outputScript library="js" name="charts.js" />
-
 	<script>
-		//<![CDATA[
-		var inactivePatients = new Boolean(#{fn:length(patientController.inactivePatients) gt 0});
-		var isDeveloper = new Boolean(#{loginController.hasDevRights()}).valueOf();
-
-		var url = location.href;
-		var activePage = url.substring(url.lastIndexOf('/') + 1, url.length);
-		var smallScreen = window.innerWidth <= 1024 && window.innerHeight <= 768;
-
-		if (activePage == 'patients' && inactivePatients && inactivePatients.valueOf() && !smallScreen) {
-			setTimeout(function() {
-				PrimeFaces.widgets['inactivePatientsDialog'] && PF('inactivePatientsDialog').show();
-
-				var closeIcon = $('#inactivePatientsForm a.ui-dialog-titlebar-icon.ui-dialog-titlebar-close');
-				closeIcon.parent().append('<span id="countdown" style="font-size: 12px; float: right;" />');
-				var secondsText = $('#countdown');
-				closeIcon.hide();
-
-				var waitTime = isDeveloper ? 1 : 30 + Math.floor((Math.random() * 30) + 1);
-				var timer = setInterval(function() {
-					secondsText.text(waitTime);
-					waitTime -= 1;
-					if (waitTime <= 0) {
-						clearInterval(timer);
-						closeIcon.show();
-						secondsText.hide();
-					}
-				}, 1000);
-			}, 1500);
-		}
-
 		function drawCharts() {
 			drawChart('Novos pacientes por mês nos últimos 12 meses', '#{chartsController.monthlyNewPatients}', 'newPatientsPerMonthChart', 'line', '#3949ab', { legend: { display: false }});
 		}
-		//]]>
 	</script>
 
 	<h:form id="patientsForm">
@@ -65,9 +32,15 @@
 			</div>
 		</lc:headerPanel>
 
+		<o:importFunctions type="java.time.LocalDate" var="localDate" />
+
 		<div class="content-wrapper">
 			<p:dataTable id="patientsTable" widgetVar="patientsTable" value="#{patientController.patients}" var="patient" paginator="true" rows="10" paginatorAlwaysVisible="false" filteredValue="#{patientController.filteredPatients}" emptyMessage="#{msg['message.noData']}"
 			 currentPageReportTemplate="({startRecord} de {totalRecords})" paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="10,25,100,500" paginatorPosition="bottom">
+
+				<p:ajax event="page" oncomplete="drawSparkline();" />
+				<p:ajax event="sort" oncomplete="drawSparkline();" />
+				<p:ajax event="filter" oncomplete="drawSparkline();" />
 
 				<f:facet name="header">
 					<p:outputPanel style="text-align: right;">
@@ -79,13 +52,17 @@
 				<ui:param name="patientStats" value="#{patientController.getPatientStats(patient.patientId)}" />
 
 				<p:column headerText="#{msg['label.name']}" sortBy="#{patient.name}" filterBy="#{patient.name}" filterStyle="display: none;" styleClass="text-left large-column">
-					<h:outputText id="name" value="#{patient.name}" />
+					<h:outputText id="name" value="#{patient.name}" />	<!--#{patient.patientId}-->
 					<p:tooltip for="#{p:component('name')}" value="#{patient.auditLog}" position="bottom" escape="false" rendered="#{loginController.hasDevRights()}" />
 
 					<ui:fragment rendered="#{not empty patient.remarks}">
 						<i class="patient-info-#{patient.patientId} fa fa-info-circle hidden-xs" style="margin-left: 2px;"></i>
 						<p:tooltip for="@(.patient-info-#{patient.patientId})" value="#{patient.remarks}" position="bottom" escape="false" />
 					</ui:fragment>
+
+					<span class="patient-attendance pull-right">
+						<!--#{chartsController.getPatientAttendance(patient.patientId)}-->
+					</span>
 				</p:column>
 				<p:column headerText="#{msg['label.patientRecord']}" sortBy="#{patient.patientRecord}" filterBy="#{patient.patientRecord}" styleClass="small-column" filterStyle="display: none;">
 					<h:outputText value="#{patient.patientRecord}" />
@@ -147,7 +124,9 @@
 					<h:outputText value="#{msg['label.inTreatment']}" style="color: #1976d2;" rendered="#{patient.finalSessionDate eq null}" />
 				</p:column>
 				<p:column headerText="#{msg['label.action']}" styleClass="medium-column hidden-xs" style="padding: 1px">
-					<p:commandButton process="@this" update=":finishTreatmentForm:patienTreatmentStatus" actionListener="#{patientController.setPatient(patient)}" onclick="PF('finishTreatmentDialog').show();" icon="fa fa-stop-circle-o" title="#{msg['button.finishTreatment']}" rendered="#{patient.finalSessionDate eq null}" />
+					<p:commandButton process="@this" update=":finishTreatmentForm:patienTreatmentStatus, :finishTreatmentForm:patienTreatmentEndDate" actionListener="#{patientController.setPatient(patient)}" onclick="PF('finishTreatmentDialog').show();" icon="fa fa-stop-circle-o" title="#{msg['button.finishTreatment']}" rendered="#{patient.finalSessionDate eq null}">
+						<f:setPropertyActionListener value="#{localDate:now()}" target="#{patientController.patient.finalSessionDate}" />
+					</p:commandButton>
 					<p:commandButton process="@this" update="patientsTable" actionListener="#{patientController.restartTreatment(patient)}" icon="fa fa-undo" title="#{msg['button.restartTreatment']}" oncomplete="track('Restart treatment')" rendered="#{patient.finalSessionDate ne null and loginController.hasAdminRights()}" />
 					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" update=":patientInputForm" oncomplete="PF('patientDialog').show(); track('Edit patient');" icon="fa fa-pencil" title="#{msg['button.edit']}" global="false">
 						<p:resetInput target=":patientInputForm:patientGrid" />
@@ -252,19 +231,17 @@
 
 	<h:form id="finishTreatmentForm">
 		<p:dialog header="#{msg['title.finishTreatment']}" widgetVar="finishTreatmentDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
-			<div class="row ui-fluid">
-				<div class="col-md-1">
-					<p:outputLabel value="#{msg['label.status']}"/>
-				</div>
-				<div class="col-md-8">
-					<p:selectOneMenu id="patienTreatmentStatus" value="#{patientController.patient.patientStatus}" converter="omnifaces.SelectItemsConverter" style="min-width: 350px;">
-						<f:selectItems value="#{patientStatusController.patientData}" var="patientStatus" itemValue="#{patientStatus}" itemLabel="#{patientStatus.name}"/>
-					</p:selectOneMenu>
-				</div>
-				<div class="col-md-3">
-					<p:commandButton value="#{msg['button.finalize']}" process="@this, patienTreatmentStatus" update=":patientsForm:patientsTable" actionListener="#{patientController.finishTreatment}" oncomplete="PF('finishTreatmentDialog').hide(); track('Finish treatment');" styleClass="btn-primary"/>
-				</div>
-			</div>
+			<p:panelGrid columns="2">
+				<p:outputLabel value="#{msg['label.status']}"/>
+				<p:selectOneMenu id="patienTreatmentStatus" value="#{patientController.patient.patientStatus}" converter="omnifaces.SelectItemsConverter">
+					<f:selectItems value="#{patientStatusController.patientData}" var="patientStatus" itemValue="#{patientStatus}" itemLabel="#{patientStatus.name}"/>
+				</p:selectOneMenu>
+
+				<p:outputLabel value="#{msg['label.finalSessionDate']}" />
+				<p:calendar id="patienTreatmentEndDate" value="#{patientController.patient.finalSessionDate}" pattern="dd/MM/yyyy" mask="true" size="15" showOn="button" navigator="true" converter="localDateTimeConverter" required="true" />
+			</p:panelGrid>
+			<p:separator />
+			<p:commandButton value="#{msg['button.finalize']}" process="@this, patienTreatmentStatus, patienTreatmentEndDate" update=":patientsForm:patientsTable" actionListener="#{patientController.finishTreatment}" oncomplete="PF('finishTreatmentDialog').hide(); track('Finish treatment');" styleClass="btn-primary pull-right"/>
 		</p:dialog>
 	</h:form>
 
@@ -275,42 +252,34 @@
 	<lc:managePatientData messagePrefix="physicianAssistant" controller="#{physicianAssistantController}" id="physicianAssistantComponent" update=":patientsForm:patientsTable" />
 	<lc:managePatientData messagePrefix="consultationReason" controller="#{consultationReasonController}" id="consultationReasonComponent" update=":patientsForm:patientsTable" ></lc:managePatientData>
 
-	<h:form id="inactivePatientsForm">
-		<p:dialog widgetVar="inactivePatientsDialog" width="60%" dynamic="true" modal="true" resizable="false">
-			<f:facet name="header">
-				<h:outputFormat id="inactivePatientsCount" value="#{msg['title.inactivePatients']}">
-					<f:param value="#{fn:length(patientController.inactivePatients)}" />
-					<f:param value="6" />
-				</h:outputFormat>
-				<p style="font-size: 14px; font-weight: 500;">#{msg['title.paragraph.inactivePatients']}</p>
-			</f:facet>
-
-			<ui:param name="patientStats" value="#{patientController.getPatientStats(inactivePatient.patientId)}" />
-			<p:dataTable id="inactivePatientsTable" widgetVar="inactivePatientsTable" value="#{patientController.inactivePatients}" var="inactivePatient" rows="10" paginator="true" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}">
-				<p:column headerText="#{msg['label.name']}" styleClass="text-left">
-					<h:outputText value="#{inactivePatient.name}" />
-				</p:column>
-				<p:column headerText="#{msg['label.patientRecord']}" width="75">
-					<h:outputText value="#{inactivePatient.patientRecord}" />
-				</p:column>
-				<p:column headerText="#{msg['label.lastSessionDate']}" width="100">
-					<h:outputText value="#{patientStats.lastSessionDate}" converter="localDateTimeConverter" />
-				</p:column>
-				<p:column headerText="#{msg['label.finishTreatment']}" width="265">
-					<p:selectOneMenu id="treatmentStatus" value="#{inactivePatient.patientStatus}" placeholder="#{msg['label.selectTreatmentResult']}" converter="omnifaces.SelectItemsConverter" styleClass="red-placeholder">
-						<f:selectItem itemLabel="" itemValue="" />
-						<f:selectItems value="#{patientStatusController.patientData}" var="patientStatus" itemValue="#{patientStatus}" itemLabel="#{patientStatus.name}"/>
-						<p:ajax event="change" listener="#{patientController.finishInactivePatientTreatment(inactivePatient)}" process="treatmentStatus" update="inactivePatientsTable, inactivePatientsForm:inactivePatientsCount" oncomplete="track('Finish treatment');" />
-					</p:selectOneMenu>
-				</p:column>
-			</p:dataTable>
-		</p:dialog>
-	</h:form>
-
 	<script>
+		//<![CDATA[
        	$().ready(function() {
        		drawCharts();
+			drawSparkline();
+
 			track('Patients page');
 		});
+
+       	function drawSparkline() {
+			var sparklineOptions = {
+				type: 'bar',
+				barWidth: '4',
+				barSpacing: '1',
+				zeroColor: 'transparent',
+				stackedBarColor: ['#47af4c', '#d52e28']
+			}
+
+			$('.patient-attendance').sparkline('html', sparklineOptions);
+
+			$('.patient-attendance').bind('mousemove', function(e) {
+				if (e.offsetX <= 5) {
+					$('#jqstooltip').hide();
+				} else {
+					$('#jqstooltip').show();
+				}
+			});
+		}
+		//]]>
 	</script>
 </ui:composition>

@@ -334,7 +334,7 @@ th .ui-button-icon-only {
 	text-align: center;
 	font-weight: 600;
 	//color: @color;
-	.gradient(fade(@color, 2%), fade(@color, 5%));
+	//.gradient(fade(@color, 2%), fade(@color, 5%));
 	border-right-width: 0px;
 }
 
@@ -407,7 +407,7 @@ th .ui-button-icon-only {
 }
 
 .session-toolbar {
-	margin-bottom: 15px;
+	margin-bottom: 20px;
 	.ui-panelgrid-cell:first-child {
 		padding-left: 0;
 		.ui-button-icon-only {
@@ -536,16 +536,21 @@ a.form-link {
 	width: 250px;
 	position: absolute;
 	border-radius: 6px;
-	top: 70px;
-	height: 55px;
+	top: 67px;
+	height: 65px;
 	background: @grey-100;
 	right: 32px;
 	text-align: center;
 
-	div.stats-data {
-		font-size: 24px;
+	div.stats-month {
+		font-size: 28px;
 		margin-top: -4px;
 		text-transform: uppercase;
+	}
+
+	div.stats-data {
+		font-size: 18px;
+		margin-top: -4px;
 	}
 
 	div.stats-label {

@@ -1,7 +1,6 @@
 package br.com.litecode.controller;
 
 import br.com.litecode.domain.repository.ChartsRepository;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,14 +9,12 @@ import org.springframework.stereotype.Component;
 
 import javax.faces.view.ViewScoped;
 import java.time.Month;
+import java.time.Year;
 import java.time.format.TextStyle;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @ViewScoped
 @Component
@@ -68,11 +65,28 @@ public class ChartsController {
 
 	@Cacheable(cacheNames = "chart", key = "#patientId")
 	public String getPatientAttendance(Integer patientId) {
-		return loadChartData(chartsRepository::findPatientAttendance, patientId);
+		List<Object[]> rows = chartsRepository.findPatientAttendance(patientId);
+		List<String> weeklyAttendanceData = rows.stream().map(row -> row[2] + ":" + row[3]).collect(Collectors.toList());
+		Collections.reverse(weeklyAttendanceData);
+		return "0:0," + String.join(",", weeklyAttendanceData);
 	}
 
-	private String loadChartData(Supplier<List<Object[]>> dao, String... headers) {
-		return getJsonResults(dao.get(), headers);
+	@Cacheable(cacheNames = "chart", key = "{ #year, #month, #absences }")
+	public String getMonthlyAttendance(int year, int month, boolean absences) {
+		List<Object[]> rows = chartsRepository.findMonthlyAttendance(year, month);
+
+		Map<Integer, String> attendanceMap = new TreeMap<>();
+		for (Object[] row : rows) {
+		    String attendance = absences ? row[2].toString() : row[1].toString();
+		    attendanceMap.put((Integer) row[0], attendance);
+        }
+
+		String data = "";
+		for (int day = 1; day <= Month.of(month).length(Year.isLeap(year)); day++) {
+		    data += "," + attendanceMap.getOrDefault(day, "0");
+        }
+
+		return data.substring(1);
 	}
 
 	private String loadMonthlyChartData(Supplier<List<Object[]>> dao) {
@@ -81,22 +95,6 @@ public class ChartsController {
 
 	private String loadSingleCountChartData(Supplier<List<Object[]>> dao) {
 		return getSingleCountChartData(dao.get());
-	}
-
-	private String loadChartData(Function<Integer, List<Object[]>> dao, Integer id, String... headers) {
-		List<Object[]> results = dao.apply(id);
-		return getJsonResults(results, headers);
-	}
-
-	private String getJsonResults(List<Object[]> results, String... headers) {
-		if (results.isEmpty()) {
-			return null;
-		}
-
-		if (headers.length > 0) {
-			results.add(0, headers);
-		}
-		return new Gson().toJson(results);
 	}
 
 	private String getMonthlyChartData(List<Object[]> dataRows) {
