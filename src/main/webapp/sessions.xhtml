@@ -118,7 +118,8 @@
 										value="#{patientSession.patient.name}"
 										style="#{patientSession.absent ? 'color: #b14538' : chamberSession.running ? 'color: #007d18' : ''}" />
 								<p:tooltip for="@(.patient-#{patientSession.patientSessionId})" value="#{patientSession.patient.recordInfo}" escape="false" position="right"/>
-								<ui:param name="warning" value="#{patientController.getWarning(patientSession.patient, patientStats[patientSession.patient.patientId])}" />
+								<ui:param name="stats" value="#{patientStats[patientSession.patient.patientId]}" />
+								<ui:param name="warning" value="#{stats eq null ? '' : patientController.getWarning(patientSession.patient, stats)}" />
 								<h:outputText value="#{warning}" styleClass="patient-session-warning" rendered="#{not empty warning}" />
 							</div>
 						</ui:repeat>
