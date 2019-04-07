@@ -1,6 +1,7 @@
 package br.com.litecode.service.timer;
 
 import br.com.litecode.domain.model.Session;
+import br.com.litecode.service.cache.SessionCacheEvict;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,7 @@ public class SessionTimeTicker implements TimeTicker<Session> {
 	}
 
 	@Override
+	@SessionCacheEvict
 	public synchronized void stop(Session session) {
 		if (!activeSessions.containsKey(session)) {
 			log.warn("Session {} is not running", session.getSessionId());

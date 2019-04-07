@@ -150,7 +150,6 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@SessionCacheEvict
 	public void stopSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionTimer.stopSession(session);
@@ -160,7 +159,6 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@SessionCacheEvict
 	public void finishSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionTimer.stopSession(session);
@@ -177,7 +175,6 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }")
 	public void pauseSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 		sessionTimer.stopSession(session);
@@ -187,7 +184,6 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@SessionCacheEvict
 	@CacheEvict(key = "'getScheduledSessionDates'")
 	public void deleteSession(Session session) {
 		sessionTimer.stopSession(session);

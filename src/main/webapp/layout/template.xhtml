@@ -44,39 +44,7 @@
 					<div class="inner-container">
 						<h:panelGroup id="content" layout="block">
 							<ui:include src="#{navigationController.activePage}" />
-
-							<h:outputScript>
-								//<![CDATA[
-								var inactivePatients = new Boolean(#{fn:length(patientController.inactivePatients) gt 0});
-								var isDeveloper = new Boolean(#{loginController.hasDevRights()}).valueOf();
-
-								var url = location.href;
-								var activePage = url.substring(url.lastIndexOf('/') + 1, url.length);
-								var smallScreen = window.innerWidth <= 1024 && window.innerHeight <= 768;
-
-								if ((activePage === '' || activePage === 'patients') && inactivePatients && inactivePatients.valueOf() && !smallScreen) {
-									setTimeout(function() {
-										PrimeFaces.widgets['inactivePatientsDialog'] && PF('inactivePatientsDialog').show();
-
-										var closeIcon = $('#inactivePatientsForm a.ui-dialog-titlebar-icon.ui-dialog-titlebar-close');
-										closeIcon.parent().append('<span id="countdown" style="font-size: 12px; float: right;" />');
-										var secondsText = $('#countdown');
-										closeIcon.hide();
-
-										var waitTime = isDeveloper ? 1 : 30 + Math.floor((Math.random() * 30) + 1);
-										var timer = setInterval(function() {
-											secondsText.text(waitTime);
-											waitTime -= 1;
-											if (waitTime <= 0) {
-												clearInterval(timer);
-												closeIcon.show();
-												secondsText.hide();
-											}
-										}, 1000);
-									}, 1500);
-								}
-								//]]>
-							</h:outputScript>						</h:panelGroup>
+						</h:panelGroup>
 					</div>
 				</div>
 			</div>

@@ -2,8 +2,8 @@
 <faces-config
     xmlns="http://xmlns.jcp.org/xml/ns/javaee"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd"
-    version="2.2">
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_3.xsd"
+    version="2.3">
 
 	<application>
 		<locale-config>
@@ -22,7 +22,7 @@
 		<action-listener>org.omnifaces.eventlistener.ResetInputAjaxActionListener</action-listener>
 
 		<resource-handler>org.omnifaces.resourcehandler.CDNResourceHandler</resource-handler>
-		<resource-handler>org.omnifaces.resourcehandler.CombinedResourceHandler</resource-handler>
+		<!--<resource-handler>org.omnifaces.resourcehandler.CombinedResourceHandler</resource-handler>-->
 		<resource-handler>org.omnifaces.resourcehandler.UnmappedResourceHandler</resource-handler>
 
 		<el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>
@@ -36,24 +36,24 @@
 		<phase-listener>br.com.litecode.web.LogPhaseListener</phase-listener>
 	</lifecycle>
 
-	<faces-config-extension>
-		<facelets-processing>
-			<file-extension>.xhtml</file-extension>
-			<process-as>xhtml</process-as>
-			<oam-compress-spaces>true</oam-compress-spaces>
-		</facelets-processing>
-		<view-pool-mapping>
-			<url-pattern>/*</url-pattern>
-			<parameter>
-				<name>org.apache.myfaces.VIEW_POOL_MAX_POOL_SIZE</name>
-				<value>5</value>
-			</parameter>
-		</view-pool-mapping>
-	</faces-config-extension>
+	<!--<faces-config-extension>-->
+		<!--<facelets-processing>-->
+			<!--<file-extension>.xhtml</file-extension>-->
+			<!--<process-as>xhtml</process-as>-->
+			<!--<oam-compress-spaces>true</oam-compress-spaces>-->
+		<!--</facelets-processing>-->
+		<!--<view-pool-mapping>-->
+			<!--<url-pattern>/*</url-pattern>-->
+			<!--<parameter>-->
+				<!--<name>org.apache.myfaces.VIEW_POOL_MAX_POOL_SIZE</name>-->
+				<!--<value>5</value>-->
+			<!--</parameter>-->
+		<!--</view-pool-mapping>-->
+	<!--</faces-config-extension>-->
 
-	<ordering>
-		<after>
-			<name>primefaces</name>
-		</after>
-	</ordering>
+	<!--<ordering>-->
+		<!--<after>-->
+			<!--<name>primefaces</name>-->
+		<!--</after>-->
+	<!--</ordering>-->
 </faces-config>

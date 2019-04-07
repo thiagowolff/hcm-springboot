@@ -6,7 +6,6 @@ import br.com.litecode.domain.model.Session.SessionStatus;
 import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.SessionRepository;
 import br.com.litecode.domain.repository.UserRepository;
-import br.com.litecode.service.cache.SessionCacheEvict;
 import br.com.litecode.service.push.NotificationMessage;
 import br.com.litecode.service.push.ProgressMessage;
 import br.com.litecode.service.push.PushChannel;
@@ -61,7 +60,6 @@ public class ChamberSessionTimer implements SessionTimer {
 		sessionRepository.save(session);
 
 		if (session.getStatus() == SessionStatus.FINISHED) {
-			sessionTimeTicker.stop(session);
 			stopSession(session);
 		}
 
@@ -70,7 +68,6 @@ public class ChamberSessionTimer implements SessionTimer {
 	}
 
 	@Override
-	@SessionCacheEvict
 	public void stopSession(Session session) {
 		sessionTimeTicker.stop(session);
 	}

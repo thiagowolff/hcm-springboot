@@ -10,6 +10,26 @@
 		function drawCharts() {
 			drawChart('Novos pacientes por mês nos últimos 12 meses', '#{chartsController.monthlyNewPatients}', 'newPatientsPerMonthChart', 'line', '#3949ab', { legend: { display: false }});
 		}
+
+		function drawSparkline() {
+			var sparklineOptions = {
+				type: 'bar',
+				barWidth: '4',
+				barSpacing: '1',
+				zeroColor: 'transparent',
+				stackedBarColor: ['#47af4c', '#d52e28']
+			}
+
+			$('.patient-attendance').sparkline('html', sparklineOptions);
+
+			$('.patient-attendance').bind('mousemove', function(e) {
+				if (e.offsetX &lt;= 5) {
+					$('#jqstooltip').hide();
+				} else {
+					$('#jqstooltip').show();
+				}
+			});
+		}
 	</script>
 
 	<h:form id="patientsForm">
@@ -33,6 +53,7 @@
 		</lc:headerPanel>
 
 		<o:importFunctions type="java.time.LocalDate" var="localDate" />
+		<ui:param name="today" value="#{localDate:now()}" />
 
 		<div class="content-wrapper">
 			<p:dataTable id="patientsTable" widgetVar="patientsTable" value="#{patientController.patients}" var="patient" paginator="true" rows="10" paginatorAlwaysVisible="false" filteredValue="#{patientController.filteredPatients}" emptyMessage="#{msg['message.noData']}"
@@ -60,8 +81,8 @@
 						<p:tooltip for="@(.patient-info-#{patient.patientId})" value="#{patient.remarks}" position="bottom" escape="false" />
 					</ui:fragment>
 
-					<span class="patient-attendance pull-right">
-						<!--#{chartsController.getPatientAttendance(patient.patientId)}-->
+					<span class="patient-attendance pull-right" style="color: transparent;">
+						#{chartsController.getPatientAttendance(patient.patientId)}
 					</span>
 				</p:column>
 				<p:column headerText="#{msg['label.patientRecord']}" sortBy="#{patient.patientRecord}" filterBy="#{patient.patientRecord}" styleClass="small-column" filterStyle="display: none;">
@@ -125,7 +146,7 @@
 				</p:column>
 				<p:column headerText="#{msg['label.action']}" styleClass="medium-column hidden-xs" style="padding: 1px">
 					<p:commandButton process="@this" update=":finishTreatmentForm:patienTreatmentStatus, :finishTreatmentForm:patienTreatmentEndDate" actionListener="#{patientController.setPatient(patient)}" onclick="PF('finishTreatmentDialog').show();" icon="fa fa-stop-circle-o" title="#{msg['button.finishTreatment']}" rendered="#{patient.finalSessionDate eq null}">
-						<f:setPropertyActionListener value="#{localDate:now()}" target="#{patientController.patient.finalSessionDate}" />
+						<f:setPropertyActionListener value="#{today}" target="#{patientController.patient.finalSessionDate}" />
 					</p:commandButton>
 					<p:commandButton process="@this" update="patientsTable" actionListener="#{patientController.restartTreatment(patient)}" icon="fa fa-undo" title="#{msg['button.restartTreatment']}" oncomplete="track('Restart treatment')" rendered="#{patient.finalSessionDate ne null and loginController.hasAdminRights()}" />
 					<p:commandButton process="@this" actionListener="#{patientController.setPatient(patient)}" update=":patientInputForm" oncomplete="PF('patientDialog').show(); track('Edit patient');" icon="fa fa-pencil" title="#{msg['button.edit']}" global="false">
@@ -253,33 +274,12 @@
 	<lc:managePatientData messagePrefix="consultationReason" controller="#{consultationReasonController}" id="consultationReasonComponent" update=":patientsForm:patientsTable" ></lc:managePatientData>
 
 	<script>
-		//<![CDATA[
        	$().ready(function() {
+			checkForInactivePatients();
        		drawCharts();
-			drawSparkline();
+       		drawSparkline();
 
 			track('Patients page');
 		});
-
-       	function drawSparkline() {
-			var sparklineOptions = {
-				type: 'bar',
-				barWidth: '4',
-				barSpacing: '1',
-				zeroColor: 'transparent',
-				stackedBarColor: ['#47af4c', '#d52e28']
-			}
-
-			$('.patient-attendance').sparkline('html', sparklineOptions);
-
-			$('.patient-attendance').bind('mousemove', function(e) {
-				if (e.offsetX <= 5) {
-					$('#jqstooltip').hide();
-				} else {
-					$('#jqstooltip').show();
-				}
-			});
-		}
-		//]]>
 	</script>
 </ui:composition>

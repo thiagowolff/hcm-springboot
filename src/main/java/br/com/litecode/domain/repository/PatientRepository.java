@@ -3,12 +3,11 @@ package br.com.litecode.domain.repository;
 import br.com.litecode.domain.model.Patient;
 import br.com.litecode.domain.model.Patient.PatientStats;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface PatientRepository extends PagingAndSortingRepository<Patient, Integer> {
+public interface PatientRepository extends BaseCrudRepository<Patient, Integer> {
 	@Query("select p from Patient p where active = true order by p.auditLog.createdDate desc, p.name")
 	List<Patient> findActivePatients();
 

@@ -10,15 +10,33 @@
 				xmlns:lc="http://xmlns.jcp.org/jsf/composite/components">
 
 	<script>
-		//<![CDATA[
 		var dates = new Array(#{sessionController.scheduledSessionDates});
 
 		function sessionDates(date) {
-			var isoDate = date.getFullYear() + '-' + (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1) + '-' + (date.getDate() < 10 ? '0' : '') + date.getDate();
+			var isoDate = date.getFullYear() + '-' + (date.getMonth() &lt; 9 ? '0' : '') + (date.getMonth() + 1) + '-' + (date.getDate() &lt; 10 ? '0' : '') + date.getDate();
 			var styleClass = dates.indexOf(isoDate) != -1 ? 'session-day' : '';
-			return [ true,  styleClass]
+			return [true, styleClass]
 		}
-		//]]>
+
+		function drawSparkline() {
+			var sparklineOptions = {
+				type: 'line',
+				width: 50,
+				lineColor: '#47af4c',
+				fillColor: null,
+				spotColor: null,
+				minSpotColor: null,
+				maxSpotColor: null,
+				tooltipFormatter: function(sparkline, options, fields) {
+					return 'Dia ' + (fields.x + 1) + ': ' + fields.y;
+				}
+			}
+
+			$('.monthly-attendance').sparkline('html', sparklineOptions);
+
+			sparklineOptions.lineColor = '#d52e28';
+			$('.monthly-absence').sparkline('html', sparklineOptions);
+		}
 	</script>
 
 	<div class="content-wrapper">
@@ -67,17 +85,15 @@
 					<div class="col-md-4 stats-data" style="color: #d52e28;">#{sessionController.getSessionMonthlyStats().numberOfAbsences}</div>
 
 					<div class="col-md-4 stats-month" />
-					<div class="col-md-4 monthly-attendance">
-						<!--#{chartsController.getMonthlyAttendance(sessionController.sessionData.sessionDate.year, sessionController.sessionData.sessionDate.monthValue, false)}-->
+					<div class="col-md-4 monthly-attendance" style="color: transparent;">
+						#{chartsController.getMonthlyAttendance(sessionController.sessionData.sessionDate.year, sessionController.sessionData.sessionDate.monthValue, false)}
 					</div>
-					<div class="col-md-4 monthly-absence">
-						<!--#{chartsController.getMonthlyAttendance(sessionController.sessionData.sessionDate.year, sessionController.sessionData.sessionDate.monthValue, true)}-->
+					<div class="col-md-4 monthly-absence" style="color: transparent;">
+						#{chartsController.getMonthlyAttendance(sessionController.sessionData.sessionDate.year, sessionController.sessionData.sessionDate.monthValue, true)}
 					</div>
 					<script>
 						$(document).ready(function() {
-							if (typeof drawSparkline !== 'undefined') {
-								drawSparkline();
-							}
+							drawSparkline();
 						});
 					</script>
 				</p:outputPanel>
@@ -383,32 +399,10 @@
     </h:form>
 
     <script>
-		//<![CDATA[
 		$().ready(function() {
-			//refreshSessions();
-			//drawSparkline();
+			checkForInactivePatients();
 			track('Sessions page');
 		});
-
-		function drawSparkline() {
-			var sparklineOptions = {
-				type: 'line',
-				width: 50,
-				lineColor: '#47af4c',
-				fillColor: null,
-				spotColor: null,
-				minSpotColor: null,
-				maxSpotColor: null,
-				tooltipFormatter: function(sparkline, options, fields) {
-					return 'Dia ' + (fields.x + 1) + ': ' + fields.y;
-				}
-			}
-
-			$('.monthly-attendance').sparkline('html', sparklineOptions);
-
-			sparklineOptions.lineColor = '#d52e28';
-			$('.monthly-absence').sparkline('html', sparklineOptions);
-		}
 
 		function updateTimer(session) {
 			$('#currentTime-' + session.sessionId).text(session.timeRemaining);
@@ -417,18 +411,18 @@
 
 		function progressStep(session) {
 			var widget = PF('progress-' + session.sessionId);
-			if (widget && session.currentProgress > 0) {
+			if (widget &amp;&amp; session.currentProgress > 0) {
 				widget.setValue(session.currentProgress);
 			}
 		}
 
 		function onSessionTimeout(data) {
-			if (!data.match(/&sessionId=([0-9]*)/)) {
+			if (!data.match(/&amp;sessionId=([0-9]*)/)) {
 				return;
 			}
 
-			var sessionId = data.match(/&sessionId=([0-9]*)/)[1];
-			var eventType = data.match(/&eventType=([a-z]*)/)[1];
+			var sessionId = data.match(/&amp;sessionId=([0-9]*)/)[1];
+			var eventType = data.match(/&amp;eventType=([a-z]*)/)[1];
 
 			var nextEvent = $('.session-status-' + sessionId);
 			var nextEventEffect = 'pulse';
@@ -438,7 +432,7 @@
 				$(nextEvent).removeClass(nextEventEffect);
 			}, 1500);
 
-			if (eventType == 'completion') {
+			if (eventType === 'completion') {
 				var statsEffect = 'bounceIn';
 				var stats = $('.patient-stats-' + sessionId + " div");
 				$(stats).addClass(statsEffect);
@@ -450,6 +444,5 @@
 				}, 2000);
 			}
 		}
-		//]]>
     </script>
 </ui:composition>

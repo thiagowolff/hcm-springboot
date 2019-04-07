@@ -76,7 +76,7 @@ public class PatientController implements Serializable {
 		return patientStats;
 	}
 
-	@Cacheable
+	@Cacheable(sync = true)
 	public PatientStats getPatientStats(Integer patientId) {
 		return patientRepository.findPatienStats(patientId);
 	}
@@ -124,10 +124,6 @@ public class PatientController implements Serializable {
 
 	@Cacheable(key = "{ #patient.patientId, #patientStats.completedSessions }")
 	public String getWarning(Patient patient, PatientStats patientStats) {
-		if (patientStats == null) {
-			return "";
-		}
-
 		Object result = alarmService.evaluateScripts(ImmutableMap.of("patient", patient,"patientStats", patientStats));
 
 		if (result != null) {
@@ -142,12 +138,10 @@ public class PatientController implements Serializable {
 		return patientRepository.findInactivePatients(LocalDate.now().minusMonths(6).atStartOfDay());
 	}
 
-	@CacheEvict(key = "'getInactivePatients'")
-    	@Caching(evict = {
-			@CacheEvict(key = "'getPatients'"),
-			@CacheEvict(key = "'getInactivePatients'")
+	@Caching(evict = {
+		@CacheEvict(key = "'getPatients'"),
+		@CacheEvict(key = "'getInactivePatients'")
 	})
-
 	public void finishInactivePatientTreatment(Patient patient) {
 		patient.setFinalSessionDate(LocalDate.now());
 		patientRepository.save(patient);

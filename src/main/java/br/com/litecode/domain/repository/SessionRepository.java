@@ -4,13 +4,12 @@ import br.com.litecode.domain.model.Session;
 import br.com.litecode.domain.model.Session.MonthlyStats;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface SessionRepository extends CrudRepository<Session, Integer> {
+public interface SessionRepository extends BaseCrudRepository<Session, Integer> {
 	default List<Session> findSessionsByDate(LocalDate sessionDate) {
 		return findSessionsByDate(sessionDate.atStartOfDay(), sessionDate.atTime(23, 59, 59));
 	}

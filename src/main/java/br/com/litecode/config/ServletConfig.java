@@ -4,22 +4,20 @@ import br.com.litecode.controller.NavigationController;
 import lombok.extern.slf4j.Slf4j;
 import org.omnifaces.filter.CacheControlFilter;
 import org.omnifaces.util.Messages;
-import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
-import org.springframework.boot.web.servlet.ErrorPage;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.ErrorPage;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.el.ELException;
 import javax.faces.application.ViewExpiredException;
-import javax.faces.webapp.FacesServlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import java.text.MessageFormat;
@@ -29,13 +27,7 @@ import java.util.ResourceBundle;
 
 @Configuration
 @Slf4j
-public class ServletConfig extends WebMvcConfigurerAdapter implements ServletContextInitializer, EmbeddedServletContainerCustomizer {
-	@Bean
-	public ServletRegistrationBean servletRegistrationBean() {
-		ServletRegistrationBean facesServlet = new ServletRegistrationBean(new FacesServlet(), "*.xhtml", "/javax.faces.resource/*");
-		facesServlet.setAsyncSupported(true);
-		return facesServlet;
-	}
+public class ServletConfig implements WebMvcConfigurer, ServletContextInitializer, WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
 
 	@Bean
 	public FilterRegistrationBean cacheControlRegistration() {
@@ -51,11 +43,11 @@ public class ServletConfig extends WebMvcConfigurerAdapter implements ServletCon
 	public void onStartup(ServletContext servletContext) throws ServletException {
 		initMessageResolver();
 
-		servletContext.setInitParameter("litefaces.ENUM_MESSAGE_BUNDLE", "enums");
-		servletContext.setInitParameter("litefaces.ENUM_KEY_PREFIX", "enum");
-		servletContext.setInitParameter("primefaces.MOVE_SCRIPTS_TO_BOTTOM", "false");
-		servletContext.setInitParameter("org.apache.myfaces.SUPPORT_MANAGED_BEANS", "false");
-		servletContext.setInitParameter("org.apache.myfaces.INIT_PARAM_CACHE_EL_EXPRESSIONS", "alwaysRecompile");
+//		servletContext.setInitParameter("litefaces.ENUM_MESSAGE_BUNDLE", "enums");
+//		servletContext.setInitParameter("litefaces.ENUM_KEY_PREFIX", "enum");
+//		servletContext.setInitParameter("primefaces.MOVE_SCRIPTS_TO_BOTTOM", "false");
+//		servletContext.setInitParameter("org.apache.myfaces.SUPPORT_MANAGED_BEANS", "false");
+//		servletContext.setInitParameter("org.apache.myfaces.INIT_PARAM_CACHE_EL_EXPRESSIONS", "alwaysRecompile");
 
 		try {
 			ResourceBundle versionBundle = ResourceBundle.getBundle("version");
@@ -89,14 +81,14 @@ public class ServletConfig extends WebMvcConfigurerAdapter implements ServletCon
 			registry.addViewController(page).setViewName("forward:/index.xhtml");
 		}
 		registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
-		super.addViewControllers(registry);
 	}
 
 	@Override
-	public void customize(ConfigurableEmbeddedServletContainer container) {
-		container.addErrorPages(new ErrorPage(ViewExpiredException.class, "/login.xhtml"));
-		container.addErrorPages(new ErrorPage(ELException.class, "/errorPage.xhtml"));
-		container.addErrorPages(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/errorPage.xhtml"));
-		container.addErrorPages(new ErrorPage(HttpStatus.NOT_FOUND, "/pageNotFound.xhtml"));
+	public void customize(TomcatServletWebServerFactory factory) {
+		factory.addErrorPages(new ErrorPage(ViewExpiredException.class, "/login.xhtml"));
+		factory.addErrorPages(new ErrorPage(ELException.class, "/errorPage.xhtml"));
+		factory.addErrorPages(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/errorPage.xhtml"));
+		factory.addErrorPages(new ErrorPage(HttpStatus.NOT_FOUND, "/pageNotFound.xhtml"));
+		factory.getMimeMappings().add("less", "plain/text");
 	}
 }
