@@ -1,5 +1,6 @@
 package br.com.litecode.service.timer;
 
+import br.com.litecode.TestConfig;
 import br.com.litecode.domain.model.ChamberEvent;
 import br.com.litecode.domain.model.Patient.PatientStats;
 import br.com.litecode.domain.model.PatientSession;
@@ -11,28 +12,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalField;
-import java.time.temporal.TemporalUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
+@Import(TestConfig.class)
 @SpringBootTest
-@DataJpaTest
-@EnableAutoConfiguration
-@ComponentScan(basePackages = "br.com.litecode")
 public class TestChamberSessionTimer {
 	@Autowired
 	private SessionRepository sessionRepository;

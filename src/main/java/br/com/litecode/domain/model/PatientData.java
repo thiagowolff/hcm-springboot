@@ -13,7 +13,7 @@ import java.util.Objects;
 @DiscriminatorColumn(name = "patient_data_type")
 public abstract class PatientData {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer patientDataId;
 	protected String name;
 

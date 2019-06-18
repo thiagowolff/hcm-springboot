@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 
 @ViewScoped
 @Component
-
 @CacheConfig(cacheNames = "patient")
 public class PatientController implements Serializable {
 	@Autowired

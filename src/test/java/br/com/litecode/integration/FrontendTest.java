@@ -11,6 +11,7 @@ import org.fluentlenium.core.annotation.Page;
 import org.fluentlenium.core.hook.wait.Wait;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.Dimension;
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.fluentlenium.core.filter.FilterConstructor.withId;
 
+@Ignore
 @Wait(timeout = 10, timeUnit = TimeUnit.SECONDS)
 @FluentConfiguration(webDriver = "chrome", baseUrl = "http://localhost:8888")
 @RunWith(SpringRunner.class)

@@ -40,4 +40,9 @@ public class EventType implements Serializable {
 	public int hashCode() {
 		return Objects.hash(eventTypeCode);
 	}
+
+	@Override
+	public String toString() {
+		return eventTypeCode;
+	}
 }

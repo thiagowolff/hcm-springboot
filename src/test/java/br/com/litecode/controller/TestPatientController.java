@@ -1,6 +1,5 @@
 package br.com.litecode.controller;
 
-import br.com.litecode.Application;
 import br.com.litecode.domain.model.Patient;
 import br.com.litecode.domain.model.Patient.PatientStats;
 import br.com.litecode.domain.model.Session;
@@ -8,11 +7,6 @@ import br.com.litecode.domain.repository.PatientRepository;
 import br.com.litecode.domain.repository.SessionRepository;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.support.NoOpCacheManager;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -31,15 +25,6 @@ public class TestPatientController extends BaseControllerTest {
 
 	@Autowired
 	private SessionController sessionController;
-
-	@Configuration
-	@Import(Application.class)
-	public static class TestConfig {
-		@Bean
-		public CacheManager cacheManager() {
-			return new NoOpCacheManager();
-		}
-	}
 
 	@Test
 	public void addPatient() {

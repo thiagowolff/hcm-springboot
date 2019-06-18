@@ -14,6 +14,7 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
+@Table(name="\"user\"")
 public class User {
 	public enum Role {
         DEVELOPER,

@@ -130,7 +130,10 @@
 					<h:outputText value="#{patientStats.lastSessionDate}" converter="localDateTimeConverter" rendered="#{patientStats.lastSessionDate ne null}"/>
 					<h:outputText value="-" rendered="#{patientStats.lastSessionDate eq null}"/>
 				</p:column>
-                <p:column headerText="#{msg['label.initialSessionDate']}&lt;br/&gt;#{msg['label.finalSessionDate']}" styleClass="small-column hidden-sm hidden-xs">
+                <p:column styleClass="small-column hidden-sm hidden-xs">
+					<f:facet name="header">
+						<h:outputText value="#{msg['label.initialSessionDate']}&lt;br/&gt;#{msg['label.finalSessionDate']}" escape="false" />
+					</f:facet>
 					<h:outputText value="#{patientStats.initialSessionDate}" converter="localDateTimeConverter" />
 					<br />
 					<h:outputText value="#{patient.finalSessionDate}" converter="localDateTimeConverter" style="color: #f57c00;" rendered="#{patient.finalSessionDate ne null}"/>

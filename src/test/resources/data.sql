@@ -1,4 +1,4 @@
-insert into user (user_id, username, password, name, role, active, notification_messages, notification_sounds) values (1, 'admin', 'jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg=', 'Test User', 'ADMIN', 1, 0, 0);
+insert into "user" (user_id, username, password, name, role, active, notification_messages, notification_sounds) values (1, 'admin', 'jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg=', 'Test User', 'ADMIN', 1, 0, 0);
 
 insert into chamber (chamber_id, name, capacity) values (1, 'Câmara I', 9);
 insert into chamber (chamber_id, name, capacity) values (2, 'Câmara II', 9);

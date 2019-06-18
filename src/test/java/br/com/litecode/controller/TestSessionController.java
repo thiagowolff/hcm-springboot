@@ -1,6 +1,5 @@
 package br.com.litecode.controller;
 
-import br.com.litecode.Application;
 import br.com.litecode.controller.SessionController.SessionData;
 import br.com.litecode.domain.model.Chamber;
 import br.com.litecode.domain.model.Patient;
@@ -10,36 +9,24 @@ import br.com.litecode.domain.repository.ChamberRepository;
 import br.com.litecode.domain.repository.PatientRepository;
 import br.com.litecode.domain.repository.SessionRepository;
 import br.com.litecode.service.timer.ChamberSessionTimer;
-import br.com.litecode.service.timer.TimeTicker;
-import br.com.litecode.service.timer.ControlledSessionTimeTicker;
 import br.com.litecode.util.MessageUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 public class TestSessionController extends BaseControllerTest {
-	@Configuration
-	@Import(Application.class)
-	public static class TestConfig {
-		@Bean
-		public TimeTicker sessionClock() {
-			return new ControlledSessionTimeTicker();
-		}
-	}
-
 	@Autowired
 	private ChamberRepository chamberRepository;
 
@@ -63,6 +50,7 @@ public class TestSessionController extends BaseControllerTest {
 
 	@Before
 	public void setUp() {
+		//sessionController = new JsfSpringBeanBuilder(applicationContext).build(SessionController.class);
 		chamber = chamberRepository.findOne(1);
 		patient = patientRepository.findOne(1);
 		sessionData = sessionController.getSessionData();
@@ -98,13 +86,12 @@ public class TestSessionController extends BaseControllerTest {
 		sessionController.addSession();
 
 		ArgumentCaptor<FacesMessage> facesMessageCaptor = ArgumentCaptor.forClass(FacesMessage.class);
-		verify(facesContext).addMessage(Mockito.nullable(String.class), facesMessageCaptor.capture());
+		verify(FacesContext.getCurrentInstance()).addMessage(Mockito.nullable(String.class), facesMessageCaptor.capture());
 
 		FacesMessage message = facesMessageCaptor.getValue();
 		assertThat(message.getSeverity()).isEqualTo(FacesMessage.SEVERITY_ERROR);
 		assertThat(message.getDetail()).isEqualTo(MessageUtil.getMessage("error.chamberPatientsLimitExceeded", sessionData.getChamber().getCapacity()));
 	}
-
 
 	@Test
 	public void addSessionExistingPeriod() {
@@ -113,8 +100,9 @@ public class TestSessionController extends BaseControllerTest {
 		sessionController.addSession();
 		sessionController.addSession();
 
+		FacesContext facesContext = FacesContext.getCurrentInstance();
 		ArgumentCaptor<FacesMessage> facesMessageCaptor = ArgumentCaptor.forClass(FacesMessage.class);
-		verify(facesContext).addMessage(Mockito.nullable(String.class), facesMessageCaptor.capture());
+		verify(facesContext, atLeastOnce()).addMessage(Mockito.nullable(String.class), facesMessageCaptor.capture());
 
 		FacesMessage message = facesMessageCaptor.getValue();
 		assertThat(message.getSeverity()).isEqualTo(FacesMessage.SEVERITY_ERROR);
@@ -139,7 +127,7 @@ public class TestSessionController extends BaseControllerTest {
 		sessionData.getPatients().add(patientB);
 
 		sessionController.addPatientsToSession(session);
-
+		session = sessionRepository.findOne(session.getSessionId());
 		assertThat(session.getPatientSessions()).hasSize(4);
 	}
 
@@ -149,6 +137,7 @@ public class TestSessionController extends BaseControllerTest {
 		sessionData.setSession(session);
 
 		sessionController.removePatientFromSession(sessionData.getSession().getPatientSessions().first());
+		session = sessionRepository.findOne(session.getSessionId());
 
 		assertThat(session.getPatientSessions()).hasSize(1);
 	}
@@ -185,8 +174,8 @@ public class TestSessionController extends BaseControllerTest {
 		Session session = sessionRepository.findOne(1);
 		sessionController.startSession(session);
 		chamberSessionTimer.getSessionTimeTicker().elapseTime(session, 0);
-
 		Session startedSession = sessionRepository.findOne(session.getSessionId());
+
 		assertThat(startedSession.isRunning()).isTrue();
 	}
 
@@ -195,6 +184,7 @@ public class TestSessionController extends BaseControllerTest {
 		Session session = sessionRepository.findOne(1);
 
 		sessionController.finishSession(session);
+		session = sessionRepository.findOne(session.getSessionId());
 
 		assertThat(session.isRunning()).isFalse();
 		assertThat(session.getCurrentProgress()).isEqualTo(100);
@@ -208,6 +198,8 @@ public class TestSessionController extends BaseControllerTest {
 		assertThat(session.getStatus()).isEqualTo(SessionStatus.FINISHED);
 
 		sessionController.stopSession(session);
+		session = sessionRepository.findOne(session.getSessionId());
+
 		assertThat(session.isRunning()).isFalse();
 		assertThat(session.getCurrentProgress()).isEqualTo(0);
 		assertThat(session.getStatus()).isEqualTo(SessionStatus.CREATED);
