@@ -39,7 +39,7 @@ public class AlarmController implements Serializable {
 		return alarmRepository.findAll();
 	}
 
-	@CacheEvict(cacheNames = "alarm", allEntries = true)
+	@CacheEvict(allEntries = true)
 	public void saveAlarm() {
 		alarmRepository.save(alarm);
 
@@ -52,7 +52,7 @@ public class AlarmController implements Serializable {
 		}
 	}
 
-	@CacheEvict(cacheNames = "alarm", allEntries = true)
+	@CacheEvict(allEntries = true)
 	public void deleteAlarm() {
 		alarm.setActive(false);
 		alarmRepository.save(alarm);

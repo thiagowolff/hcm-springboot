@@ -11,9 +11,16 @@ import javax.persistence.Embeddable;
 public class UserSettings {
 	private boolean notificationMessages;
 	private boolean notificationSounds;
+	private boolean vitalSigns;
 
 	public UserSettings() {
 		notificationMessages = true;
 		notificationSounds = true;
+		vitalSigns = true;
+	}
+
+	@Override
+	public String toString() {
+		return "notificationMessages: " + notificationMessages + ", notificationSounds: " + notificationSounds + ", vitalSigns: " + vitalSigns;
 	}
 }

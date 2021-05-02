@@ -10,6 +10,7 @@
         <composite:attribute name="messagePrefix" />
         <composite:attribute name="controller" />
         <composite:attribute name="update" />
+        <composite:attribute name="oncomplete" />
     </composite:interface>
 
     <composite:implementation>
@@ -25,7 +26,7 @@
                 <p:separator />
 
                 <p:dataTable id="patientDataTable" widgetVar="patientDataTable" value="#{cc.attrs.controller.patientData}" var="dataItem" editable="true" paginator="true" rows="8" paginatorAlwaysVisible="false" paginatorPosition="bottom" emptyMessage="#{msg['message.noData']}" >
-                    <p:ajax event="rowEdit" listener="#{cc.attrs.controller.onRowEdit}" update="patientDataTable, #{cc.attrs.update}"  />
+                    <p:ajax event="rowEdit" listener="#{cc.attrs.controller.onRowEdit}" update="patientDataTable, #{cc.attrs.update}" oncomplete="#{cc.attrs.oncomplete}" />
 
                     <p:column headerText="#{msg['label.id']}" styleClass="small-column">
                         <h:outputText value="#{dataItem.patientDataId}" />

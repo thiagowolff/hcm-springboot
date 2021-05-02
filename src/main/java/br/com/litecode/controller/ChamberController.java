@@ -17,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 
@@ -44,7 +45,7 @@ public class ChamberController implements Serializable {
         Map<ChamberEvent, Pair<Integer, String>> events = new LinkedHashMap<>();
 
         int i = 0;
-        List<ChamberEvent> chamberEvents = chamber.getEvents();
+        List<ChamberEvent> chamberEvents = chamber.getEvents().stream().filter(e -> e.getEventType().isActive()).collect(Collectors.toList());
         int totalTimeout = chamberEvents.get(chamberEvents.size() - 1).getTimeout();
         for (ChamberEvent chamberEvent : chamberEvents) {
             if (chamberEvent.getTimeout() == 0) {
@@ -52,7 +53,7 @@ public class ChamberController implements Serializable {
                 continue;
             }
 
-            ChamberEvent previousChamberEvent = chamber.getEvents().get(i - 1);
+            ChamberEvent previousChamberEvent = chamberEvents.get(i - 1);
             int duration = chamberEvent.getTimeout() - previousChamberEvent.getTimeout();
             int percentage = Math.round((float) (duration) / totalTimeout * 100);
 

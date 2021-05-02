@@ -28,7 +28,8 @@ public class User {
     }
     
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "user_generator")
+	@SequenceGenerator(name="user_generator", sequenceName="user_user_id_seq")
 	private Integer userId;
 
 	@Enumerated(EnumType.STRING)
@@ -80,8 +81,7 @@ public class User {
 			return "";
 		}
 
-		JsonParser jsonParser = new JsonParser();
-		JsonObject locationJson = jsonParser.parse(lastAccessLocation).getAsJsonObject();
+		JsonObject locationJson = JsonParser.parseString(lastAccessLocation).getAsJsonObject();
 
 		String ip = locationJson.get("ip") == null ? null : "IP: " + locationJson.get("ip").getAsString();
 		String city = locationJson.get("city") == null ? null : "City: " + locationJson.get("city").getAsString();

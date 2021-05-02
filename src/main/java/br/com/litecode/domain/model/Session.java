@@ -5,6 +5,7 @@ import com.google.common.base.Joiner;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SortNatural;
+import org.springframework.cache.interceptor.SimpleKey;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -171,6 +172,10 @@ public class Session implements Comparable<Session>, Serializable {
 		return TimePeriod.AFTERNOON;
 	}
 
+	public LocalDateTime getSessionEnd() {
+		return scheduledTime.toLocalDate().atTime(endTime);
+	}
+
 	public String getSessionInfo() {
 		if (executionMetadata == null) {
 			return "";
@@ -191,7 +196,8 @@ public class Session implements Comparable<Session>, Serializable {
 	}
 
 	public ChamberEvent getNextChamberEvent() {
-		for (Iterator<ChamberEvent> it = chamber.getEvents().iterator(); it.hasNext();) {
+		Iterator<ChamberEvent> chamberEvents = chamber.getEvents().stream().filter(e -> e.getEventType().isActive()).iterator();
+		for (Iterator<ChamberEvent> it = chamberEvents; it.hasNext();) {
 			ChamberEvent chamberEvent = it.next();
 			if (chamberEvent.getEventType().getSessionStatus() == status) {
 				return it.hasNext() ? it.next() : null;
@@ -216,6 +222,10 @@ public class Session implements Comparable<Session>, Serializable {
 
 	public boolean isPaused() {
 		return executionMetadata.isPaused();
+	}
+
+	public SimpleKey getCacheKey() {
+		return new SimpleKey(chamber.getChamberId(), getSessionDate());
 	}
 
 	private LocalTime currentTime() {
@@ -260,6 +270,17 @@ public class Session implements Comparable<Session>, Serializable {
 			currentProgress = 0;
 			elapsedTime = 0;
 			currentEvent = null;
+		}
+
+		@Override
+		public String toString() {
+			return "ExecutionMetadata{" +
+					"currentProgress=" + currentProgress +
+					", currentEvent=" + currentEvent +
+					", elapsedTime=" + elapsedTime +
+					", paused=" + paused +
+					", startedBy='" + startedBy + '\'' +
+					'}';
 		}
 	}
 

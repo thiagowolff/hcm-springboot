@@ -17,6 +17,7 @@ public class EventType implements Serializable {
 
 	private String eventTypeCode;
 	private String description;
+	private boolean active;
 
 	@Enumerated(EnumType.STRING)
 	private Session.SessionStatus sessionStatus;

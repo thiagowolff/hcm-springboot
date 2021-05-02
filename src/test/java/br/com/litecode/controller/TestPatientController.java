@@ -62,9 +62,9 @@ public class TestPatientController extends BaseControllerTest {
 	public void sessionPatientStats() {
 		Session session = sessionRepository.findOne(1);
 
-		Map<Integer, PatientStats> patientStatsBefore = patientController.getPatientStats(session, LocalDate.now());
+		Map<Integer, PatientStats> patientStatsBefore = patientController.getPatientStats(session);
 		sessionController.finishSession(session);
-		Map<Integer, PatientStats> patientStatsAfter = patientController.getPatientStats(session, LocalDate.now());
+		Map<Integer, PatientStats> patientStatsAfter = patientController.getPatientStats(session);
 
 		for (PatientStats patientStats : patientStatsBefore.values()) {
 			assertThat(patientStatsAfter.get(patientStats.getPatientId()).getCompletedSessions()).isEqualTo(patientStats.getCompletedSessions() + 1);

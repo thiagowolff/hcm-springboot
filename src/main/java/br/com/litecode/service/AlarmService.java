@@ -24,7 +24,7 @@ import java.util.concurrent.ScheduledFuture;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class AlarmService {
 	private static final ScriptEngine scriptEngine = new NashornScriptEngineFactory().getScriptEngine();
 

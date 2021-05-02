@@ -31,11 +31,17 @@ public class Chamber {
 	}
 
 	public ChamberEvent getFirstEvent() {
-		return chamberEvents.stream().min(Comparator.comparingInt(ChamberEvent::getTimeout)).get();
+		return chamberEvents.stream()
+				.filter(e -> e.getEventType().isActive())
+				.min(Comparator.comparingInt(ChamberEvent::getTimeout))
+				.get();
 	}
 
 	public ChamberEvent getLastEvent() {
-		return chamberEvents.stream().max(Comparator.comparingInt(ChamberEvent::getTimeout)).get();
+		return chamberEvents.stream()
+				.filter(e -> e.getEventType().isActive())
+				.max(Comparator.comparingInt(ChamberEvent::getTimeout))
+				.get();
 	}
 
 	@Override

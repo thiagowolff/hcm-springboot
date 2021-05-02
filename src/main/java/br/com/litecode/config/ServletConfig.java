@@ -19,7 +19,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import javax.el.ELException;
 import javax.faces.application.ViewExpiredException;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -33,14 +32,14 @@ public class ServletConfig implements WebMvcConfigurer, ServletContextInitialize
 	public FilterRegistrationBean cacheControlRegistration() {
 		FilterRegistrationBean registration = new FilterRegistrationBean();
 		registration.setFilter(new CacheControlFilter());
-		registration.addUrlPatterns("*.png");
+		registration.addUrlPatterns("*.js", "*.css", "*.svg", "*.gif", "*.woff2?", "*.png");
 		registration.addInitParameter("expires", "30d");
 		registration.setName("cache30days");
 		return registration;
 	}
 
 	@Override
-	public void onStartup(ServletContext servletContext) throws ServletException {
+	public void onStartup(ServletContext servletContext) {
 		initMessageResolver();
 
 //		servletContext.setInitParameter("litefaces.ENUM_MESSAGE_BUNDLE", "enums");

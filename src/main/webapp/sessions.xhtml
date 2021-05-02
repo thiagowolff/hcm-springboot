@@ -27,8 +27,8 @@
 				spotColor: null,
 				minSpotColor: null,
 				maxSpotColor: null,
-				tooltipFormatter: function(sparkline, options, fields) {
-					return 'Dia ' + (fields.x + 1) + ': ' + fields.y;
+				tooltipFormatter: function(sparkline, options, point) {
+					return 'Dia ' + (point.x + 1) + ': ' + point.y;
 				}
 			}
 
@@ -50,7 +50,7 @@
 						</p:calendar>
 						<p:commandLink value="#{msg['label.today']}" actionListener="#{sessionController.sessionData.today()}" styleClass="today" process="@this" update="chambersGrid, sessionDate" oncomplete="track('Today\'s sessions');" />
 					</h:panelGroup>
-					<p:commandButton icon="fa fa-arrow-right" actionListener="#{sessionController.nextSessionDate()}" process="@this" update="chambersGrid, sessionDate" style="margin-left: -18px;" />
+					<p:commandButton icon="fa fa-arrow-right" actionListener="#{sessionController.nextSessionDate()}" process="@this" update="chambersGrid, sessionDate" style="margin-left: -56px;" />
 				</h:panelGroup>
 
 				<p:selectOneMenu id="sessionChamber" widgetVar="sessionChamber" value="#{sessionController.sessionData.chamber}" converter="omnifaces.SelectItemsConverter" styleClass="hidden-xs" style="min-width: 100px;">
@@ -101,8 +101,10 @@
 
             <o:importFunctions type="br.com.litecode.util.TextUtil" var="textUtil" />
 
+
 			<p:dataGrid id="chambersGrid" var="chamber" value="#{chamberController.chambers}" columns="1" layout="grid">
 				<ui:param name="chamberSessions" value="#{sessionController.getSessions(chamber.chamberId, sessionController.sessionData.sessionDate)}" />
+				<ui:param name="loggedUser" value="#{request.userPrincipal.principal.user}" />
 
 				<p:dataTable value="#{chamberSessions}" var="chamberSession" rendered="#{empty chamberSessions}" emptyMessage="#{msg['message.noSessionsFound']}">
 					<f:facet name="header">
@@ -111,7 +113,7 @@
 				</p:dataTable>
 
 				<p:dataTable id="sessionsTable" value="#{chamberSessions}" var="chamberSession" rows="#{chamber.capacity}" rendered="#{not empty chamberSessions}">
-					<ui:param name="patientStats" value="#{patientController.getPatientStats(chamberSession, sessionController.sessionData.sessionDate)}" />
+					<ui:param name="patientStats" value="#{patientController.getPatientStats(chamberSession)}" />
 					<ui:param name="bgStyleClass" value="#{lcf:enumStyle(chamberSession.status)}-bg" />
 
 					<f:facet name="header">
@@ -126,6 +128,19 @@
 						</h:panelGroup>
 					</p:column>
 
+                    <p:column headerText="#{msg['label.capacity']}" styleClass="capacity #{bgStyleClass} text-left hidden-md hidden-sm hidden-xs">
+                        <ui:param name="spinClass" value="#{textUtil:randomBoolean() ? '' : 'fa-spin-reverse'}" />
+                        <ui:repeat value="#{sessionController.getChamberPayload(chamberSession)}" var="payloadStatus">
+                            <div class="col-md-4" style="padding-left: 2px;">
+								<span class="fa-stack fa-2x" style="font-size: 12px;">
+									<i class="fa fa-circle fa-stack-2x" style="#{payloadStatus eq 'AVAILABLE' ? 'color: #d3d3d3' : payloadStatus eq 'OCCUPIED' ? 'color: #476c8d' : 'color: #d23030'}"></i>
+									<h:panelGroup styleClass="fa fa-circle-o-notch fa-spin #{spinClass} fa-fw fa-stack-1x" style="color: #1ee84a;" rendered="#{chamberSession.running and payloadStatus eq 'OCCUPIED' }"/>
+									<h:panelGroup styleClass="fa fa-pause fa-blink fa-stack-1x" style="color: #e8e006; font-size: 10px;" rendered="#{chamberSession.paused and payloadStatus eq 'OCCUPIED' }"/>
+								</span>
+                            </div>
+                        </ui:repeat>
+                    </p:column>
+
 					<p:column headerText="#{msg['label.patients']}" styleClass="#{bgStyleClass} large-column" style="vertical-align: top;">
 						<ui:repeat value="#{chamberSession.patientSessions}" var="patientSession">
 							<div class="long-text text-left">
@@ -133,15 +148,15 @@
 										styleClass="patient-#{patientSession.patientSessionId}"
 										value="#{patientSession.patient.name}"
 										style="#{patientSession.absent ? 'color: #b14538' : chamberSession.running ? 'color: #007d18' : ''}" />
-								<p:tooltip for="@(.patient-#{patientSession.patientSessionId})" value="#{patientSession.patient.recordInfo}" escape="false" position="right"/>
 								<ui:param name="stats" value="#{patientStats[patientSession.patient.patientId]}" />
+								<p:tooltip for="@(.patient-#{patientSession.patientSessionId})" value="#{patientSession.patient.recordInfo}&lt;br \&gt;#{msg['title.patientAttendanceInMonth']}: #{stats.completedSessionsInMonth}" escape="false" position="right"/>
 								<ui:param name="warning" value="#{stats eq null ? '' : patientController.getWarning(patientSession.patient, stats)}" />
 								<h:outputText value="#{warning}" styleClass="patient-session-warning" rendered="#{not empty warning}" />
 							</div>
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.vitalSigns']}" width="140" styleClass="#{bgStyleClass} hidden-sm hidden-xs" style="vertical-align: top;">
+					<p:column headerText="#{msg['label.vitalSigns']}" rendered="#{loggedUser.userSettings.vitalSigns}" width="140" styleClass="#{bgStyleClass} hidden-sm hidden-xs" style="vertical-align: top;">
                         <ui:repeat value="#{chamberSession.patientSessions}" var="patientSession">
 							<div class="long-text text-left">
                                 <h:panelGroup rendered="#{not empty patientSession.temperature}">#{patientSession.temperature} <span style="font-size: 10px; color: gray">ºC</span></h:panelGroup>
@@ -178,19 +193,6 @@
 						</ui:repeat>
 					</p:column>
 
-					<p:column headerText="#{msg['label.capacity']}" styleClass="capacity #{bgStyleClass} text-left hidden-md hidden-sm hidden-xs">
-                        <ui:param name="spinClass" value="#{textUtil:randomBoolean() ? '' : 'fa-spin-reverse'}" />
-						<ui:repeat value="#{sessionController.getChamberPayload(chamberSession)}" var="payloadStatus">
-							<div class="col-md-4" style="padding-left: 2px;">
-								<span class="fa-stack fa-2x" style="font-size: 12px;">
-									<i class="fa fa-circle fa-stack-2x" style="#{payloadStatus eq 'AVAILABLE' ? 'color: #d3d3d3' : payloadStatus eq 'OCCUPIED' ? 'color: #476c8d' : 'color: #d23030'}"></i>
-									<h:panelGroup styleClass="fa fa-circle-o-notch fa-spin #{spinClass} fa-fw fa-stack-1x" style="color: #1ee84a;" rendered="#{chamberSession.running and payloadStatus eq 'OCCUPIED' }"/>
-									<h:panelGroup styleClass="fa fa-pause fa-blink fa-stack-1x" style="color: #e8e006; font-size: 10px;" rendered="#{chamberSession.paused and payloadStatus eq 'OCCUPIED' }"/>
-								</span>
-							</div>
-						</ui:repeat>
-					</p:column>
-
 					<p:column headerText="#{msg['label.time']}" width="75" styleClass="#{bgStyleClass} hidden-md hidden-sm hidden-xs">
 						<h:outputText value="#{chamberSession.scheduledTime}">
 							<f:converter converterId="localDateTimeConverter" />
@@ -203,26 +205,6 @@
 							<f:converter converterId="localDateTimeConverter" />
 							<f:attribute name="pattern" value="HH:mm:ss" />
 						</h:outputText>
-					</p:column>
-
-					<p:column headerText="#{msg['label.nextEvent']}" styleClass="#{bgStyleClass} medium-column hidden-md hidden-sm hidden-xs">
-						<div class="event-progress">
-							<ui:repeat value="#{chamberSession.chamber.chamberEvents}" var="event" varStatus="status">
-								<span class="fa-stack fa-2x" style="font-size: 3px; color: #486d8c;">
-									<i class="fa fa-circle fa-stack-2x"></i>
-									<h:panelGroup styleClass="fa fa-circle fa-stack-1x #{not status.last and event eq chamberSession.currentChamberEvent ? 'fa-blink' : ''}" style="#{chamberSession.currentChamberEvent ne null and event le chamberSession.currentChamberEvent ? 'color: #1ee84a' : ''}" />
-								</span>
-							</ui:repeat>
-						</div>
-						<div>
-							<h:outputText value="#{chamberSession.nextChamberEvent.eventType.description}" rendered="#{chamberSession.nextChamberEvent ne null}" />
-						</div>
-						<div>
-						<h:outputText value="#{chamberSession.nextChamberEventTime}" rendered="#{chamberSession.nextChamberEvent ne null}">
-							<f:converter converterId="localDateTimeConverter" />
-							<f:attribute name="pattern" value="HH:mm:ss" />
-						</h:outputText>
-						</div>
 					</p:column>
 
 					<p:column headerText="#{msg['label.endTime']}" width="75" styleClass="#{bgStyleClass} hidden-xs">
@@ -260,6 +242,24 @@
 								<p:progressBar value="100" displayOnly="true" labelTemplate="100%" styleClass="#{fn:toLowerCase(chamberSession.status)}" rendered="#{chamberSession.status eq 'FINISHED'}" />
 							</div>
 						</div>
+
+                        <div class="event-progress">
+                            <ui:repeat value="#{chamberSession.chamber.chamberEvents}" var="event" varStatus="status">
+								<ui:fragment rendered="#{event.eventType.active}">
+								<span class="fa-stack fa-2x" style="font-size: 3px; color: #486d8c;">
+									<i class="fa fa-circle fa-stack-2x"></i>
+									<h:panelGroup styleClass="fa fa-circle fa-stack-1x #{not status.last and event eq chamberSession.currentChamberEvent ? 'fa-blink' : ''}" style="#{chamberSession.currentChamberEvent ne null and event le chamberSession.currentChamberEvent ? 'color: #1ee84a' : ''}" />
+								</span>
+								</ui:fragment>
+                            </ui:repeat>
+                        </div>
+                        <div>
+                            <h:outputText value="#{chamberSession.nextChamberEvent.eventType.description} | " style="font-size: 11px;" rendered="#{chamberSession.nextChamberEvent ne null}" />
+							<h:outputText value="#{chamberSession.nextChamberEventTime}" style="font-size: 11px;" rendered="#{chamberSession.nextChamberEvent ne null}">
+								<f:converter converterId="localDateTimeConverter" />
+								<f:attribute name="pattern" value="HH:mm:ss" />
+							</h:outputText>
+						</div>
 					</p:column>
 
 					<p:column headerText="#{msg['label.controls']}" styleClass="#{bgStyleClass} medium-column session-action hidden-xs">
@@ -278,26 +278,21 @@
 									<p:commandButton title="#{msg['button.finish']}" icon="fa fa-fast-forward" actionListener="#{sessionController.finishSession(chamberSession)}" process="@this" update=":sessionsForm:chambersGrid" disabled="#{chamberSession.status eq 'FINISHED'}" oncomplete="track('Finalize session');" />
 								</div>
 							</div>
-						</div>
-					</p:column>
-
-					<p:column headerText="#{msg['label.action']}" styleClass="#{bgStyleClass} xsmall-column session-action hidden-xs">
-						<div class="container-fluid">
-							<div class="row">
-								<div class="col-md-4">
-									<p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); track('Edit session');" process="@this" update=":editSessionForm" global="false">
-										<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
-									</p:commandButton>
-								</div>
-								<div class="col-md-4">
-									<p:commandButton title="#{msg['button.move']}" icon="fa fa-arrows-alt" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('moveSessionDialog').show(); track('Move session dialog');" process="@this" update=":moveSessionForm" global="false" disabled="#{chamberSession.running}">
-										<f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
-									</p:commandButton>
-								</div>
-								<div class="col-md-4">
-									<p:commandButton id="deleteSessionButton" title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionData.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":sessionsForm:chambersGrid" global="false" disabled="#{chamberSession.running}" styleClass="hidden-sm" />
-								</div>
-							</div>
+                            <div class="row">
+                                <div class="col-md-6 col-lg-3">
+                                    <p:commandButton title="#{msg['button.edit']}" icon="fa fa-pencil" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('sessionDialog').show(); track('Edit session');" process="@this" update=":editSessionForm" global="false">
+                                        <f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
+                                    </p:commandButton>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <p:commandButton title="#{msg['button.move']}" icon="fa fa-arrows-alt" actionListener="#{sessionController.sessionData.reset()}" oncomplete="PF('moveSessionDialog').show(); track('Move session dialog');" process="@this" update=":moveSessionForm" global="false" disabled="#{chamberSession.running}">
+                                        <f:setPropertyActionListener value="#{chamberSession}" target="#{sessionController.sessionData.session}" />
+                                    </p:commandButton>
+                                </div>
+                                <div class="col-md-6 col-lg-3">
+                                    <p:commandButton id="deleteSessionButton" title="#{msg['button.delete']}" icon="fa fa-trash" actionListener="#{sessionController.sessionData.setSession(chamberSession)}" onclick="PF('confirmDeleteSessionDialog').show()" process=":sessionsForm:chambersGrid" global="false" disabled="#{chamberSession.running}" styleClass="hidden-sm" />
+                                </div>
+                            </div>
 						</div>
 					</p:column>
 				</p:dataTable>

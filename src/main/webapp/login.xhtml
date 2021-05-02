@@ -14,8 +14,8 @@
 	<f:event type="preRenderView" listener="#{loginController.checkIfAlreadyLoggedIn}" />
 	<o:importFunctions type="br.com.litecode.util.TextUtil" var="textUtil" />
 
-	<ui:param name="backgroundColor" value="#{textUtil:randomString('#b9ccce', '#34c9d8', '#27bccb', '#23a9b6', '#1f95a1', '#1b818b', '#49cfdc', '#5fd4e0', '#74dae4', '#8ae0e8', '#176d76', '#135960', '#06282b','#9c27b0', '#b3e5fc')}" />
-	<ui:param name="logoEffect" value="#{textUtil:randomString('zoomIn', 'fadeIn', 'pulse', 'jello', 'rubberBand', 'jackInTheBox')}" />
+	<ui:param name="backgroundColor" value="#{textUtil:randomString(['#b9ccce', '#34c9d8', '#27bccb', '#23a9b6', '#1f95a1', '#1b818b', '#49cfdc', '#5fd4e0', '#74dae4', '#8ae0e8', '#176d76', '#135960', '#06282b','#9c27b0', '#b3e5fc'])}" />
+	<ui:param name="logoEffect" value="#{textUtil:randomString(['zoomIn', 'fadeIn', 'pulse', 'jello', 'rubberBand', 'jackInTheBox'])}" />
 
     <h:body styleClass="login-page" style="background: #{backgroundColor}">
 		<div class="container">
@@ -50,7 +50,7 @@
 						</div>
 						<div class="row">
 							<div class="col-md-12">
-								<p:selectBooleanCheckbox widgetVar="rememberMe" id="rememberMe" itemLabel="#{msg['label.rememberMe']}" style="margin-top: -30px;" />
+								<p:selectBooleanCheckbox value="#{true}" widgetVar="rememberMe" id="rememberMe" itemLabel="#{msg['label.rememberMe']}" style="margin-top: -30px;" />
 							</div>
 						</div>
 						<div class="row">

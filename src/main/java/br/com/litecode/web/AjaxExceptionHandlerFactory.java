@@ -8,15 +8,16 @@ import javax.faces.context.ExceptionHandlerFactory;
 import javax.faces.context.FacesContext;
 
 public class AjaxExceptionHandlerFactory extends ExceptionHandlerFactory {
-    private final ExceptionHandlerFactory parent;
+    private final ExceptionHandlerFactory wrapped;
 
-    public AjaxExceptionHandlerFactory(ExceptionHandlerFactory parent) {
-        this.parent = parent;
+    public AjaxExceptionHandlerFactory(ExceptionHandlerFactory wrapped) {
+        super(wrapped);
+        this.wrapped = wrapped;
     }
 
     @Override
     public ExceptionHandler getExceptionHandler() {
-        return new FullAjaxExceptionHandler(parent.getExceptionHandler()) {
+        return new FullAjaxExceptionHandler(wrapped.getExceptionHandler()) {
             @Override
             protected String findErrorPageLocation(FacesContext context, Throwable exception) {
                 if (exception instanceof ViewExpiredException) {

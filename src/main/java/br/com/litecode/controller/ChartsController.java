@@ -8,6 +8,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import javax.faces.view.ViewScoped;
+import java.io.Serializable;
 import java.time.Month;
 import java.time.Year;
 import java.time.format.TextStyle;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 @ViewScoped
 @Component
 @Cacheable(cacheNames = "chart", key = "#root.methodName")
-public class ChartsController {
+public class ChartsController implements Serializable {
 	@Autowired
 	private ChartsRepository chartsRepository;
 
@@ -57,6 +58,9 @@ public class ChartsController {
 
 	public String getPatientsPerConsultationReasonModel() {
 		return loadSingleCountChartData(chartsRepository::findPatientsPerConsultationReason);
+	}
+	public String getPatientsPerTreatmentStatusModel() {
+		return loadSingleCountChartData(chartsRepository::findPatientsPerTreatmentStatus);
 	}
 
 	public String getMonthlyNewPatients() {
@@ -141,7 +145,7 @@ public class ChartsController {
 
     private String getSingleCountChartData(List<Object[]> dataRows) {
         if (dataRows.isEmpty()) {
-            return null;
+            return "{}";
         }
 
         Map<Object, Number> chartData = new LinkedHashMap<>();

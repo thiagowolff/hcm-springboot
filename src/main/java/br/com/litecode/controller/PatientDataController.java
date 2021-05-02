@@ -3,6 +3,7 @@ package br.com.litecode.controller;
 import br.com.litecode.domain.model.PatientData;
 import br.com.litecode.domain.repository.PatientDataRepository;
 import br.com.litecode.util.MessageUtil;
+import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
 import org.omnifaces.util.Messages;
@@ -45,6 +46,11 @@ public abstract class PatientDataController<T extends PatientData> {
 	@CacheEvict(key = "#root.targetClass")
 	public void addPatientData() {
 		T patientData = createPatientData();
+
+		if (!Strings.isNullOrEmpty(name)) {
+			name = name.trim();
+		}
+
 		patientData.setName(name);
 		try {
             getRepository().save(patientData);

@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -133,7 +132,7 @@ public class SessionController implements Serializable {
 		pushService.publish(PushChannel.NOTIFY, notificationMessage, UserPrincipal.getLoggedUser());
 	}
 
-	@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }")
+	@CacheEvict(cacheNames = "session", key = "#session.cacheKey" )
 	public void startSession(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 
@@ -164,8 +163,7 @@ public class SessionController implements Serializable {
 		sessionTimer.stopSession(session);
 
 		ChamberEvent completionEvent = session.getChamber().getLastEvent();
-		session.setStartTime(session.getScheduledTime().toLocalTime());
-		session.setEndTime(session.getScheduledTime().plus(completionEvent.getTimeout(), ChronoUnit.SECONDS).toLocalTime());
+		session.setEndTime(LocalTime.now());
 		session.setStatus(SessionStatus.FINISHED);
 		session.getExecutionMetadata().setCurrentProgress(100);
 		session.getExecutionMetadata().setPaused(false);
@@ -240,7 +238,7 @@ public class SessionController implements Serializable {
 
 	@PushRefresh
 	@Transactional
-	@CacheEvict(cacheNames = "session", key = "{ #session.chamber.chamberId, #session.sessionDate }")
+	@CacheEvict(cacheNames = "session", key = "#session.cacheKey")
 	public void resetVitalSigns(Session session) {
 		session = sessionRepository.findOne(session.getSessionId());
 		for (PatientSession patientSession : session.getPatientSessions()) {

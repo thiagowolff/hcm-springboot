@@ -1,11 +1,10 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-                xmlns:f="http://xmlns.jcp.org/jsf/core"
-                xmlns:h="http://xmlns.jcp.org/jsf/html"
-                xmlns:p="http://primefaces.org/ui"
-                xmlns:o="http://omnifaces.org/ui"
-                xmlns:lc="http://xmlns.jcp.org/jsf/composite/components">
-
+				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+				xmlns:f="http://xmlns.jcp.org/jsf/core"
+				xmlns:h="http://xmlns.jcp.org/jsf/html"
+				xmlns:p="http://primefaces.org/ui"
+				xmlns:o="http://omnifaces.org/ui"
+				xmlns:lc="http://xmlns.jcp.org/jsf/composite/components">
 	<script>
 		function drawCharts() {
 			drawChart('Novos pacientes por mês nos últimos 12 meses', '#{chartsController.monthlyNewPatients}', 'newPatientsPerMonthChart', 'line', '#3949ab', { legend: { display: false }});
@@ -56,8 +55,19 @@
 		<ui:param name="today" value="#{localDate:now()}" />
 
 		<div class="content-wrapper">
-			<p:dataTable id="patientsTable" widgetVar="patientsTable" value="#{patientController.patients}" var="patient" paginator="true" rows="10" paginatorAlwaysVisible="false" filteredValue="#{patientController.filteredPatients}" emptyMessage="#{msg['message.noData']}"
-			 currentPageReportTemplate="({startRecord} de {totalRecords})" paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="10,25,100,500" paginatorPosition="bottom">
+			<p:dataTable id="patientsTable"
+						 widgetVar="patientsTable"
+						 value="#{patientController}"
+						 var="patient"
+						 paginator="true"
+						 rows="10"
+						 paginatorAlwaysVisible="false"
+						 lazy="true"
+						 emptyMessage="#{msg['message.noData']}"
+						 currentPageReportTemplate="({startRecord} de {totalRecords})"
+						 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+						 rowsPerPageTemplate="10,25,100,500"
+						 paginatorPosition="bottom">
 
 				<p:ajax event="page" oncomplete="drawSparkline();" />
 				<p:ajax event="sort" oncomplete="drawSparkline();" />
@@ -74,7 +84,7 @@
 
 				<p:column headerText="#{msg['label.name']}" sortBy="#{patient.name}" filterBy="#{patient.name}" filterStyle="display: none;" styleClass="text-left large-column">
 					<h:outputText id="name" value="#{patient.name}" />	<!--#{patient.patientId}-->
-					<p:tooltip for="#{p:component('name')}" value="#{patient.auditLog}" position="bottom" escape="false" rendered="#{loginController.hasDevRights()}" />
+					<p:tooltip for="#{p:resolveFirstComponentWithId('name', view).clientId}" value="#{patient.auditLog}" position="bottom" escape="false" rendered="#{loginController.hasDevRights()}" />
 
 					<ui:fragment rendered="#{not empty patient.remarks}">
 						<i class="patient-info-#{patient.patientId} fa fa-info-circle hidden-xs" style="margin-left: 2px;"></i>
@@ -111,9 +121,9 @@
 						<p:commandButton process="@this" update=":consultationReasonComponent:consultationReasonForm" oncomplete="PF('consultationReasonDialog').show();" icon="fa fa-ellipsis-h" styleClass="hidden-xs" title="#{msg['button.manage']}" global="false" onclick="track('Manage consultation reason', { 'source': 'icon'})" />
 					</f:facet>
 					<h:outputText id="consultReason" value="#{patient.consultationReason.name}" />
-                    <p:tooltip for="#{p:component('consultReason')}" position="bottom" escape="false">
-                        #{msg['label.consultationDate']}: <h:outputText value="#{patient.consultationDate}" converter="localDateTimeConverter" />
-                    </p:tooltip>
+					<p:tooltip for="#{p:resolveFirstComponentWithId('consultReason', view).clientId}" position="bottom" escape="false">
+						#{msg['label.consultationDate']}: <h:outputText value="#{patient.consultationDate}" converter="localDateTimeConverter" />
+					</p:tooltip>
 				</p:column>
 				<p:column styleClass="text-left medium-column hidden-xs hidden-sm">
 					<f:facet name="header">
@@ -130,7 +140,7 @@
 					<h:outputText value="#{patientStats.lastSessionDate}" converter="localDateTimeConverter" rendered="#{patientStats.lastSessionDate ne null}"/>
 					<h:outputText value="-" rendered="#{patientStats.lastSessionDate eq null}"/>
 				</p:column>
-                <p:column styleClass="small-column hidden-sm hidden-xs">
+				<p:column styleClass="small-column hidden-sm hidden-xs">
 					<f:facet name="header">
 						<h:outputText value="#{msg['label.initialSessionDate']}&lt;br/&gt;#{msg['label.finalSessionDate']}" escape="false" />
 					</f:facet>
@@ -160,7 +170,7 @@
 			</p:dataTable>
 		</div>
 	</h:form>
-	
+
 	<h:form id="patientInputForm">
 		<ui:param name="patient" value="#{patientController.patient}" />
 		<p:dialog header="#{patient.patientId eq null ? msg['title.newPatient'] : msg['title.editPatient']}" widgetVar="patientDialog" fitViewport="true" resizable="false" showEffect="fade" modal="true">
@@ -188,10 +198,10 @@
 					<f:selectItem itemValue="" itemLabel=""/>
 					<f:selectItems value="#{healthInsuranceController.patientData}" var="healthInsurance" itemValue="#{healthInsurance}" itemLabel="#{healthInsurance.name}"/>
 				</p:selectOneMenu>
-                <h:panelGroup style="display: flex;">
-                    <p:commandLink value="#{msg['button.add']}" process="@this" update=":healthInsuranceComponent:healthInsuranceForm" oncomplete="PF('healthInsuranceDialog').show();" global="false" onclick="track('Manage health insurance', { 'source': 'form' })" styleClass="btn btn-sm btn-default btn-flat" />
-				    <p:message for="healthInsurance" display="text" />
-                </h:panelGroup>
+				<h:panelGroup style="display: flex;">
+					<p:commandLink value="#{msg['button.add']}" process="@this" update=":healthInsuranceComponent:healthInsuranceForm" oncomplete="PF('healthInsuranceDialog').show();" global="false" onclick="track('Manage health insurance', { 'source': 'form' })" styleClass="btn btn-sm btn-default btn-flat" />
+					<p:message for="healthInsurance" display="text" />
+				</h:panelGroup>
 
 				<p:outputLabel value="#{msg['label.birthDate']}" for="patientBirthDate" />
 				<p:calendar id="patientBirthDate" value="#{patient.birthDate}" pattern="dd/MM/yyyy" mask="true" yearRange="c-100:c+15" size="15" showOn="button" navigator="true" converter="localDateTimeConverter" required="true" />
@@ -213,10 +223,10 @@
 					<f:selectItem itemValue="" itemLabel=""/>
 					<f:selectItems value="#{consultationReasonController.patientData}" var="consultationReason" itemValue="#{consultationReason}" itemLabel="#{consultationReason.name}"/>
 				</p:selectOneMenu>
-                <h:panelGroup style="display: flex;">
-                    <p:commandLink value="#{msg['button.add']}" process="@this" update=":consultationReasonComponent:consultationReasonForm" oncomplete="PF('consultationReasonDialog').show();" global="false" onclick="track('Manage consultation reason', { 'source': 'form' })" styleClass="btn btn-sm btn-default btn-flat" />
-				    <p:message for="consultationReason" display="text" />
-                </h:panelGroup>
+				<h:panelGroup style="display: flex;">
+					<p:commandLink value="#{msg['button.add']}" process="@this" update=":consultationReasonComponent:consultationReasonForm" oncomplete="PF('consultationReasonDialog').show();" global="false" onclick="track('Manage consultation reason', { 'source': 'form' })" styleClass="btn btn-sm btn-default btn-flat" />
+					<p:message for="consultationReason" display="text" />
+				</h:panelGroup>
 
 				<p:outputLabel value="#{msg['label.medicalIndication']}" for="patientMedicalIndication" />
 				<p:selectOneRadio id="patientMedicalIndication" value="#{patient.medicalIndication}" required="true">
@@ -226,7 +236,7 @@
 				<p:message for="patientMedicalIndication" display="text" />
 
 				<p:outputLabel value="#{msg['label.physicianAssistant']}" for="physicianAssistant" />
-                <p:selectOneMenu id="physicianAssistant" styleClass="patient-data" value="#{patient.physicianAssistant}" required="false" converter="omnifaces.SelectItemsConverter">
+				<p:selectOneMenu id="physicianAssistant" styleClass="patient-data" value="#{patient.physicianAssistant}" required="false" converter="omnifaces.SelectItemsConverter">
 					<f:selectItem itemValue="" itemLabel=""/>
 					<f:selectItems value="#{physicianAssistantController.patientData}" var="physicianAssistant" itemValue="#{physicianAssistant}" itemLabel="#{physicianAssistant.name}"/>
 				</p:selectOneMenu>
@@ -234,15 +244,15 @@
 
 				<p:outputLabel value="#{msg['label.email']}" for="patientEmail" />
 				<p:inputText id="patientEmail" value="#{patient.email}" maxlength="75" size="50" />
-                <h:panelGroup />
+				<h:panelGroup />
 
 				<p:outputLabel value="#{msg['label.phone']}" for="patientPhone" />
 				<p:inputMask id="patientPhone" value="#{patient.phoneNumber}" mask="(99) 999999999" maxlength="15" size="15" />
-                <h:panelGroup />
+				<h:panelGroup />
 
 				<p:outputLabel value="#{msg['label.remarks']}" for="remarks" />
 				<p:inputTextarea id="remarks" value="#{patient.remarks}" rows="4" style="width: 100%;" />
-                <h:panelGroup />
+				<h:panelGroup />
 			</p:panelGrid>
 
 			<p:separator />
@@ -250,8 +260,8 @@
 			<p:commandButton value="#{msg['button.save']}" action="#{patientController.savePatient}" process="@form" update=":patientsForm:patientsTable, :patientsForm:messages, patientGrid" oncomplete="if (!args.validationFailed) { PF('patientDialog').hide(); PF('patientsTable').clearFilters(); }" validateClient="true" styleClass="btn-primary pull-right"/>
 		</p:dialog>
 
-        <p:remoteCommand name="updatePatientInputForm" update="@(.patient-data)" process="@(.patient-data)"  />
-    </h:form>
+		<p:remoteCommand name="updatePatientInputForm" update="@(.patient-data)" process="@(.patient-data)"  />
+	</h:form>
 
 	<h:form id="finishTreatmentForm">
 		<p:dialog header="#{msg['title.finishTreatment']}" widgetVar="finishTreatmentDialog" resizable="false" showEffect="fade" hideEffect="fade" modal="true">
@@ -271,10 +281,10 @@
 
 	<lc:confirmDeleteDialog entity="Patient" deleteAction="#{patientController.deletePatient()}" update=":patientsForm:messages, :patientsForm:patientsTable, :patientInputForm:patientGrid" oncomplete="PF('patientsTable').clearFilters();" />
 
-	<lc:managePatientData messagePrefix="healthInsurance" controller="#{healthInsuranceController}" id="healthInsuranceComponent" update=":patientsForm:patientsTable" />
-	<lc:managePatientData messagePrefix="patientStatus" controller="#{patientStatusController}" id="patientStatusComponent" update=":patientsForm:patientsTable" />
-	<lc:managePatientData messagePrefix="physicianAssistant" controller="#{physicianAssistantController}" id="physicianAssistantComponent" update=":patientsForm:patientsTable" />
-	<lc:managePatientData messagePrefix="consultationReason" controller="#{consultationReasonController}" id="consultationReasonComponent" update=":patientsForm:patientsTable" ></lc:managePatientData>
+	<lc:managePatientData messagePrefix="healthInsurance" controller="#{healthInsuranceController}" id="healthInsuranceComponent" update=":patientsForm:patientsTable" oncomplete="drawSparkline();"/>
+	<lc:managePatientData messagePrefix="patientStatus" controller="#{patientStatusController}" id="patientStatusComponent" update=":patientsForm:patientsTable" oncomplete="drawSparkline();"/>
+	<lc:managePatientData messagePrefix="physicianAssistant" controller="#{physicianAssistantController}" id="physicianAssistantComponent" update=":patientsForm:patientsTable" oncomplete="drawSparkline();"/>
+	<lc:managePatientData messagePrefix="consultationReason" controller="#{consultationReasonController}" id="consultationReasonComponent" update=":patientsForm:patientsTable" oncomplete="drawSparkline();" />
 
 	<script>
        	$().ready(function() {

@@ -33,8 +33,9 @@
 					</li>
 					<li>
 						<p:menuButton value="#{''}" styleClass="header-menu" icon="fa fa-cogs">
-							<p:menuitem value="#{msg['menu.disableMessages']}" icon="fa #{loggedUser.userSettings.notificationMessages ? 'fa-toggle-on' : 'fa-toggle-off'}" actionListener="#{userController.setUser(loggedUser)}" action="#{userController.toggleNotificationMessages}" update="@form" />
-							<p:menuitem value="#{msg['menu.disableSounds']}" icon="fa #{loggedUser.userSettings.notificationSounds ? 'fa-toggle-on' : 'fa-toggle-off'}" actionListener="#{userController.setUser(loggedUser)}" action="#{userController.toggleNotificationSounds}" update="@form" />
+							<p:menuitem value="#{msg['menu.disableMessages']}" icon="fa #{loggedUser.userSettings.notificationMessages ? 'fa-toggle-on' : 'fa-toggle-off'}" actionListener="#{loggedUser.userSettings.setNotificationMessages(not loggedUser.userSettings.notificationMessages)}" action="#{userController.updateUserSettings(loggedUser)}" process="@this" update="@form" />
+							<p:menuitem value="#{msg['menu.disableSounds']}" icon="fa #{loggedUser.userSettings.notificationSounds ? 'fa-toggle-on' : 'fa-toggle-off'}" actionListener="#{loggedUser.userSettings.setNotificationSounds(not loggedUser.userSettings.notificationSounds)}" action="#{userController.updateUserSettings(loggedUser)}" process="@this" update="@form" />
+							<p:menuitem value="#{msg['menu.vitalSigns']}" icon="fa #{loggedUser.userSettings.vitalSigns ? 'fa-toggle-on' : 'fa-toggle-off'}" actionListener="#{loggedUser.userSettings.setVitalSigns(not loggedUser.userSettings.vitalSigns)}" action="#{userController.updateUserSettings(loggedUser)}" process="@this" update="@form :content" />
 							<p:separator/>
 							<p:menuitem value="#{msg['menu.alarms']}" url="/alarms" icon="fa fa-bell" onclick="return false" rendered="#{loginController.hasDevRights()}" />
 							<p:menuitem value="#{msg['menu.system']}" url="/system" onclick="return false" icon="fa fa-desktop" rendered="#{loginController.hasDevRights()}" />

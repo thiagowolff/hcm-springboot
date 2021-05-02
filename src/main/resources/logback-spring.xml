@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
 	<property name="LOGS" value="./logs"/>
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
@@ -11,40 +10,54 @@
 		</layout>
 	</appender>
 
-	<appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${LOGS}/hcm.log</file>
-		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
-		</encoder>
+	<springProfile name="production">
+		<appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+			<file>${LOGS}/hcm.log</file>
+			<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+				<Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+			</encoder>
 
-		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${LOGS}/archived/hcm-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-				<maxFileSize>16MB</maxFileSize>
-			</timeBasedFileNamingAndTriggeringPolicy>
-		</rollingPolicy>
-	</appender>
+			<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+				<fileNamePattern>${LOGS}/archived/hcm-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+				<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+					<maxFileSize>16MB</maxFileSize>
+				</timeBasedFileNamingAndTriggeringPolicy>
+			</rollingPolicy>
+		</appender>
 
-	<appender name="debug" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${LOGS}/debug.log</file>
-		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
-		</encoder>
+		<appender name="debug" class="ch.qos.logback.core.rolling.RollingFileAppender">
+			<file>${LOGS}/debug.log</file>
+			<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+				<Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+			</encoder>
 
-		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${LOGS}/archived/debug-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-				<maxFileSize>32MB</maxFileSize>
-			</timeBasedFileNamingAndTriggeringPolicy>
-		</rollingPolicy>
-	</appender>
+			<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+				<fileNamePattern>${LOGS}/archived/debug-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+				<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+					<maxFileSize>32MB</maxFileSize>
+				</timeBasedFileNamingAndTriggeringPolicy>
+			</rollingPolicy>
+		</appender>
+	</springProfile>
 
-	<root level="info">
-		<appender-ref ref="file"/>
-		<appender-ref ref="console"/>
-	</root>
+	<springProfile name="production">
+		<root level="info">
+			<appender-ref ref="file"/>
+			<appender-ref ref="console"/>
+		</root>
 
-	<logger name="br.com.litecode" level="debug">
-		<appender-ref ref="debug"/>
-	</logger>
+		<logger name="br.com.litecode" level="debug">
+			<appender-ref ref="debug"/>
+		</logger>
+	</springProfile>
+
+	<springProfile name="development">
+		<root level="info">
+			<appender-ref ref="console"/>
+		</root>
+
+		<logger name="br.com.litecode" level="debug" additivity="false">
+			<appender-ref ref="console" />
+		</logger>
+	</springProfile>
 </configuration>

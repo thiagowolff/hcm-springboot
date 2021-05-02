@@ -1,6 +1,7 @@
 package br.com.litecode.util;
 
 import java.text.Normalizer;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class TextUtil {
@@ -16,7 +17,7 @@ public final class TextUtil {
         return ThreadLocalRandom.current().nextBoolean();
 	}
 
-	public static String randomString(String... strings) {
-        return strings[ThreadLocalRandom.current().nextInt(0, strings.length)];
+	public static String randomString(List<String> strings) {
+        return strings.get(ThreadLocalRandom.current().nextInt(0, strings.size()));
 	}
 }

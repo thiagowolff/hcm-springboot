@@ -79,7 +79,7 @@ public class Patient {
 		String record = MessageUtil.getFormattedLabel("label.patientRecord", patientRecord);
 		String reason = MessageUtil.getFormattedLabel("label.consultationReason", consultationReason == null ? null : consultationReason.getName());
 
-		return Joiner.on("<br/>").skipNulls().join(record, reason);
+		return Joiner.on("<br/>").skipNulls().join("<strong>" + name + "</strong>", record, reason);
 	}
 
 	public Integer getAge() {
@@ -125,6 +125,7 @@ public class Patient {
 		Integer getPatientId();
 		int getCompletedSessions();
 		int getAbsentSessions();
+		int getCompletedSessionsInMonth();
 		LocalDateTime getInitialSessionDate();
 		LocalDateTime getLastSessionDate();
 	}
@@ -138,6 +139,11 @@ public class Patient {
 
 			@Override
 			public int getCompletedSessions() {
+				return 0;
+			}
+
+			@Override
+			public int getCompletedSessionsInMonth() {
 				return 0;
 			}
 

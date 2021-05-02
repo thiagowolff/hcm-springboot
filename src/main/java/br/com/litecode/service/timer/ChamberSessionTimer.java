@@ -2,6 +2,7 @@ package br.com.litecode.service.timer;
 
 import br.com.litecode.domain.model.ChamberEvent;
 import br.com.litecode.domain.model.Session;
+import br.com.litecode.domain.model.Session.ExecutionMetadata;
 import br.com.litecode.domain.model.Session.SessionStatus;
 import br.com.litecode.domain.model.User;
 import br.com.litecode.domain.repository.SessionRepository;
@@ -40,7 +41,7 @@ public class ChamberSessionTimer implements SessionTimer {
 		Set<ChamberEvent> chamberEvents = new HashSet<>(session.getChamber().getEvents());
 
 		for (ChamberEvent chamberEvent : chamberEvents) {
-			if (session.getExecutionMetadata().getElapsedTime() > chamberEvent.getTimeout()) {
+			if (!chamberEvent.getEventType().isActive() || session.getExecutionMetadata().getElapsedTime() > chamberEvent.getTimeout()) {
 				continue;
 			}
 
@@ -53,7 +54,10 @@ public class ChamberSessionTimer implements SessionTimer {
 	}
 
 	private void sessionTimeout(Session session, ChamberEvent chamberEvent) {
+		ExecutionMetadata executionMetadata = session.getExecutionMetadata();
+		session = sessionRepository.findOne(session.getSessionId());
 		session.setStatus(chamberEvent.getEventType().getSessionStatus());
+		session.setExecutionMetadata(executionMetadata);
 		session.getExecutionMetadata().setCurrentEvent(session.getStatus() != SessionStatus.FINISHED ? chamberEvent : null);
  		session.updateProgress();
 		sessionRepository.save(session);
@@ -76,6 +80,8 @@ public class ChamberSessionTimer implements SessionTimer {
 		for (Session session : sessionTimeTicker.getActiveListeners()) {
 			session.updateProgress();
 			pushService.publish(PushChannel.PROGRESS, ProgressMessage.create(session), null);
+
+			log.debug(session.getExecutionMetadata().toString());
 		}
 	}
 }

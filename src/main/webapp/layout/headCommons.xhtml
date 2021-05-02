@@ -18,7 +18,7 @@
 		<ui:param name="stylesheet" value="#{development ? 'less' : 'css'}" />
 
 		<h:outputStylesheet library="css" name="animate.min.css" />
-		<link type="text/css" rel="stylesheet#{development ? '/less' : ''}" href="#{request.contextPath}/javax.faces.resource/style#{development ? '' : '.min'}.#{stylesheet}?ln=#{stylesheet}&amp;version=#{version['version']}" />
+		<link type="text/css" rel="stylesheet#{development ? '/less' : ''}" href="#{request.contextPath}/javax.faces.resource/style.#{stylesheet}?ln=#{stylesheet}&amp;version=#{version['version']}" />
 
 		<h:outputScript library="js" name="less-2.7.2.min.js" rendered="#{development}" />
 		<h:outputScript library="js" name="locale-primefaces.js" target="body" />

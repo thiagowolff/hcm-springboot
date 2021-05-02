@@ -14,9 +14,10 @@
 			drawChart('Consultas por ano', '#{chartsController.consultationsPerYearModel}', 'consultationsPerYearChart', 'bar', '#2e7d32', { legend: { display: false }});
 			drawChart('Ausências por mês', '#{chartsController.absencesPerMonthModel}', 'absencesPerMonthChart', 'bar', absencesChartColors);
 			drawChart('Ausências por ano', '#{chartsController.absencesPerYearModel}', 'absencesPerYearChart', 'bar', '#e53935', { legend: { display: false }});
-			// drawChart('Sessões por convênio', '#{chartsController.sessionsPerHealthInsuranceModel}', 'sessionsPerHealthInsuranceChart', 'pie', null, { legend: { display: false }});
-			// drawChart('Pacientes por indicação médica', '#{chartsController.patientsPerMedicalIndicationModel}', 'patientsPerMedicalIndicationChart', 'doughnut', ['#2e7d32', '#e53935'], { legend: { display: true }});
-			// drawChart('Pacientes por motivos consulta', '#{chartsController.patientsPerConsultationReasonModel}', 'patientsPerConsultationReasonChart', 'horizontalBar', null, { legend: { display: false }});
+			drawChart('Sessões por convênio', '#{chartsController.sessionsPerHealthInsuranceModel}', 'sessionsPerHealthInsuranceChart', 'pie', null, { legend: { display: false }});
+			drawChart('Pacientes por indicação médica', '#{chartsController.patientsPerMedicalIndicationModel}', 'patientsPerMedicalIndicationChart', 'doughnut', ['#e53935', '#2e7d32'], { legend: { display: true }});
+			drawChart('Pacientes por motivos consulta', '#{chartsController.patientsPerConsultationReasonModel}', 'patientsPerConsultationReasonChart', 'horizontalBar', null, { legend: { display: false }});
+			drawChart('Pacientes por status de tratemento', '#{chartsController.patientsPerTreatmentStatusModel}', 'patientsPerTreatmentStatus', 'horizontalBar', null, { legend: { display: false }});
 		}
 	</script>
 
@@ -40,18 +41,21 @@
 				<div class="col-md-8 col-sm-6 col-xs-12">
 					<canvas id="absencesPerMonthChart" style="height: 250px;" />
 				</div>
-				<div class="col-md-4 col-sm-6 col-xs-12">
+				<div class="col-md-3 col-sm-6 col-xs-12">
 					<canvas id="absencesPerYearChart" style="height: 250px;" />
 				</div>
-				<!--<div class="col-md-4 col-sm-4 col-xs-12">-->
-					<!--<canvas id="patientsPerConsultationReasonChart" style="height: 300px;" />-->
-				<!--</div>-->
-				<!--<div class="col-md-4 col-sm-4 col-xs-12">-->
-					<!--<canvas id="patientsPerMedicalIndicationChart" style="height: 300px;" />-->
-				<!--</div>-->
-				<!--<div class="col-md-4 col-sm-4 col-xs-12">-->
-					<!--<canvas id="sessionsPerHealthInsuranceChart" style="height: 300px;" />-->
-				<!--</div>-->
+				<div class="col-md-3 col-sm-6 col-xs-12">
+					<canvas id="patientsPerConsultationReasonChart" style="height: 300px;" />
+				</div>
+				<div class="col-md-3 col-sm-6 col-xs-12">
+					<canvas id="patientsPerTreatmentStatus" style="height: 300px;" />
+				</div>
+				<div class="col-md-3 col-sm-6 col-xs-12">
+					<canvas id="patientsPerMedicalIndicationChart" style="height: 300px;" />
+				</div>
+				<div class="col-md-3 col-sm-6 col-xs-12">
+					<canvas id="sessionsPerHealthInsuranceChart" style="height: 300px;" />
+				</div>
 			</div>
 		</div>
 	</h:form>

@@ -90,7 +90,7 @@
 				<f:facet name="header">
 					<h:outputFormat id="inactivePatientsCount" value="#{msg['title.inactivePatients']}">
 						<f:param value="#{fn:length(patientController.inactivePatients)}" />
-						<f:param value="6" />
+						<f:param value="4" />
 					</h:outputFormat>
 					<p style="font-size: 14px; font-weight: 500;">#{msg['title.paragraph.inactivePatients']}</p>
 				</f:facet>
@@ -118,13 +118,11 @@
 		</h:form>
 
 		<script>
-			//<![CDATA[
 			$().ready(function() {
 				var url = location.href;
 				url = url.substring(url.lastIndexOf('/'), url.length);
 				refreshNavigation([{name: 'activePage', value: url}, {name: 'update', value: 'content'}]);
 			});
-			//]]>
 		</script>
 
         <ui:include src="/layout/scriptCommons.xhtml" />

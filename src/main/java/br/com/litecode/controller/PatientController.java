@@ -13,12 +13,19 @@ import lombok.Getter;
 import lombok.Setter;
 import org.omnifaces.util.Faces;
 import org.omnifaces.util.Messages;
+import org.primefaces.model.FilterMeta;
+import org.primefaces.model.LazyDataModel;
+import org.primefaces.model.SortMeta;
+import org.primefaces.model.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import javax.faces.view.ViewScoped;
@@ -32,7 +39,7 @@ import java.util.stream.Collectors;
 @ViewScoped
 @Component
 @CacheConfig(cacheNames = "patient")
-public class PatientController implements Serializable {
+public class PatientController extends LazyDataModel<Patient> implements Serializable {
 	@Autowired
 	private PatientRepository patientRepository;
 
@@ -42,19 +49,32 @@ public class PatientController implements Serializable {
 	@Getter	@Setter
 	private Patient patient;
 
-	@Getter	@Setter
-	private List<Patient> filteredPatients;
-
-	@Getter @Setter
-	private String attendanceChartData;
-
 	public PatientController() {
 		patient = new Patient();
 	}
 
-    @Cacheable(key = "#root.methodName")
-	public List<Patient> getPatients() {
-	    return patientRepository.findActivePatients();
+	@Override
+	public List<Patient> load(int offset, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
+		Page<Patient> patients;
+		int page = offset / pageSize;
+
+		Sort sort;
+		if (!sortBy.isEmpty()) {
+			sort = Sort.by(sortBy.values().stream().map(sortMeta -> new Sort.Order(sortMeta.getSortOrder() == SortOrder.ASCENDING ? Sort.Direction.ASC : Sort.Direction.DESC, sortMeta.getSortField())).collect(Collectors.toList()));
+		} else {
+			sort = Sort.by(Sort.Direction.DESC, "auditLog.createdDate");
+		}
+
+		PageRequest pageRequest = PageRequest.of(page, pageSize, sort);
+		if (filterBy.isEmpty() || filterBy.getOrDefault("globalFilter", new FilterMeta()).getFilterValue() == null) {
+			patients = patientRepository.findActivePatients(pageRequest);
+		} else {
+			String filterValue = (String) filterBy.get("globalFilter").getFilterValue();
+			patients = patientRepository.findByNameOrRecord(filterValue, filterValue, pageRequest);
+		}
+
+		setRowCount((int) patients.getTotalElements());
+		return patients.getContent();
 	}
 
     @Cacheable(key = "#root.methodName")
@@ -63,8 +83,8 @@ public class PatientController implements Serializable {
 	}
 
 	@Cacheable
-	public Map<Integer, PatientStats> getPatientStats(Session session, LocalDate date) {
-		List<PatientStats> stats = patientRepository.findPatienStats(session.getSessionId(), date.plusDays(1).atStartOfDay());
+	public Map<Integer, PatientStats> getPatientStats(Session session) {
+		List<PatientStats> stats = patientRepository.findPatienStats(session.getSessionId(), session.getSessionEnd());
 
 		Map<Integer, PatientStats> patientStats = stats.stream().collect(Collectors.toMap(PatientStats::getPatientId, Function.identity()));
 		for (PatientSession patientSession : session.getPatientSessions()) {
@@ -134,7 +154,7 @@ public class PatientController implements Serializable {
 
 	@Cacheable(key = "#root.methodName")
 	public List<Patient> getInactivePatients() {
-		return patientRepository.findInactivePatients(LocalDate.now().minusMonths(6).atStartOfDay());
+		return patientRepository.findInactivePatients(LocalDate.now().minusMonths(4).atStartOfDay());
 	}
 
 	@Caching(evict = {

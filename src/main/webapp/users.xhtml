@@ -35,7 +35,7 @@
 						<f:attribute name="pattern" value="dd/MM/yyyy HH:mm:ss" />
 					</h:outputText>
 					<span style="color: #787878">(#{user.lastAccessDuration})</span>
-					<p:tooltip for="#{p:component('userLastAccess')}" value="#{user.lastAccessLocationFormatted}" position="bottom" escape="false" rendered="#{loginController.hasDevRights()}" />
+					<p:tooltip for="#{p:resolveFirstComponentWithId('userLastAccess', view).clientId}" value="#{user.lastAccessLocationFormatted}" position="bottom" escape="false" rendered="#{loginController.hasDevRights()}" />
 				</p:column>
 				<p:column headerText="#{msg['label.creationDate']}" sortBy="#{user.creationDate}" width="150" priority="3">
 					<h:outputText value="#{user.creationDate}" converter="localDateTimeConverter" />
