@@ -1,4 +1,5 @@
 import org.lesscss.LessCompiler
+
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -10,26 +11,28 @@ buildscript {
         springBootVersion = "2.4.5"
     }
     dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        //classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
         classpath "org.lesscss:lesscss:1.7.0.1.1"
     }
 }
 
 plugins {
+    id "java"
+    id "org.springframework.boot" version "2.4.5"
+    id "io.spring.dependency-management" version "1.1.5"
     id "org.hidetake.ssh" version "2.10.1"
 //    id "com.eriwen.gradle.css" version "2.14.0"
 }
 
-apply plugin: "java"
-apply plugin: "idea"
-apply plugin: "org.springframework.boot"
-apply plugin: "io.spring.dependency-management"
+repositories {
+    mavenCentral()
+}
 
 def webAppDir = "src/main/webapp"
 def resourcesDir = "$webAppDir/resources"
 
 bootJar {
-    baseName "hcm"
+    archiveBaseName = "hcm"
     launchScript()
 }
 
@@ -66,8 +69,8 @@ dependencies {
     implementation "com.itextpdf:itextpdf:5.5.12"
     implementation "com.github.sps.pushover.net:pushover-client:1.0.0"
 
-    runtime "org.postgresql:postgresql:42.2.19"
-    runtime "javax.servlet:jstl:1.2"
+    runtimeOnly "org.postgresql:postgresql:42.2.19"
+    runtimeOnly "javax.servlet:jstl:1.2"
 
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.springframework.security:spring-security-test"

@@ -37,10 +37,13 @@
 					<span style="color: #787878">(#{user.lastAccessDuration})</span>
 					<p:tooltip for="#{p:resolveFirstComponentWithId('userLastAccess', view).clientId}" value="#{user.lastAccessLocationFormatted}" position="bottom" escape="false" rendered="#{loginController.hasDevRights()}" />
 				</p:column>
+
+				<ui:remove>
 				<p:column headerText="#{msg['label.creationDate']}" sortBy="#{user.creationDate}" width="150" priority="3">
 					<h:outputText value="#{user.creationDate}" converter="localDateTimeConverter" />
 				</p:column>
-				
+				</ui:remove>
+
 				<p:column headerText="#{msg['label.action']}" width="175" priority="4" styleClass="text-left">
 					<p:commandButton process="@this" update=":userForm" actionListener="#{userController.setUser(user)}" oncomplete="PF('userDialog').show()" icon="fa fa-pencil" title="#{msg['button.edit']}" />
 					<p:commandButton process="@this" update=":changePasswordForm" actionListener="#{userController.setUser(user)}" oncomplete="PF('changePasswordDialog').show()" icon="fa fa-lock" title="#{msg['button.changePassword']}" >

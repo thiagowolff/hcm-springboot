@@ -4,9 +4,9 @@
 				xmlns:lc="http://java.sun.com/jsf/composite/components">
 	<script>
 		function drawCharts() {
-			var sessionChartColors = ['#ad1457', '#1565c0', '#4527a0', '#283593', '#1565c0'];
-			var consultationChartColors = ['#00acc1', '#2e7d32', '#00695c', '#43a047', '#c0ca33'];
-			var absencesChartColors = ['#fdd835', '#e53935', '#ffa000', '#d84315', '#f57c00'];
+			var sessionChartColors = ['#ad1457', '#1565c0', '#4527a0', '#283593', '#1565c0', '#307e32', '#672f7d', '#7d5f2f', '#7d312f', '#2f587d'];
+			var consultationChartColors = ['#00acc1', '#2e7d32', '#00695c', '#43a047', '#c0ca33', '#ad1457', '#1565c0', '#4527a0', '#283593', '#1565c0', '#307e32'];
+			var absencesChartColors = ['#fdd835', '#e53935', '#ffa000', '#d84315', '#f57c00', '#ad1457', '#1565c0', '#4527a0', '#283593', '#1565c0', '#307e32'];
 
 			drawChart('Sessões por mês', '#{chartsController.presencesPerMonthModel}', 'presencesPerMonthChart', 'bar', sessionChartColors);
 			drawChart('Sessões por ano', '#{chartsController.presencesPerYearModel}', 'presencesPerYearChart', 'bar', '#1565c0', { legend: { display: false }});

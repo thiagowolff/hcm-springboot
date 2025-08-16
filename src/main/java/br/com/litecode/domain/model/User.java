@@ -40,17 +40,18 @@ public class User {
 	private String name;
 	private boolean active;
 	private Instant lastAccess;
-	private Instant creationDate;
 	private String sessionId;
 	private String lastAccessLocation;
 	private String timeZone;
+
+	@Transient
+	private Instant creationDate;
 
 	@Embedded
 	private UserSettings userSettings;
 	
     public User() {
     	active = true;
-    	creationDate = Instant.now();
 		userSettings = new UserSettings();
     }
 
